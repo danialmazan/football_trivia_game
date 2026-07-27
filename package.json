@@ -1,0 +1,36 @@
+{
+  "name": "leo-guessi",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "data:validate": "vitest run src/data/players.validation.test.ts",
+    "data:refresh": "node scripts/build-football-data.mjs",
+    "data:manifest": "node scripts/build-football-data.mjs --manifest-only",
+    "data:achievements": "node scripts/fetch-achievements.mjs",
+    "data:badges": "node scripts/fetch-club-badges.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "fflate": "^0.8.3",
+    "jsdom": "latest",
+    "vitest": "latest"
+  }
+}
