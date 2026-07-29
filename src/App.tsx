@@ -244,6 +244,7 @@ export function App() {
         <GameScreen
           game={game}
           player={currentPlayer}
+          activePool={activePool}
           onSubmit={submitGuess}
           onReveal={revealClue}
           onGiveUp={giveUp}

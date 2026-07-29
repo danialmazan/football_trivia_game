@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Player } from '../data/types'
+import { getPlayerSuggestions } from '../game/answerMatching'
 import { GAME_CONFIG, MODE_LABELS, POOL_LABELS, PRACTICE_LEAGUES } from '../game/config'
 import { generateClues, getCareerSummary } from '../game/clues'
 import { calculateAvailableScore } from '../game/scoring'
@@ -9,6 +10,7 @@ import { ClueCard } from './ClueCard'
 interface GameScreenProps {
   game: GameState
   player: Player
+  activePool: Player[]
   onSubmit: (guess: string) => void
   onReveal: () => void
   onGiveUp: () => void
@@ -20,8 +22,19 @@ function shouldAutoFocusGuess(): boolean {
   return window.matchMedia('(min-width: 781px) and (pointer: fine)').matches
 }
 
-export function GameScreen({ game, player, onSubmit, onReveal, onGiveUp, onNext, onExit }: GameScreenProps) {
+export function GameScreen({
+  game,
+  player,
+  activePool,
+  onSubmit,
+  onReveal,
+  onGiveUp,
+  onNext,
+  onExit,
+}: GameScreenProps) {
   const [guess, setGuess] = useState('')
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false)
+  const [activeSuggestion, setActiveSuggestion] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const isReview = game.phase === 'review'
   const practiceFilter = game.settings.mode === 'practice' ? game.settings.practiceFilter : undefined
@@ -29,19 +42,60 @@ export function GameScreen({ game, player, onSubmit, onReveal, onGiveUp, onNext,
   const visibleClues = clues.slice(0, isReview ? GAME_CONFIG.cluesPerRound : game.round.clueLevel)
   const availableScore = calculateAvailableScore(game.round.clueLevel, game.round.incorrectGuesses.length)
   const roundNumber = game.results.length + (isReview ? 0 : 1)
+  const suggestions = getPlayerSuggestions(guess, activePool)
+  const showSuggestions = suggestionsOpen && suggestions.length > 0
+  const suggestionListId = 'player-suggestions'
 
   useEffect(() => {
     if (!isReview && shouldAutoFocusGuess()) inputRef.current?.focus()
   }, [game.round.clueLevel, game.round.incorrectGuesses.length, game.round.playerId, isReview])
 
+  useEffect(() => {
+    setGuess('')
+    setSuggestionsOpen(false)
+    setActiveSuggestion(-1)
+  }, [game.round.playerId])
+
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
+    setSuggestionsOpen(false)
+    setActiveSuggestion(-1)
     onSubmit(guess)
     setGuess('')
     requestAnimationFrame(() => {
       if (shouldAutoFocusGuess()) inputRef.current?.focus()
       else inputRef.current?.blur()
     })
+  }
+
+  function selectSuggestion(selectedPlayer: Player) {
+    setGuess(selectedPlayer.displayName)
+    setSuggestionsOpen(false)
+    setActiveSuggestion(-1)
+    inputRef.current?.focus()
+  }
+
+  function handleGuessKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Escape') {
+      setSuggestionsOpen(false)
+      setActiveSuggestion(-1)
+      return
+    }
+
+    if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && suggestions.length > 0) {
+      event.preventDefault()
+      setSuggestionsOpen(true)
+      setActiveSuggestion((current) => {
+        if (event.key === 'ArrowDown') return current >= suggestions.length - 1 ? 0 : current + 1
+        return current <= 0 ? suggestions.length - 1 : current - 1
+      })
+      return
+    }
+
+    if (event.key === 'Enter' && showSuggestions && activeSuggestion >= 0) {
+      event.preventDefault()
+      selectSuggestion(suggestions[activeSuggestion])
+    }
   }
 
   const solved = game.results.filter((result) => result.outcome === 'correct').length
@@ -173,15 +227,56 @@ export function GameScreen({ game, player, onSubmit, onReveal, onGiveUp, onNext,
                   Guess now <span>· −{GAME_CONFIG.incorrectGuessPenalty} pts per miss</span>
                 </label>
                 <div className="guess-row">
-                  <input
-                    id="player-guess"
-                    ref={inputRef}
-                    value={guess}
-                    onChange={(event) => setGuess(event.target.value)}
-                    placeholder="Player name"
-                    autoComplete="off"
-                    spellCheck="false"
-                  />
+                  <div className="player-autocomplete">
+                    <input
+                      id="player-guess"
+                      ref={inputRef}
+                      value={guess}
+                      onChange={(event) => {
+                        setGuess(event.target.value)
+                        setSuggestionsOpen(true)
+                        setActiveSuggestion(-1)
+                      }}
+                      onFocus={() => setSuggestionsOpen(true)}
+                      onBlur={() => setSuggestionsOpen(false)}
+                      onKeyDown={handleGuessKeyDown}
+                      placeholder="Player name"
+                      autoComplete="off"
+                      spellCheck="false"
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-expanded={showSuggestions}
+                      aria-controls={suggestionListId}
+                      aria-activedescendant={
+                        showSuggestions && activeSuggestion >= 0
+                          ? `player-suggestion-${suggestions[activeSuggestion].id}`
+                          : undefined
+                      }
+                    />
+                    {showSuggestions && (
+                      <ul
+                        className="player-suggestions"
+                        id={suggestionListId}
+                        role="listbox"
+                        aria-label="Player suggestions"
+                      >
+                        {suggestions.map((suggestion, index) => (
+                          <li
+                            className={index === activeSuggestion ? 'player-suggestion is-active' : 'player-suggestion'}
+                            id={`player-suggestion-${suggestion.id}`}
+                            key={suggestion.id}
+                            role="option"
+                            aria-selected={index === activeSuggestion}
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => selectSuggestion(suggestion)}
+                          >
+                            <small aria-hidden="true">{String(index + 1).padStart(2, '0')}</small>
+                            <span>{suggestion.displayName}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                   <button className="primary-button" type="submit">Submit</button>
                 </div>
               </form>

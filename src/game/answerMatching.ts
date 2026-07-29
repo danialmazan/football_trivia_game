@@ -6,6 +6,9 @@ export type MatchResult =
   | { status: 'ambiguous'; candidates: Player[] }
   | { status: 'invalid'; message: string }
 
+export const MIN_AUTOCOMPLETE_CHARACTERS = 3
+export const MAX_AUTOCOMPLETE_RESULTS = 6
+
 export function normalizeAnswer(value: string): string {
   return value
     .normalize('NFD')
@@ -45,6 +48,45 @@ function answerForms(player: Player): string[] {
   return [...new Set(normalized.flatMap((form) => [form, form.replace(/\s/g, '')]))]
 }
 
+function isExactAnswer(player: Player, query: string): boolean {
+  if (answerForms(player).includes(query) || normalizeAnswer(player.lastName) === query) return true
+
+  // Compound surnames such as "Del Piero", "De Bruyne" and "Di María" are
+  // sometimes stored with only their final token in `lastName`. Accept an
+  // exact, word-boundary suffix without making arbitrary partial names valid.
+  if (!query.includes(' ')) return false
+  return [player.displayName, ...player.acceptedNames]
+    .map(normalizeAnswer)
+    .some((form) => form.endsWith(` ${query}`))
+}
+
+export function getPlayerSuggestions(
+  input: string,
+  activePool: Player[],
+  limit = MAX_AUTOCOMPLETE_RESULTS,
+): Player[] {
+  const query = normalizeAnswer(input)
+  if (query.replace(/\s/g, '').length < MIN_AUTOCOMPLETE_CHARACTERS) return []
+
+  return activePool
+    .map((player) => {
+      const name = normalizeAnswer(player.displayName)
+      const matchIndex = name.indexOf(query)
+      if (matchIndex < 0) return null
+      const startsWord = matchIndex === 0 || name[matchIndex - 1] === ' '
+      return { player, matchIndex, startsWord }
+    })
+    .filter((match): match is { player: Player; matchIndex: number; startsWord: boolean } => match !== null)
+    .sort(
+      (left, right) =>
+        Number(right.startsWord) - Number(left.startsWord) ||
+        left.matchIndex - right.matchIndex ||
+        left.player.displayName.localeCompare(right.player.displayName),
+    )
+    .slice(0, Math.max(0, limit))
+    .map(({ player }) => player)
+}
+
 export function matchAnswer(input: string, selectedPlayer: Player, activePool: Player[]): MatchResult {
   if (!input.trim()) return { status: 'invalid', message: 'Enter a player name first.' }
   if (containsMultipleAnswers(input)) {
@@ -54,10 +96,7 @@ export function matchAnswer(input: string, selectedPlayer: Player, activePool: P
   const query = normalizeAnswer(input)
   if (!query) return { status: 'invalid', message: 'Enter a player name first.' }
 
-  const exactCandidates = activePool.filter((player) => {
-    const forms = answerForms(player)
-    return forms.includes(query) || normalizeAnswer(player.lastName) === query
-  })
+  const exactCandidates = activePool.filter((player) => isExactAnswer(player, query))
   if (exactCandidates.length > 1) return { status: 'ambiguous', candidates: exactCandidates }
   if (exactCandidates.length === 1) {
     return exactCandidates[0].id === selectedPlayer.id

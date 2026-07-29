@@ -1067,6 +1067,11 @@ button:disabled {
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
+.player-autocomplete {
+  position: relative;
+  min-width: 0;
+}
+
 .answer-zone input {
   width: 100%;
   min-height: 4rem;
@@ -1077,6 +1082,58 @@ button:disabled {
   background: var(--ink);
   color: var(--paper);
   font-size: 1rem;
+}
+
+.player-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% - 1px);
+  right: 0;
+  left: 0;
+  max-height: min(20rem, 42vh);
+  margin: 0;
+  padding: 0.25rem;
+  overflow-y: auto;
+  border: 1px solid rgba(6, 26, 20, 0.25);
+  background: var(--paper);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.34);
+  color: var(--ink);
+  list-style: none;
+}
+
+.player-suggestion {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: center;
+  min-height: 2.85rem;
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.player-suggestion + .player-suggestion {
+  border-top: 1px solid rgba(6, 26, 20, 0.12);
+}
+
+.player-suggestion small {
+  color: #68776f;
+  font-family: var(--score);
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.player-suggestion span {
+  overflow: hidden;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-suggestion:hover,
+.player-suggestion.is-active {
+  background: var(--lime);
+  color: var(--ink);
 }
 
 .guess-row .primary-button {

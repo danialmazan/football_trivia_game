@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { players } from '../data/players'
-import { matchAnswer, normalizeAnswer } from './answerMatching'
+import { getPlayerSuggestions, matchAnswer, normalizeAnswer } from './answerMatching'
 
 const byName = (name: string) => players.find((player) => player.displayName === name)!
 
@@ -12,6 +12,11 @@ describe('football answer matching', () => {
 
   it('accepts accent-insensitive names and unique surnames', () => {
     expect(matchAnswer('Modric', byName('Luka Modrić'), players).status).toBe('correct')
+  })
+
+  it('accepts an exact compound surname even when the dataset stores only its final token', () => {
+    expect(matchAnswer('del Piero', byName('Alessandro Del Piero'), players).status).toBe('correct')
+    expect(matchAnswer('Di María', byName('Ángel Di María'), players).status).toBe('correct')
   })
 
   it('accepts mononyms and configured common short names', () => {
@@ -30,5 +35,23 @@ describe('football answer matching', () => {
 
   it('rejects lists of player names', () => {
     expect(matchAnswer('Messi or Ronaldo', byName('Lionel Messi'), players).status).toBe('invalid')
+  })
+
+  it('suggests scoped player names only after three exact contiguous characters', () => {
+    const scopedPool = [
+      byName('David Beckham'),
+      byName('Kevin De Bruyne'),
+      byName('Lionel Messi'),
+    ]
+
+    expect(getPlayerSuggestions('Be', scopedPool)).toEqual([])
+    expect(getPlayerSuggestions('Bec', scopedPool).map((player) => player.displayName)).toEqual([
+      'David Beckham',
+    ])
+    expect(getPlayerSuggestions('vid Bec', scopedPool).map((player) => player.displayName)).toEqual([
+      'David Beckham',
+    ])
+    expect(getPlayerSuggestions('Beckam', scopedPool)).toEqual([])
+    expect(getPlayerSuggestions('Bec', [byName('Lionel Messi')])).toEqual([])
   })
 })

@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 async function startGame(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: /kick off/i }).click()
   await expect(page.getByRole('heading', { name: /know your three moves/i })).toBeVisible()
-  await page.getByRole('button', { name: /take the first touch/i }).click()
+  await page.getByRole('button', { name: /let's go/i }).click()
 }
 
 test('starts a Normal challenge, deducts misses, reveals clues and accepts the answer', async ({ page }) => {
@@ -58,6 +58,24 @@ test('does not summon the keyboard by focusing the guess input on mobile', async
   await expect(input).not.toBeFocused()
   await page.getByRole('button', { name: /next clue/i }).click()
   await expect(input).not.toBeFocused()
+})
+
+test('suggests in-scope players after three contiguous matching characters', async ({ page }) => {
+  await startGame(page)
+  const input = page.getByLabel(/guess now/i)
+
+  await input.fill('Be')
+  await expect(page.getByRole('listbox', { name: 'Player suggestions' })).toHaveCount(0)
+
+  await input.fill('Bec')
+  const suggestions = page.getByRole('listbox', { name: 'Player suggestions' })
+  await expect(suggestions).toBeVisible()
+  await expect(suggestions.getByRole('option', { name: /David Beckham/ })).toBeVisible()
+
+  await input.press('ArrowDown')
+  await input.press('Enter')
+  await expect(input).toHaveValue('David Beckham')
+  await expect(suggestions).toHaveCount(0)
 })
 
 test('giving up reveals the answer and scores zero', async ({ page }) => {
