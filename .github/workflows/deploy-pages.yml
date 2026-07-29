@@ -42,7 +42,7 @@ jobs:
         env:
           VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH }}
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhdW5mZWltaHpiYnBkZWRjY2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMjE3NDQsImV4cCI6MjEwMDg5Nzc0NH0.Ls0vDtowt4BXBRS0NRxsH7NcjE8lTFysU56Y0aoapXg
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
