@@ -1,4 +1,4 @@
-export type GameMode = 'challenge' | 'endless' | 'practice'
+export type GameMode = 'daily' | 'challenge' | 'endless' | 'practice'
 export type Pool = 'normal' | 'hardcore'
 export type Decade = '1990s' | '2000s' | '2010s' | '2020s'
 export type PracticeLeague = 'GB1' | 'ES1' | 'IT1' | 'L1' | 'FR1'
@@ -34,7 +34,7 @@ export interface RoundState {
 }
 
 export interface GameState {
-  version: 1
+  version: 1 | 2
   phase: 'playing' | 'review' | 'results'
   settings: GameSettings
   round: RoundState
@@ -44,6 +44,7 @@ export interface GameState {
   poolCycle: number
   poolResetMessage: string | null
   startedAt: string
+  dailyChallenge?: DailyChallenge
 }
 
 export interface EndlessStats {
@@ -53,8 +54,52 @@ export interface EndlessStats {
 }
 
 export interface SavedData {
+  schemaVersion: 2
   highScores: Record<Pool, number>
   endlessStats: Record<Pool, EndlessStats>
   lastSettings: GameSettings
   unfinishedGame: GameState | null
+  dailyGame: GameState | null
+  dailyCompletion: DailyCompletion | null
+  installationId: string
+}
+
+export interface DailyChallenge {
+  date: string
+  expiresAt: string
+  playerId: string
+  clueSeed: number
+  rosterVersion: string
+  attemptToken: string
+}
+
+export interface LeaderboardEntry {
+  rank: number
+  nickname: string
+  points: number
+  submittedAt: string
+}
+
+export interface DailyResultSubmission {
+  challengeDate: string
+  attemptToken: string
+  nickname: string
+  outcome: RoundOutcome
+  cluesUsed: number
+  incorrectGuesses: number
+}
+
+export interface DailyResultResponse {
+  date: string
+  points: number
+  rank: number
+  leaderboard: LeaderboardEntry[]
+}
+
+export interface DailyCompletion {
+  date: string
+  nickname: string
+  points: number
+  rank: number
+  leaderboard: LeaderboardEntry[]
 }

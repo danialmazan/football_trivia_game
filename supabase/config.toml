@@ -1,0 +1,7 @@
+project_id = "leo-guessi"
+
+[functions.daily-game]
+verify_jwt = false
+
+[functions.daily-maintenance]
+verify_jwt = false

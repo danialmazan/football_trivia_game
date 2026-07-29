@@ -19,10 +19,13 @@ export const POOL_RULES: Record<Pool, string> = {
 }
 
 export const MODE_LABELS: Record<GameMode, string> = {
+  daily: 'Player of the day',
   challenge: 'Ten-round challenge',
   endless: 'Endless mode',
-  practice: 'Practice by decade',
+  practice: 'Practice by decade or league',
 }
+
+export const GAME_MODES: GameMode[] = ['daily', 'challenge', 'endless', 'practice']
 
 export const POOL_LABELS: Record<Pool, string> = {
   normal: 'Normal',

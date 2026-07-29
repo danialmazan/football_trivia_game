@@ -4,6 +4,7 @@ import { getPlayerSuggestions } from '../game/answerMatching'
 import { GAME_CONFIG, MODE_LABELS, POOL_LABELS, PRACTICE_LEAGUES } from '../game/config'
 import { generateClues, getCareerSummary } from '../game/clues'
 import { calculateAvailableScore } from '../game/scoring'
+import { isValidNickname } from '../game/daily'
 import type { GameState } from '../game/types'
 import { ClueCard } from './ClueCard'
 
@@ -16,6 +17,11 @@ interface GameScreenProps {
   onGiveUp: () => void
   onNext: () => void
   onExit: () => void
+  dailyNickname?: string
+  dailySubmitting?: boolean
+  dailyError?: string | null
+  onDailyNicknameChange?: (nickname: string) => void
+  onDailySubmit?: () => void
 }
 
 function shouldAutoFocusGuess(): boolean {
@@ -31,6 +37,11 @@ export function GameScreen({
   onGiveUp,
   onNext,
   onExit,
+  dailyNickname = '',
+  dailySubmitting = false,
+  dailyError = null,
+  onDailyNicknameChange,
+  onDailySubmit,
 }: GameScreenProps) {
   const [guess, setGuess] = useState('')
   const [suggestionsOpen, setSuggestionsOpen] = useState(false)
@@ -100,6 +111,7 @@ export function GameScreen({
 
   const solved = game.results.filter((result) => result.outcome === 'correct').length
   const averageEndless = game.results.length ? Math.round(game.totalScore / game.results.length) : 0
+  const isDaily = game.settings.mode === 'daily'
 
   return (
     <main className="game-shell">
@@ -126,9 +138,19 @@ export function GameScreen({
 
       <section className="game-scorebar" aria-label="Game status">
         <div>
-          <span>{game.settings.mode === 'challenge' ? 'Progress' : game.settings.mode === 'endless' ? 'Players seen' : 'Practice rep'}</span>
+          <span>
+            {isDaily
+              ? 'Today’s player'
+              : game.settings.mode === 'challenge'
+                ? 'Progress'
+                : game.settings.mode === 'endless'
+                  ? 'Players seen'
+                  : 'Practice rep'}
+          </span>
           <strong>
-            {game.settings.mode === 'challenge'
+            {isDaily
+              ? '1 / 1'
+              : game.settings.mode === 'challenge'
               ? `${Math.max(1, roundNumber)} / ${GAME_CONFIG.challengeRounds}`
               : String(Math.max(1, roundNumber)).padStart(2, '0')}
           </strong>
@@ -142,7 +164,9 @@ export function GameScreen({
           </div>
         </div>
         <div>
-          <span>{game.settings.mode === 'practice' ? 'Players solved' : 'Game score'}</span>
+          <span>
+            {isDaily ? 'Daily score' : game.settings.mode === 'practice' ? 'Players solved' : 'Game score'}
+          </span>
           <strong data-testid="total-score">{game.settings.mode === 'practice' ? solved : game.totalScore}</strong>
         </div>
         {game.settings.mode === 'endless' && (
@@ -209,12 +233,46 @@ export function GameScreen({
                   <p>{game.round.incorrectGuesses.join(' · ')}</p>
                 </div>
               )}
-              <button className="primary-button primary-button--large" type="button" onClick={onNext}>
-                {game.settings.mode === 'challenge' && game.results.length >= GAME_CONFIG.challengeRounds
-                  ? 'See final results'
-                  : 'Next player'}{' '}
-                <span aria-hidden="true">→</span>
-              </button>
+              {isDaily ? (
+                <form
+                  className="daily-submit"
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    onDailySubmit?.()
+                  }}
+                >
+                  <label htmlFor="daily-nickname">
+                    Join today’s leaderboard
+                    <span>Your nickname will be public.</span>
+                  </label>
+                  <div className="daily-submit__row">
+                    <input
+                      id="daily-nickname"
+                      value={dailyNickname}
+                      onChange={(event) => onDailyNicknameChange?.(event.target.value)}
+                      maxLength={48}
+                      placeholder="Name or nickname"
+                      autoComplete="nickname"
+                    />
+                    <button
+                      className="primary-button"
+                      type="submit"
+                      disabled={dailySubmitting || !isValidNickname(dailyNickname)}
+                    >
+                      {dailySubmitting ? 'Submitting…' : 'Submit score'}
+                    </button>
+                  </div>
+                  <small>1–24 characters · one scored entry per browser today</small>
+                  {dailyError && <p className="daily-service-error" role="alert">{dailyError}</p>}
+                </form>
+              ) : (
+                <button className="primary-button primary-button--large" type="button" onClick={onNext}>
+                  {game.settings.mode === 'challenge' && game.results.length >= GAME_CONFIG.challengeRounds
+                    ? 'See final results'
+                    : 'Next player'}{' '}
+                  <span aria-hidden="true">→</span>
+                </button>
+              )}
             </div>
           ) : (
             <>
