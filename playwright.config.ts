@@ -15,6 +15,11 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 4173',
     url: 'http://127.0.0.1:4173',
+    env: {
+      ...process.env,
+      VITE_SUPABASE_URL: 'http://127.0.0.1:4173/api',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'playwright-publishable-key',
+    },
     reuseExistingServer: !process.env.CI,
   },
 })

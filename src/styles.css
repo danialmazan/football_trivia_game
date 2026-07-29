@@ -425,7 +425,7 @@ button:disabled {
 }
 
 .choice-grid--modes {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .choice-card {
@@ -519,6 +519,21 @@ button:disabled {
 .pool-toggle button.active {
   background: var(--paper);
   color: var(--ink);
+}
+
+.pool-toggle button:disabled {
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.015) 0 6px,
+      rgba(255, 255, 255, 0.04) 6px 12px
+    );
+  color: #707873;
+  cursor: not-allowed;
+}
+
+.pool-toggle button:disabled small {
+  color: #707873;
 }
 
 .pool-toggle span {
@@ -620,6 +635,21 @@ button:disabled {
   line-height: 1.7;
 }
 
+.guide-daily-note {
+  margin: 1.2rem clamp(1rem, 3vw, 2.5rem) 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.guide-error,
+.daily-service-error {
+  margin: 1rem clamp(1rem, 3vw, 2.5rem) 0;
+  color: #ff9a7a;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
 .guide-matchup {
   display: flex;
   align-items: center;
@@ -641,6 +671,16 @@ button:disabled {
 
 .guide-rules {
   padding: clamp(1rem, 3vw, 2.5rem);
+}
+
+.guide-card__rules-column {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.guide-card__rules-column .guide-rules {
+  flex: 1;
 }
 
 .guide-rules article {
@@ -693,7 +733,6 @@ button:disabled {
 
 .guide-confirm {
   margin: 0 clamp(1rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2.5rem);
-  grid-column: 2;
 }
 
 /* Gameplay */
@@ -1311,6 +1350,214 @@ button:disabled {
   font-size: 0.8rem;
 }
 
+.daily-submit {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.daily-submit label {
+  display: flex;
+  margin-bottom: 0.7rem;
+  flex-direction: column;
+  color: var(--paper);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.daily-submit label span,
+.daily-submit > small {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.4;
+  text-transform: none;
+}
+
+.daily-submit__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+}
+
+.daily-submit input {
+  min-width: 0;
+  height: 3rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  outline: 0;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--paper);
+  font: inherit;
+}
+
+.daily-submit input:focus {
+  border-color: var(--lime);
+  box-shadow: inset 0 -2px var(--lime);
+}
+
+.daily-submit .daily-service-error {
+  margin: 0.8rem 0 0;
+  grid-column: auto;
+}
+
+/* Daily results */
+.daily-results-shell {
+  min-height: 100vh;
+  padding: clamp(2rem, 5vw, 5rem);
+  background:
+    radial-gradient(circle at 88% 10%, rgba(217, 255, 67, 0.08), transparent 24rem),
+    var(--ink);
+}
+
+.daily-results-hero,
+.daily-leaderboard,
+.daily-results-actions {
+  width: min(64rem, 100%);
+  margin-inline: auto;
+}
+
+.daily-results-hero {
+  padding: 0 0 clamp(2rem, 5vw, 4rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.daily-results-hero .wordmark {
+  display: block;
+  margin-bottom: clamp(3rem, 7vw, 6rem);
+}
+
+.daily-results-hero h1 {
+  max-width: 12ch;
+  margin: 0.7rem 0 1.2rem;
+  font-family: var(--display);
+  font-size: clamp(3rem, 8vw, 7.5rem);
+  font-style: italic;
+  letter-spacing: -0.07em;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+.daily-results-hero > p {
+  max-width: 38rem;
+  margin: 1.2rem 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.daily-result-score {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.daily-result-score strong {
+  color: var(--lime);
+  font-family: var(--score);
+  font-size: clamp(3rem, 6vw, 5rem);
+}
+
+.daily-result-score span {
+  color: var(--paper);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.daily-leaderboard {
+  padding: clamp(2rem, 5vw, 4rem) 0;
+}
+
+.daily-leaderboard .daily-service-error {
+  margin-inline: 0;
+  grid-column: auto;
+}
+
+.text-button {
+  border: 0;
+  background: transparent;
+  color: var(--lime);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.text-button:disabled {
+  color: var(--muted);
+  cursor: wait;
+}
+
+.daily-table {
+  margin-top: 1.2rem;
+  border-top: 1px solid var(--line);
+}
+
+.daily-table__row {
+  display: grid;
+  min-height: 3.6rem;
+  padding: 0.75rem 1rem;
+  grid-template-columns: 5rem minmax(0, 1fr) 6rem;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.daily-table__row--head {
+  min-height: 2.6rem;
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.daily-table__row--current {
+  background: rgba(217, 255, 67, 0.08);
+  box-shadow: inset 3px 0 var(--lime);
+}
+
+.daily-table__row strong,
+.daily-table__row b {
+  color: var(--lime);
+  font-family: var(--score);
+  font-size: 1.1rem;
+}
+
+.daily-table__row b,
+.daily-table__row--head span:last-child {
+  text-align: right;
+}
+
+.daily-empty {
+  margin: 1.5rem 0 0;
+  color: var(--muted);
+}
+
+.daily-results-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 2rem;
+}
+
+.daily-results-actions > span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.daily-results-shell + .settings-trigger {
+  display: none;
+}
+
 /* Results */
 .results-shell {
   max-width: 76rem;
@@ -1633,7 +1880,6 @@ button:disabled {
 
   .guide-confirm {
     margin: 0 1rem 1rem;
-    grid-column: 1;
   }
 
   .game-header {
@@ -1852,6 +2098,32 @@ button:disabled {
     width: 100%;
   }
 
+  .daily-submit__row {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-submit__row .primary-button {
+    min-height: 3rem;
+  }
+
+  .daily-results-shell {
+    padding: 1.5rem 1.2rem 4rem;
+  }
+
+  .daily-results-hero .wordmark {
+    margin-bottom: 3.5rem;
+  }
+
+  .daily-table__row {
+    padding-inline: 0.6rem;
+    grid-template-columns: 3.5rem minmax(0, 1fr) 4.5rem;
+  }
+
+  .daily-results-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .section-heading {
     align-items: flex-start;
     gap: 1rem;
@@ -1935,6 +2207,7 @@ button:disabled {
   }
 
   .guide-confirm {
+    width: calc(100% - 2rem);
     min-height: 3.5rem;
   }
 

@@ -1,6 +1,7 @@
 import type { Player } from '../data/types'
 import {
   DECADES,
+  GAME_MODES,
   MODE_LABELS,
   POOL_LABELS,
   POOL_RULES,
@@ -28,7 +29,16 @@ export function SetupScreen({
   onResume,
 }: SetupScreenProps) {
   const filter = settings.mode === 'practice' ? settings.practiceFilter : undefined
-  const poolCount = getActivePool(players, settings.pool, filter).length
+  const effectivePool = settings.mode === 'daily' ? 'normal' : settings.pool
+  const poolCount = getActivePool(players, effectivePool, filter).length
+
+  function selectMode(mode: GameSettings['mode']) {
+    onSettingsChange({
+      ...settings,
+      mode,
+      pool: mode === 'daily' ? 'normal' : settings.pool,
+    })
+  }
 
   return (
     <main className="setup-shell">
@@ -78,21 +88,23 @@ export function SetupScreen({
           </div>
         </div>
         <div className="choice-grid choice-grid--modes">
-          {(['challenge', 'endless', 'practice'] as const).map((mode) => (
+          {GAME_MODES.map((mode) => (
             <button
               type="button"
               className={`choice-card ${settings.mode === mode ? 'choice-card--active' : ''}`}
               aria-pressed={settings.mode === mode}
               key={mode}
-              onClick={() => onSettingsChange({ ...settings, mode })}
+              onClick={() => selectMode(mode)}
             >
               <span>{MODE_LABELS[mode]}</span>
               <small>
-                {mode === 'challenge'
+                {mode === 'daily'
+                  ? 'A player each day. Same for everyone.'
+                  : mode === 'challenge'
                   ? '10 players · 1,000 max'
                   : mode === 'endless'
                     ? 'Play through the pool'
-                    : 'Train by era or league'}
+                    : 'Train by decade or league'}
               </small>
             </button>
           ))}
@@ -180,10 +192,15 @@ export function SetupScreen({
               key={pool}
               className={settings.pool === pool ? 'active' : ''}
               aria-pressed={settings.pool === pool}
+              disabled={settings.mode === 'daily' && pool === 'hardcore'}
               onClick={() => onSettingsChange({ ...settings, pool })}
             >
               <span>{POOL_LABELS[pool]}</span>
-              <small>{POOL_RULES[pool]}</small>
+              <small>
+                {settings.mode === 'daily' && pool === 'hardcore'
+                  ? 'Player of the day uses the Normal pool.'
+                  : POOL_RULES[pool]}
+              </small>
             </button>
           ))}
         </div>

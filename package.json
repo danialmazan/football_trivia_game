@@ -14,7 +14,8 @@
     "data:refresh": "node scripts/build-football-data.mjs",
     "data:manifest": "node scripts/build-football-data.mjs --manifest-only",
     "data:achievements": "node scripts/fetch-achievements.mjs",
-    "data:badges": "node scripts/fetch-club-badges.mjs"
+    "data:badges": "node scripts/fetch-club-badges.mjs",
+    "daily:pool": "node scripts/build-daily-pool.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
