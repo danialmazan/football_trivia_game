@@ -209,16 +209,34 @@ test('gates the homepage leaderboard by today’s nickname and switches game and
   await page.getByRole('button', { name: /check the leaderboard/i }).click()
   await expect(page.getByRole('heading', { name: /check the leaderboard/i })).toBeVisible()
   await expect(page.getByLabel('Public nickname')).toHaveValue('')
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
 
   await page.getByLabel('Public nickname').fill('Unknown')
   await page.getByRole('button', { name: /check the leaderboard/i }).click()
   await expect(page.getByText('Guess today’s Player of the Day to see the leaderboard!')).toBeVisible()
   await expect(page.getByLabel('Unlocked leaderboards')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
 
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: ShareData) => {
+        Reflect.set(window, '__hubSharedResult', data)
+      },
+    })
+  })
   await page.getByLabel('Public nickname').fill('LeoFan')
   await page.getByRole('button', { name: /check the leaderboard/i }).click()
   await expect(page.getByLabel('Unlocked leaderboards')).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('LeoFan')
+  await page.getByRole('button', { name: /share your result/i }).click()
+  const hubSharedResult = await page.evaluate(() => Reflect.get(window, '__hubSharedResult'))
+  expect(hubSharedResult).toEqual({
+    title: 'Leo Guessi — Player of the Day',
+    text: 'I scored 100/100 in Leo Guessi’s Player of the Day — rank #1 on 2026-07-31 UTC.',
+    url: 'http://127.0.0.1:4175/',
+  })
+  expect(JSON.stringify(hubSharedResult)).not.toContain('LeoFan')
 
   await page.getByRole('tab', { name: '10-round challenge' }).click()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('NormalLeader')

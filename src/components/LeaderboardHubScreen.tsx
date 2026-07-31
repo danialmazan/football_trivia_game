@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { POOL_LABELS } from '../game/config'
 import { isValidNickname } from '../game/daily'
+import { buildDailyShareData, getGameUrl } from '../game/sharing'
 import type { LeaderboardHubResponse, Pool } from '../game/types'
 import { LeaderboardTabs } from './LeaderboardTabs'
+import { SavedResultShare } from './SavedResultShare'
 
 interface LeaderboardHubScreenProps {
   nickname: string
@@ -30,6 +32,9 @@ export function LeaderboardHubScreen({
   const [page, setPage] = useState<'daily' | 'challenge'>('daily')
   const [pool, setPool] = useState<Pool>('normal')
   const unlocked = response?.eligible === true
+  const ownDailyResult = response?.eligible
+    ? response.dailyBoards.today.find((entry) => entry.nickname === response.nickname)
+    : undefined
 
   return (
     <main className="leaderboard-hub-shell">
@@ -87,8 +92,20 @@ export function LeaderboardHubScreen({
       ) : (
         <section className="leaderboard-hub-content" aria-label="Unlocked leaderboards">
           <div className="leaderboard-hub-toolbar">
-            <p>Viewing as <strong>{response.nickname}</strong></p>
-            <div>
+            <div className="leaderboard-hub-toolbar__share">
+              <p>Viewing as <strong>{response.nickname}</strong></p>
+              {ownDailyResult && (
+                <SavedResultShare
+                  data={buildDailyShareData({
+                    points: ownDailyResult.value,
+                    rank: ownDailyResult.rank,
+                    date: response.date,
+                    url: getGameUrl(),
+                  })}
+                />
+              )}
+            </div>
+            <div className="leaderboard-hub-toolbar__tools">
               <button className="text-button" type="button" onClick={onRefresh} disabled={loading}>
                 {loading ? 'Refreshing…' : 'Refresh leaderboards'}
               </button>
