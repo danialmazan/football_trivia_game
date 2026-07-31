@@ -15,6 +15,7 @@ import {
   buildChallengeLeaderboardBoards,
   buildDailyLeaderboardBoards,
   calculateDailyScore,
+  findTodayNicknameResult,
   isValidDailyNickname,
   normalizeLeaderboardNickname,
   type HistoricalResult,
@@ -124,6 +125,33 @@ Deno.serve(async (request) => {
         date: today,
         pool,
         boards: buildChallengeLeaderboardBoards(await getChallengeResults(client, pool), today),
+      })
+    }
+
+    if (request.method === 'POST' && action === 'leaderboard-hub') {
+      const body = await request.json().catch(() => null) as Record<string, unknown> | null
+      if (!body || !isValidDailyNickname(body.nickname)) {
+        return json(request, { error: 'Use a nickname between 1 and 24 characters.' }, 400)
+      }
+
+      const todayResults = await getDailyResults(client, today)
+      const ownResult = findTodayNicknameResult(todayResults, today, body.nickname)
+      if (!ownResult) return json(request, { eligible: false, date: today })
+
+      const [allDailyResults, normalResults, hardcoreResults] = await Promise.all([
+        getDailyResults(client),
+        getChallengeResults(client, 'normal'),
+        getChallengeResults(client, 'hardcore'),
+      ])
+      return json(request, {
+        eligible: true,
+        date: today,
+        nickname: ownResult.nickname,
+        dailyBoards: buildDailyLeaderboardBoards(allDailyResults, today),
+        challengeBoards: {
+          normal: buildChallengeLeaderboardBoards(normalResults, today),
+          hardcore: buildChallengeLeaderboardBoards(hardcoreResults, today),
+        },
       })
     }
 

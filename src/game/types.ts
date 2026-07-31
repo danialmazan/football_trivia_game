@@ -96,6 +96,19 @@ export interface LeaderboardBoards {
   best: LeaderboardMetricEntry[]
 }
 
+export type LeaderboardHubResponse =
+  | {
+      eligible: false
+      date: string
+    }
+  | {
+      eligible: true
+      date: string
+      nickname: string
+      dailyBoards: LeaderboardBoards
+      challengeBoards: Record<Pool, LeaderboardBoards>
+    }
+
 export interface DailyResultSubmission {
   challengeDate: string
   attemptToken: string

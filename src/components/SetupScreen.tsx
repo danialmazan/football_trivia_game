@@ -18,6 +18,7 @@ interface SetupScreenProps {
   onSettingsChange: (settings: GameSettings) => void
   onStart: () => void
   onResume: () => void
+  onOpenLeaderboard: () => void
 }
 
 export function SetupScreen({
@@ -27,6 +28,7 @@ export function SetupScreen({
   onSettingsChange,
   onStart,
   onResume,
+  onOpenLeaderboard,
 }: SetupScreenProps) {
   const filter = settings.mode === 'practice' ? settings.practiceFilter : undefined
   const effectivePool = settings.mode === 'daily' ? 'normal' : settings.pool
@@ -67,15 +69,24 @@ export function SetupScreen({
             1995 onwards.
           </p>
         </div>
-        <div className="hero__scoreboard" aria-label="Saved high scores">
-          <div>
-            <span>Normal best</span>
-            <strong>{savedData.highScores.normal.toString().padStart(4, '0')}</strong>
+        <div className="hero__records">
+          <div className="hero__scoreboard" aria-label="Saved high scores">
+            <div>
+              <span>Player of the day best</span>
+              <strong>{(savedData.dailyCompletion?.points ?? 0).toString().padStart(3, '0')}</strong>
+            </div>
+            <div>
+              <span>Normal best</span>
+              <strong>{savedData.highScores.normal.toString().padStart(4, '0')}</strong>
+            </div>
+            <div>
+              <span>Hardcore best</span>
+              <strong>{savedData.highScores.hardcore.toString().padStart(4, '0')}</strong>
+            </div>
           </div>
-          <div>
-            <span>Hardcore best</span>
-            <strong>{savedData.highScores.hardcore.toString().padStart(4, '0')}</strong>
-          </div>
+          <button className="hero__leaderboard-button" type="button" onClick={onOpenLeaderboard}>
+            Check the leaderboard <span aria-hidden="true">↗</span>
+          </button>
         </div>
       </section>
 

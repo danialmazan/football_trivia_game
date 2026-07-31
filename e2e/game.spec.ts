@@ -130,7 +130,7 @@ test('plays the shared daily player once and restores its leaderboard after relo
   expect(sharedResult).toEqual({
     title: 'Leo Guessi — Player of the Day',
     text: `I scored 100/100 in Leo Guessi’s Player of the Day — rank #1 on ${dailyDate} UTC.`,
-    url: 'http://127.0.0.1:4173/',
+    url: 'http://127.0.0.1:4175/',
   })
   expect(JSON.stringify(sharedResult)).not.toContain('Lionel Messi')
   expect(JSON.stringify(sharedResult)).not.toContain('LeoFan')
@@ -152,6 +152,85 @@ test('plays the shared daily player once and restores its leaderboard after relo
   await expect(page.getByRole('heading', { name: /score saved/i })).toBeVisible()
   await expect(page.getByRole('button', { name: /share your result/i })).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('AwayDays')
+  await page.getByRole('button', { name: /back to home page/i }).click()
+  await expect(page.getByText('Player of the day best').locator('..')).toContainText('100')
+})
+
+test('gates the homepage leaderboard by today’s nickname and switches game and pool views', async ({ page }) => {
+  const dailyBoards = {
+    today: [{ rank: 1, nickname: 'LeoFan', value: 100, gamesPlayed: 1 }],
+    cumulative: [{ rank: 1, nickname: 'LeoFan', value: 180, gamesPlayed: 2 }],
+    average: [],
+    best: [{ rank: 1, nickname: 'LeoFan', value: 100, gamesPlayed: 2 }],
+  }
+  const normalBoards = {
+    today: [{ rank: 1, nickname: 'NormalLeader', value: 900, gamesPlayed: 1 }],
+    gamesPlayed: [{ rank: 1, nickname: 'NormalLeader', value: 1, gamesPlayed: 1 }],
+    average: [],
+    best: [{ rank: 1, nickname: 'NormalLeader', value: 900, gamesPlayed: 1 }],
+  }
+  const hardcoreBoards = {
+    today: [{ rank: 1, nickname: 'HardcoreLeader', value: 700, gamesPlayed: 1 }],
+    gamesPlayed: [{ rank: 1, nickname: 'HardcoreLeader', value: 1, gamesPlayed: 1 }],
+    average: [],
+    best: [{ rank: 1, nickname: 'HardcoreLeader', value: 700, gamesPlayed: 1 }],
+  }
+  await page.route('**/api/functions/v1/daily-game**', async (route) => {
+    const request = route.request()
+    if (new URL(request.url()).searchParams.get('action') !== 'leaderboard-hub') {
+      await route.fallback()
+      return
+    }
+    const { nickname } = request.postDataJSON()
+    if (nickname !== 'LeoFan') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ eligible: false, date: '2026-07-31' }),
+      })
+      return
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        eligible: true,
+        date: '2026-07-31',
+        nickname: 'LeoFan',
+        dailyBoards,
+        challengeBoards: { normal: normalBoards, hardcore: hardcoreBoards },
+      }),
+    })
+  })
+
+  const savedScores = page.getByLabel('Saved high scores')
+  await expect(savedScores).toContainText('Player of the day best')
+  await expect(savedScores).toContainText('000')
+  await page.getByRole('button', { name: /check the leaderboard/i }).click()
+  await expect(page.getByRole('heading', { name: /check the leaderboard/i })).toBeVisible()
+  await expect(page.getByLabel('Public nickname')).toHaveValue('')
+
+  await page.getByLabel('Public nickname').fill('Unknown')
+  await page.getByRole('button', { name: /check the leaderboard/i }).click()
+  await expect(page.getByText('Guess today’s Player of the Day to see the leaderboard!')).toBeVisible()
+  await expect(page.getByLabel('Unlocked leaderboards')).toHaveCount(0)
+
+  await page.getByLabel('Public nickname').fill('LeoFan')
+  await page.getByRole('button', { name: /check the leaderboard/i }).click()
+  await expect(page.getByLabel('Unlocked leaderboards')).toBeVisible()
+  await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('LeoFan')
+
+  await page.getByRole('tab', { name: '10-round challenge' }).click()
+  await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('NormalLeader')
+  await expect(page.getByText(/shared 10-round records began/i)).toBeVisible()
+  await page.getByRole('button', { name: 'Hardcore', exact: true }).click()
+  await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('HardcoreLeader')
+
+  await page.getByRole('button', { name: /change nickname/i }).click()
+  await expect(page.getByLabel('Public nickname')).toHaveValue('')
+  await expect(page.getByLabel('Unlocked leaderboards')).toHaveCount(0)
+  await page.getByRole('button', { name: /back to home page/i }).click()
+  await expect(page.getByRole('heading', { name: /game format/i })).toBeVisible()
 })
 
 test('keeps daily errors inside the guide and leaves local modes available', async ({ page }) => {
@@ -341,6 +420,14 @@ test('completes ten rounds, submits its nickname and persists a high score', asy
   await expect(page.getByText("That’s the final whistle.")).toBeVisible()
   await expect(page.getByText('/ 1000')).toBeVisible()
   await expect(page.getByText('New personal best.')).toBeVisible()
+  await expect(page.getByRole('button', { name: /switch player pool/i })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /back to home page/i })).toBeVisible()
+  page.once('dialog', async (dialog) => {
+    expect(dialog.message()).toBe('Return home without submitting this score to the leaderboard?')
+    await dialog.dismiss()
+  })
+  await page.getByRole('button', { name: /leo guessi/i }).click()
+  await expect(page.getByText("That’s the final whistle.")).toBeVisible()
   await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
   await page.getByLabel('Public nickname').fill('LeoFan')
   await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
@@ -365,7 +452,7 @@ test('completes ten rounds, submits its nickname and persists a high score', asy
   await page.getByRole('button', { name: /share your result/i }).click()
   await expect(page.getByRole('status')).toHaveText('Link copied.')
   await expect.poll(() => page.evaluate(() => Reflect.get(window, '__copiedLink'))).toBe(
-    'http://127.0.0.1:4173/',
+    'http://127.0.0.1:4175/',
   )
 
   await page.evaluate(() => {
@@ -383,6 +470,6 @@ test('completes ten rounds, submits its nickname and persists a high score', asy
     'Couldn’t share or copy the link. Copy it from your address bar.',
   )
 
-  await page.reload()
+  await page.getByRole('button', { name: /back to home page/i }).click()
   await expect(page.getByText('Normal best').locator('..')).toContainText('1000')
 })

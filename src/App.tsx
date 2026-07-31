@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { DailyResultsScreen } from './components/DailyResultsScreen'
 import { GameGuide } from './components/GameGuide'
 import { GameScreen } from './components/GameScreen'
+import { LeaderboardHubScreen } from './components/LeaderboardHubScreen'
 import { ResultsScreen } from './components/ResultsScreen'
 import { SetupScreen } from './components/SetupScreen'
 import { playerSearch, players } from './data/players'
@@ -12,6 +13,7 @@ import {
   getDailyChallenge,
   getDailyLeaderboard,
   getChallengeLeaderboard,
+  getLeaderboardHub,
   submitChallengeResult,
   submitDailyResult,
 } from './game/dailyApi'
@@ -29,6 +31,7 @@ import type {
   GameSettings,
   GameState,
   LeaderboardBoards,
+  LeaderboardHubResponse,
   RoundOutcome,
   RoundResult,
   SavedData,
@@ -55,6 +58,10 @@ export function App() {
   )
   const [challengeBoards, setChallengeBoards] = useState<LeaderboardBoards | null>(null)
   const [challengeSubmitted, setChallengeSubmitted] = useState(false)
+  const [leaderboardHubOpen, setLeaderboardHubOpen] = useState(false)
+  const [leaderboardHubNickname, setLeaderboardHubNickname] = useState('')
+  const [leaderboardHubResponse, setLeaderboardHubResponse] =
+    useState<LeaderboardHubResponse | null>(null)
 
   useEffect(() => {
     saveData(savedData)
@@ -469,8 +476,16 @@ export function App() {
   }
 
   function exitGame() {
-    if (
-      (game?.settings.mode === 'challenge' || game?.settings.mode === 'practice') &&
+    if (game?.settings.mode === 'challenge') {
+      const confirmation =
+        game.phase === 'results' && !challengeSubmitted
+          ? 'Return home without submitting this score to the leaderboard?'
+          : game.phase !== 'results'
+            ? 'Leave this active 10-round game? Your progress will remain saved.'
+            : null
+      if (confirmation && !window.confirm(confirmation)) return
+    } else if (
+      game?.settings.mode === 'practice' &&
       game.phase !== 'results' &&
       !window.confirm('Leave this active 10-round game? Your progress will remain saved.')
     ) {
@@ -495,14 +510,43 @@ export function App() {
     setGame(buildNewGame(game?.settings ?? settings))
   }
 
-  function switchPool() {
-    if (game) {
-      setSettings({
-        ...game.settings,
-        pool: game.settings.pool === 'normal' ? 'hardcore' : 'normal',
-      })
+  function openLeaderboardHub() {
+    setLeaderboardHubNickname('')
+    setLeaderboardHubResponse(null)
+    setDailyError(null)
+    setLeaderboardHubOpen(true)
+  }
+
+  function closeLeaderboardHub() {
+    setLeaderboardHubOpen(false)
+    setLeaderboardHubNickname('')
+    setLeaderboardHubResponse(null)
+    setDailyError(null)
+  }
+
+  function resetLeaderboardAccess() {
+    setLeaderboardHubNickname('')
+    setLeaderboardHubResponse(null)
+    setDailyError(null)
+  }
+
+  async function loadLeaderboardHub() {
+    if (!isValidNickname(leaderboardHubNickname)) return
+    setDailyLoading(true)
+    setDailyError(null)
+    try {
+      const response = await getLeaderboardHub(leaderboardHubNickname.trim())
+      setLeaderboardHubResponse(response)
+      if (response.eligible) {
+        setLeaderboardHubNickname(response.nickname)
+        setSavedData((current) => ({ ...current, lastNickname: response.nickname }))
+      }
+    } catch (error) {
+      setLeaderboardHubResponse(null)
+      setDailyError(error instanceof Error ? error.message : 'Could not load the leaderboards.')
+    } finally {
+      setDailyLoading(false)
     }
-    setGame(null)
   }
 
   function handleResetSavedData() {
@@ -519,7 +563,7 @@ export function App() {
 
   return (
     <div className="app">
-      {!game && !showGuide && (
+      {!game && !showGuide && !leaderboardHubOpen && (
         <SetupScreen
           settings={settings}
           savedData={savedData}
@@ -527,6 +571,20 @@ export function App() {
           onSettingsChange={updateSettings}
           onStart={startGame}
           onResume={resumeGame}
+          onOpenLeaderboard={openLeaderboardHub}
+        />
+      )}
+      {!game && !showGuide && leaderboardHubOpen && (
+        <LeaderboardHubScreen
+          nickname={leaderboardHubNickname}
+          response={leaderboardHubResponse}
+          loading={dailyLoading}
+          error={dailyError}
+          onNicknameChange={setLeaderboardHubNickname}
+          onSubmit={loadLeaderboardHub}
+          onRefresh={loadLeaderboardHub}
+          onResetAccess={resetLeaderboardAccess}
+          onExit={closeLeaderboardHub}
         />
       )}
       {!game && showGuide && (
@@ -560,7 +618,7 @@ export function App() {
           game={game}
           highScore={savedData.highScores[game.settings.pool]}
           onPlayAgain={playAgain}
-          onSwitchPool={switchPool}
+          onHome={exitGame}
           nickname={dailyNickname}
           submitting={dailyLoading}
           error={dailyError}

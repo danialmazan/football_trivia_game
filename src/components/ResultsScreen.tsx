@@ -9,7 +9,7 @@ interface ResultsScreenProps {
   game: GameState
   highScore: number
   onPlayAgain: () => void
-  onSwitchPool: () => void
+  onHome: () => void
   nickname: string
   submitting: boolean
   error: string | null
@@ -24,7 +24,7 @@ export function ResultsScreen({
   game,
   highScore,
   onPlayAgain,
-  onSwitchPool,
+  onHome,
   nickname,
   submitting,
   error,
@@ -50,6 +50,9 @@ export function ResultsScreen({
   return (
     <main className="results-shell">
       <header className="results-hero">
+        <button className="wordmark results-wordmark" type="button" onClick={onHome}>
+          LEO <span>GUESSI</span>
+        </button>
         <span className="eyebrow">
           Full time · {MODE_LABELS[game.settings.mode]} · {POOL_LABELS[game.settings.pool]}
           {practiceLabel ? ` · ${practiceLabel}` : ''}
@@ -160,7 +163,7 @@ export function ResultsScreen({
 
       <div className="results-actions">
         <button className="primary-button primary-button--large" type="button" onClick={onPlayAgain}>Play again</button>
-        <button className="secondary-button" type="button" onClick={onSwitchPool}>Switch player pool</button>
+        <button className="secondary-button" type="button" onClick={onHome}>Back to home page</button>
       </div>
     </main>
   )

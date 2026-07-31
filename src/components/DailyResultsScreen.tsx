@@ -60,7 +60,7 @@ export function DailyResultsScreen({
 
       <div className="daily-results-actions">
         <button className="primary-button primary-button--large" type="button" onClick={onExit}>
-          Back to game modes
+          Back to home page
         </button>
       </div>
     </main>

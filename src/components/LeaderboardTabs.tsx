@@ -66,6 +66,11 @@ export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTa
           </button>
         ))}
       </div>
+      {mode === 'challenge' && (
+        <p className="leaderboard-era-note">
+          Shared 10-round records began on 31 July 2026. Earlier games stayed only in each browser.
+        </p>
+      )}
       {active === 'average' && (
         <p className="leaderboard-note">Ranked after at least three completed games.</p>
       )}

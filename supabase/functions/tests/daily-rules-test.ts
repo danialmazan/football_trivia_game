@@ -2,6 +2,7 @@ import {
   buildChallengeLeaderboardBoards,
   buildDailyLeaderboardBoards,
   calculateDailyScore,
+  findTodayNicknameResult,
   isValidDailyNickname,
   normalizeLeaderboardNickname,
   rankDailyResults,
@@ -49,6 +50,21 @@ Deno.test('daily nickname validation supports Unicode and enforces length', () =
   assert(isValidDailyNickname('⚽'), 'Unicode nicknames should be accepted')
   assert(!isValidDailyNickname(''), 'empty nicknames should be rejected')
   assert(!isValidDailyNickname('x'.repeat(25)), 'nicknames over 24 characters should be rejected')
+})
+
+Deno.test('homepage access requires the normalized nickname to have played today', () => {
+  const rows = [
+    { challenge_date: '2026-07-30', nickname: 'Yesterday', points: 80, submitted_at: '2026-07-30T09:00:00Z' },
+    { challenge_date: '2026-07-31', nickname: 'Dani FC', points: 100, submitted_at: '2026-07-31T09:00:00Z' },
+  ]
+  assert(
+    findTodayNicknameResult(rows, '2026-07-31', '  DANI   FC ')?.nickname === 'Dani FC',
+    'matching should be normalized and case-insensitive',
+  )
+  assert(
+    findTodayNicknameResult(rows, '2026-07-31', 'Yesterday') === null,
+    'yesterday should not unlock today',
+  )
 })
 
 Deno.test('daily leaderboard uses competition ranking for ties', () => {

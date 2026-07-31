@@ -6,6 +6,7 @@ import type {
   DailyResultSubmission,
   LeaderboardEntry,
   LeaderboardBoards,
+  LeaderboardHubResponse,
   Pool,
 } from './types'
 
@@ -79,4 +80,11 @@ export function getChallengeLeaderboard(pool: Pool): Promise<{
   const url = new URL(endpoint('challenge-leaderboard'))
   url.searchParams.set('pool', pool)
   return request(url.toString())
+}
+
+export function getLeaderboardHub(nickname: string): Promise<LeaderboardHubResponse> {
+  return request<LeaderboardHubResponse>(endpoint('leaderboard-hub'), {
+    method: 'POST',
+    body: JSON.stringify({ nickname }),
+  })
 }

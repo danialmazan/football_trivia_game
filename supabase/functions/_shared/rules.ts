@@ -35,6 +35,19 @@ export function normalizeLeaderboardNickname(value: string): string {
   return value.normalize('NFKC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('en')
 }
 
+export function findTodayNicknameResult<T extends HistoricalResult>(
+  rows: T[],
+  today: string,
+  nickname: string,
+): T | null {
+  const normalized = normalizeLeaderboardNickname(nickname)
+  return rows.find(
+    (row) =>
+      row.challenge_date === today &&
+      normalizeLeaderboardNickname(row.nickname) === normalized,
+  ) ?? null
+}
+
 export function calculateDailyScore(
   outcome: 'correct' | 'gave-up',
   cluesUsed: number,
