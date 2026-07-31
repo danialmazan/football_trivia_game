@@ -1,7 +1,9 @@
 import { GAME_CONFIG, MODE_LABELS, POOL_LABELS, PRACTICE_LEAGUES } from '../game/config'
 import { isValidNickname } from '../game/daily'
+import { buildChallengeShareData, getGameUrl } from '../game/sharing'
 import type { GameState, LeaderboardBoards } from '../game/types'
 import { LeaderboardTabs } from './LeaderboardTabs'
+import { SavedResultShare } from './SavedResultShare'
 
 interface ResultsScreenProps {
   game: GameState
@@ -70,12 +72,12 @@ export function ResultsScreen({
         <section className={`claim-place ${submitted ? 'claim-place--submitted' : ''}`}>
           <div className="claim-place__marker" aria-hidden="true">LG</div>
           <div className="claim-place__copy">
-            <span className="eyebrow">Your score is ready</span>
-            <h2>{submitted ? 'You’re on the board.' : 'Claim your place.'}</h2>
+            <span className="eyebrow">{submitted ? 'Score saved.' : 'Save your game'}</span>
+            <h2>{submitted ? 'Now share your result.' : 'Save it. Share it.'}</h2>
             <p>
               {submitted
                 ? 'This game now counts toward your challenge history.'
-                : 'Enter your nickname to submit this result and unlock all leaderboard views.'}
+                : 'Enter your nickname to save this game, build your stats history and unlock sharing.'}
             </p>
           </div>
           {!submitted ? (
@@ -101,16 +103,26 @@ export function ResultsScreen({
                   type="submit"
                   disabled={submitting || !isValidNickname(nickname)}
                 >
-                  {submitting ? 'Submitting…' : 'Submit & view boards'}
+                  {submitting ? 'Saving…' : 'Save score & view boards'}
                 </button>
               </div>
               <small>Use the same nickname every time for your stats history to stay together.</small>
               {error && <p className="daily-service-error" role="alert">{error}</p>}
             </form>
           ) : (
-            <button className="text-button" type="button" onClick={onRefresh} disabled={submitting}>
-              {submitting ? 'Refreshing…' : 'Refresh leaderboards'}
-            </button>
+            <div className="claim-place__saved-actions">
+              <SavedResultShare
+                data={buildChallengeShareData({
+                  points: game.totalScore,
+                  pool: game.settings.pool,
+                  identified: correct.length,
+                  url: getGameUrl(),
+                })}
+              />
+              <button className="text-button" type="button" onClick={onRefresh} disabled={submitting}>
+                {submitting ? 'Refreshing…' : 'Refresh leaderboards'}
+              </button>
+            </div>
           )}
         </section>
       )}

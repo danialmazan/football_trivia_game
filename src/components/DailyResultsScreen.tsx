@@ -1,5 +1,7 @@
 import type { DailyCompletion, GameState, LeaderboardBoards } from '../game/types'
+import { buildDailyShareData, getGameUrl } from '../game/sharing'
 import { LeaderboardTabs } from './LeaderboardTabs'
+import { SavedResultShare } from './SavedResultShare'
 
 interface DailyResultsScreenProps {
   game: GameState
@@ -27,7 +29,7 @@ export function DailyResultsScreen({
           LEO <span>GUESSI</span>
         </button>
         <span className="eyebrow">Player of the day · {completion.date} UTC</span>
-        <h1>Score submitted.</h1>
+        <h1>Score saved.</h1>
         <div className="daily-result-score">
           <strong>{completion.points}</strong>
           <span>points · rank #{completion.rank}</span>
@@ -36,6 +38,16 @@ export function DailyResultsScreen({
           Today’s player was {game.results[0]?.playerName}. {completion.nickname}, your result
           is locked until a new player arrives at 00:00:00 UTC.
         </p>
+        <div className="daily-saved-actions">
+          <SavedResultShare
+            data={buildDailyShareData({
+              points: completion.points,
+              rank: completion.rank,
+              date: completion.date,
+              url: getGameUrl(),
+            })}
+          />
+        </div>
       </header>
 
       <div className="leaderboard-refresh-row">

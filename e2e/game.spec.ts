@@ -109,16 +109,48 @@ test('plays the shared daily player once and restores its leaderboard after relo
 
   await page.getByLabel(/guess now/i).fill('Lionel Messi')
   await page.getByRole('button', { name: 'Submit' }).click()
-  await page.getByLabel(/claim your place on today’s board/i).fill('LeoFan')
-  await page.getByRole('button', { name: /submit score/i }).click()
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
+  await page.getByLabel(/enter your nickname to save this result/i).fill('LeoFan')
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: ShareData) => {
+        Reflect.set(window, '__sharedResult', data)
+      },
+    })
+  })
+  await page.getByRole('button', { name: /save score/i }).click()
 
-  await expect(page.getByRole('heading', { name: /score submitted/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /score saved/i })).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('LeoFan')
   await expect(page.getByText(/rank #1/i)).toBeVisible()
+  await page.getByRole('button', { name: /share your result/i }).click()
+  const sharedResult = await page.evaluate(() => Reflect.get(window, '__sharedResult'))
+  expect(sharedResult).toEqual({
+    title: 'Leo Guessi — Player of the Day',
+    text: `I scored 100/100 in Leo Guessi’s Player of the Day — rank #1 on ${dailyDate} UTC.`,
+    url: 'http://127.0.0.1:4173/',
+  })
+  expect(JSON.stringify(sharedResult)).not.toContain('Lionel Messi')
+  expect(JSON.stringify(sharedResult)).not.toContain('LeoFan')
+  await expect(page.getByRole('status')).toHaveText('Shared.')
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async () => {
+        throw { name: 'AbortError' }
+      },
+    })
+  })
+  await page.getByRole('button', { name: /share your result/i }).click()
+  await expect(page.getByRole('status')).toBeEmpty()
 
   await page.reload()
   await page.getByRole('button', { name: /kick off/i }).click()
-  await expect(page.getByRole('heading', { name: /score submitted/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /score saved/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /share your result/i })).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('AwayDays')
 })
 
@@ -256,6 +288,7 @@ test('persists and resumes an unfinished game under the football save', async ({
 })
 
 test('completes ten rounds, submits its nickname and persists a high score', async ({ page }) => {
+  let resultAttempts = 0
   const challengeBoards = {
     today: [{ rank: 1, nickname: 'LeoFan', value: 1000, gamesPlayed: 1 }],
     gamesPlayed: [{ rank: 1, nickname: 'LeoFan', value: 1, gamesPlayed: 1 }],
@@ -277,6 +310,15 @@ test('completes ten rounds, submits its nickname and persists a high score', asy
         incorrectGuesses: 0,
       })),
     })
+    resultAttempts += 1
+    if (resultAttempts === 1) {
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Could not save this game yet.' }),
+      })
+      return
+    }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -299,10 +341,47 @@ test('completes ten rounds, submits its nickname and persists a high score', asy
   await expect(page.getByText("That’s the final whistle.")).toBeVisible()
   await expect(page.getByText('/ 1000')).toBeVisible()
   await expect(page.getByText('New personal best.')).toBeVisible()
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
   await page.getByLabel('Public nickname').fill('LeoFan')
-  await page.getByRole('button', { name: /submit & view boards/i }).click()
-  await expect(page.getByRole('heading', { name: /you’re on the board/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
+  await page.getByRole('button', { name: /save score & view boards/i }).click()
+  await expect(page.getByRole('alert')).toHaveText('Could not save this game yet.')
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
+  await page.getByRole('button', { name: /save score & view boards/i }).click()
+  await expect(page.getByRole('heading', { name: /now share your result/i })).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('LeoFan')
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'share', { configurable: true, value: undefined })
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          Reflect.set(window, '__copiedLink', text)
+        },
+      },
+    })
+  })
+  await page.getByRole('button', { name: /share your result/i }).click()
+  await expect(page.getByRole('status')).toHaveText('Link copied.')
+  await expect.poll(() => page.evaluate(() => Reflect.get(window, '__copiedLink'))).toBe(
+    'http://127.0.0.1:4173/',
+  )
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async () => {
+          throw new Error('Clipboard unavailable')
+        },
+      },
+    })
+  })
+  await page.getByRole('button', { name: /share your result/i }).click()
+  await expect(page.getByRole('status')).toHaveText(
+    'Couldn’t share or copy the link. Copy it from your address bar.',
+  )
 
   await page.reload()
   await expect(page.getByText('Normal best').locator('..')).toContainText('1000')

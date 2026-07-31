@@ -241,7 +241,7 @@ export function GameScreen({
                   }}
                 >
                   <label htmlFor="daily-nickname">
-                    Claim your place on today’s board
+                    Enter your nickname to save this result, build your stats history and unlock sharing.
                     <span>Your nickname is public and can submit once today.</span>
                   </label>
                   <div className="daily-submit__row">
@@ -258,7 +258,7 @@ export function GameScreen({
                       type="submit"
                       disabled={dailySubmitting || !isValidNickname(dailyNickname)}
                     >
-                      {dailySubmitting ? 'Submitting…' : 'Submit score'}
+                      {dailySubmitting ? 'Saving…' : 'Save score'}
                     </button>
                   </div>
                   <small>
