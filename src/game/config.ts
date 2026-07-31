@@ -6,23 +6,26 @@ export const GAME_CONFIG = {
   clueBaseScores: [100, 80, 60, 40, 20] as const,
   incorrectGuessPenalty: 10,
   eraCutoffStartYear: 1995,
+  minimumNormalPostCutoffAppearances: 50,
   minimumBigFiveAppearances: 150,
   minimumClueClubAppearances: 50,
   normalPoolSize: 250,
   hardcorePoolSize: 800,
+  practiceNormalPoolSize: 100,
+  practiceHardcorePoolSize: 300,
 } as const
 
 export const POOL_RULES: Record<Pool, string> = {
-  normal: 'The 250 highest-ranked Big-Five careers.',
+  normal: '250 recognised players with 50+ Big-Five appearances since 1995.',
   hardcore:
-    'The 800 highest-ranked players with 150+ Big-Five appearances.',
+    '800 ranked players with 150+ career Big-Five appearances.',
 }
 
 export const MODE_LABELS: Record<GameMode, string> = {
   daily: 'Player of the day',
-  challenge: 'Ten-round challenge',
+  challenge: '10-round challenge',
   endless: 'Endless mode',
-  practice: 'Practice by decade or league',
+  practice: 'By decade or league',
 }
 
 export const GAME_MODES: GameMode[] = ['daily', 'challenge', 'endless', 'practice']

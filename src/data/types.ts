@@ -40,6 +40,20 @@ export interface SeasonAppearance {
   appearances: number
 }
 
+export interface PracticeMetric {
+  appearances: number
+  postCutoffAppearances?: number
+  recognitionScore: number
+  clueClubId?: string
+}
+
+export interface SearchPlayer {
+  id: string
+  displayName: string
+  acceptedNames: string[]
+  lastName: string
+}
+
 export interface FootballPlayer {
   id: string
   sourcePlayerId: string
@@ -59,11 +73,16 @@ export interface FootballPlayer {
   nationalTeam: NationalTeam
   seasonAppearances: SeasonAppearance[]
   bigFiveAppearances: number
+  postCutoffBigFiveAppearances: number
   championsLeagueAppearances: number
+  postCutoffChampionsLeagueAppearances: number
+  postCutoffTitleRankingPoints: number
   titles: TeamTitle[]
   recognitionScore: number
   normalPool: boolean
   hardcoreEligible: boolean
+  practiceRanks: Record<string, number>
+  practiceMetrics: Record<string, PracticeMetric>
   sources: string[]
   provenanceNote: string
   lastVerified: string

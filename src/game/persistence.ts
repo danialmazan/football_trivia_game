@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
 }
 
 export const DEFAULT_SAVED_DATA: SavedData = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   highScores: { normal: 0, hardcore: 0 },
   endlessStats: {
     normal: { totalScore: 0, solved: 0, rounds: 0 },
@@ -21,6 +21,7 @@ export const DEFAULT_SAVED_DATA: SavedData = {
   dailyGame: null,
   dailyCompletion: null,
   installationId: '',
+  lastNickname: '',
 }
 
 function createInstallationId(): string {
@@ -47,7 +48,7 @@ export function loadSavedData(): SavedData {
       return { ...DEFAULT_SAVED_DATA, installationId: createInstallationId() }
     }
     const parsed = JSON.parse(stored) as Partial<SavedData>
-    const migrated = parsed.schemaVersion !== 2
+    const migrated = !parsed.schemaVersion || parsed.schemaVersion < 2
     const parsedDailyGame = isCurrentDailyGame(parsed.dailyGame ?? null)
       ? parsed.dailyGame ?? null
       : null
@@ -56,7 +57,7 @@ export function loadSavedData(): SavedData {
     return {
       ...DEFAULT_SAVED_DATA,
       ...parsed,
-      schemaVersion: 2,
+      schemaVersion: 3,
       highScores: { ...DEFAULT_SAVED_DATA.highScores, ...parsed.highScores },
       endlessStats: { ...DEFAULT_SAVED_DATA.endlessStats, ...parsed.endlessStats },
       lastSettings: migrated
@@ -69,6 +70,7 @@ export function loadSavedData(): SavedData {
       dailyGame: parsedDailyGame,
       dailyCompletion: parsedDailyCompletion,
       installationId: parsed.installationId || createInstallationId(),
+      lastNickname: parsed.lastNickname ?? parsed.dailyCompletion?.nickname ?? '',
     }
   } catch {
     return { ...DEFAULT_SAVED_DATA, installationId: createInstallationId() }

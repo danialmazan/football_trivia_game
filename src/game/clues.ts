@@ -26,11 +26,12 @@ export function getTeamClueCandidates(
   player: Player,
   practiceFilter?: PracticeFilter,
 ): ClubStint[] {
-  return player.clubs.filter(
-    (club) =>
-      club.appearances >= 50 &&
-      (practiceFilter?.kind !== 'league' || club.leagueId === practiceFilter.value),
-  )
+  if (practiceFilter) {
+    const clueClubId = player.practiceMetrics[`${practiceFilter.kind}:${practiceFilter.value}`]?.clueClubId
+    const selected = player.clubs.find((club) => club.clubId === clueClubId)
+    return selected ? [selected] : []
+  }
+  return player.clubs.filter((club) => club.appearances >= 50)
 }
 
 export function getTeamClue(

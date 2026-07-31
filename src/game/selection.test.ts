@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { players } from '../data/players'
 import type { Player } from '../data/types'
-import { assignDecade, qualifiesForPractice, selectNextPlayer } from './selection'
+import { assignDecade, getActivePool, qualifiesForPractice, selectNextPlayer } from './selection'
 
 describe('football player selection', () => {
   it('assigns practice decade from the busiest post-cutoff season', () => {
@@ -16,11 +16,15 @@ describe('football player selection', () => {
     expect(assignDecade(player)).toBe('2000s')
   })
 
-  it('requires 50 appearances in a selected practice league', () => {
-    const player = players.find((candidate) =>
-      candidate.clubs.some((club) => club.leagueId === 'GB1' && club.appearances >= 50),
-    )!
+  it('uses the generated filter-local rank for practice eligibility', () => {
+    const player = players.find((candidate) => (candidate.practiceRanks['league:GB1'] ?? Infinity) <= 300)!
     expect(qualifiesForPractice(player, { kind: 'league', value: 'GB1' })).toBe(true)
+    expect(player.practiceMetrics['league:GB1'].appearances).toBeGreaterThanOrEqual(50)
+  })
+
+  it('returns exact filter-specific Normal and Hardcore practice rosters', () => {
+    expect(getActivePool(players, 'normal', { kind: 'decade', value: '1990s' })).toHaveLength(100)
+    expect(getActivePool(players, 'hardcore', { kind: 'league', value: 'FR1' })).toHaveLength(300)
   })
 
   it('prevents repeats while unused players remain', () => {

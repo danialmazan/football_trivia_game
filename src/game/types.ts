@@ -54,7 +54,7 @@ export interface EndlessStats {
 }
 
 export interface SavedData {
-  schemaVersion: 2
+  schemaVersion: 3
   highScores: Record<Pool, number>
   endlessStats: Record<Pool, EndlessStats>
   lastSettings: GameSettings
@@ -62,6 +62,7 @@ export interface SavedData {
   dailyGame: GameState | null
   dailyCompletion: DailyCompletion | null
   installationId: string
+  lastNickname: string
 }
 
 export interface DailyChallenge {
@@ -80,6 +81,21 @@ export interface LeaderboardEntry {
   submittedAt: string
 }
 
+export interface LeaderboardMetricEntry {
+  rank: number
+  nickname: string
+  value: number
+  gamesPlayed: number
+}
+
+export interface LeaderboardBoards {
+  today: LeaderboardMetricEntry[]
+  cumulative?: LeaderboardMetricEntry[]
+  gamesPlayed?: LeaderboardMetricEntry[]
+  average: LeaderboardMetricEntry[]
+  best: LeaderboardMetricEntry[]
+}
+
 export interface DailyResultSubmission {
   challengeDate: string
   attemptToken: string
@@ -94,6 +110,7 @@ export interface DailyResultResponse {
   points: number
   rank: number
   leaderboard: LeaderboardEntry[]
+  boards: LeaderboardBoards
 }
 
 export interface DailyCompletion {
@@ -102,4 +119,22 @@ export interface DailyCompletion {
   points: number
   rank: number
   leaderboard: LeaderboardEntry[]
+  boards?: LeaderboardBoards
+}
+
+export interface ChallengeResultSubmission {
+  nickname: string
+  pool: Pool
+  rounds: Array<{
+    outcome: RoundOutcome
+    cluesUsed: number
+    incorrectGuesses: number
+  }>
+}
+
+export interface ChallengeResultResponse {
+  date: string
+  pool: Pool
+  points: number
+  boards: LeaderboardBoards
 }

@@ -9,8 +9,10 @@ export interface StoredChallenge {
 }
 
 export interface StoredResult {
+  challenge_date: string
   participant_hash: string
   nickname: string
+  normalized_nickname?: string | null
   points: number
   outcome: 'correct' | 'gave-up'
   clues_used: number

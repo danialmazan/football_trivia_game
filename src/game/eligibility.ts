@@ -16,7 +16,16 @@ export function meetsHardcoreCriteria(player: Player): boolean {
   )
 }
 
+export function meetsNormalCriteria(player: Player): boolean {
+  return (
+    meetsHardcoreCriteria(player) &&
+    player.postCutoffBigFiveAppearances >= GAME_CONFIG.minimumNormalPostCutoffAppearances
+  )
+}
+
 export function isInPool(player: Player, pool: Pool): boolean {
   if (!meetsEraCutoff(player)) return false
-  return pool === 'normal' ? player.normalPool : player.hardcoreEligible && meetsHardcoreCriteria(player)
+  return pool === 'normal'
+    ? player.normalPool && meetsNormalCriteria(player)
+    : player.hardcoreEligible && meetsHardcoreCriteria(player)
 }

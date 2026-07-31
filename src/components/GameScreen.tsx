@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Player } from '../data/types'
+import type { Player, SearchPlayer } from '../data/types'
 import { getPlayerSuggestions } from '../game/answerMatching'
 import { GAME_CONFIG, MODE_LABELS, POOL_LABELS, PRACTICE_LEAGUES } from '../game/config'
 import { generateClues, getCareerSummary } from '../game/clues'
@@ -11,7 +11,7 @@ import { ClueCard } from './ClueCard'
 interface GameScreenProps {
   game: GameState
   player: Player
-  activePool: Player[]
+  suggestionCatalog: SearchPlayer[]
   onSubmit: (guess: string) => void
   onReveal: () => void
   onGiveUp: () => void
@@ -31,7 +31,7 @@ function shouldAutoFocusGuess(): boolean {
 export function GameScreen({
   game,
   player,
-  activePool,
+  suggestionCatalog,
   onSubmit,
   onReveal,
   onGiveUp,
@@ -53,7 +53,7 @@ export function GameScreen({
   const visibleClues = clues.slice(0, isReview ? GAME_CONFIG.cluesPerRound : game.round.clueLevel)
   const availableScore = calculateAvailableScore(game.round.clueLevel, game.round.incorrectGuesses.length)
   const roundNumber = game.results.length + (isReview ? 0 : 1)
-  const suggestions = getPlayerSuggestions(guess, activePool)
+  const suggestions = getPlayerSuggestions(guess, suggestionCatalog)
   const showSuggestions = suggestionsOpen && suggestions.length > 0
   const suggestionListId = 'player-suggestions'
 
@@ -79,7 +79,7 @@ export function GameScreen({
     })
   }
 
-  function selectSuggestion(selectedPlayer: Player) {
+  function selectSuggestion(selectedPlayer: SearchPlayer) {
     setGuess(selectedPlayer.displayName)
     setSuggestionsOpen(false)
     setActiveSuggestion(-1)
@@ -109,7 +109,6 @@ export function GameScreen({
     }
   }
 
-  const solved = game.results.filter((result) => result.outcome === 'correct').length
   const averageEndless = game.results.length ? Math.round(game.totalScore / game.results.length) : 0
   const isDaily = game.settings.mode === 'daily'
 
@@ -141,16 +140,16 @@ export function GameScreen({
           <span>
             {isDaily
               ? 'Today’s player'
-              : game.settings.mode === 'challenge'
+              : game.settings.mode === 'challenge' || game.settings.mode === 'practice'
                 ? 'Progress'
                 : game.settings.mode === 'endless'
                   ? 'Players seen'
-                  : 'Practice rep'}
+                  : 'Progress'}
           </span>
           <strong>
             {isDaily
               ? '1 / 1'
-              : game.settings.mode === 'challenge'
+              : game.settings.mode === 'challenge' || game.settings.mode === 'practice'
               ? `${Math.max(1, roundNumber)} / ${GAME_CONFIG.challengeRounds}`
               : String(Math.max(1, roundNumber)).padStart(2, '0')}
           </strong>
@@ -165,9 +164,9 @@ export function GameScreen({
         </div>
         <div>
           <span>
-            {isDaily ? 'Daily score' : game.settings.mode === 'practice' ? 'Players solved' : 'Game score'}
+            {isDaily ? 'Daily score' : 'Game score'}
           </span>
-          <strong data-testid="total-score">{game.settings.mode === 'practice' ? solved : game.totalScore}</strong>
+          <strong data-testid="total-score">{game.totalScore}</strong>
         </div>
         {game.settings.mode === 'endless' && (
           <div className="scorebar-optional">
@@ -242,8 +241,8 @@ export function GameScreen({
                   }}
                 >
                   <label htmlFor="daily-nickname">
-                    Join today’s leaderboard
-                    <span>Your nickname will be public.</span>
+                    Claim your place on today’s board
+                    <span>Your nickname is public and can submit once today.</span>
                   </label>
                   <div className="daily-submit__row">
                     <input
@@ -262,12 +261,15 @@ export function GameScreen({
                       {dailySubmitting ? 'Submitting…' : 'Submit score'}
                     </button>
                   </div>
-                  <small>1–24 characters · one scored entry per browser today</small>
+                  <small>
+                    Use the same nickname every time for your stats history to stay together.
+                  </small>
                   {dailyError && <p className="daily-service-error" role="alert">{dailyError}</p>}
                 </form>
               ) : (
                 <button className="primary-button primary-button--large" type="button" onClick={onNext}>
-                  {game.settings.mode === 'challenge' && game.results.length >= GAME_CONFIG.challengeRounds
+                  {(game.settings.mode === 'challenge' || game.settings.mode === 'practice') &&
+                  game.results.length >= GAME_CONFIG.challengeRounds
                     ? 'See final results'
                     : 'Next player'}{' '}
                   <span aria-hidden="true">→</span>

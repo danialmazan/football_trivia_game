@@ -4,13 +4,15 @@ import { GameGuide } from './components/GameGuide'
 import { GameScreen } from './components/GameScreen'
 import { ResultsScreen } from './components/ResultsScreen'
 import { SetupScreen } from './components/SetupScreen'
-import { players } from './data/players'
+import { playerSearch, players } from './data/players'
 import { matchAnswer, normalizeAnswer } from './game/answerMatching'
 import { GAME_CONFIG } from './game/config'
 import { getUtcDateKey, isValidNickname } from './game/daily'
 import {
   getDailyChallenge,
   getDailyLeaderboard,
+  getChallengeLeaderboard,
+  submitChallengeResult,
   submitDailyResult,
 } from './game/dailyApi'
 import {
@@ -26,11 +28,18 @@ import type {
   DailyCompletion,
   GameSettings,
   GameState,
-  LeaderboardEntry,
+  LeaderboardBoards,
   RoundOutcome,
   RoundResult,
   SavedData,
 } from './game/types'
+
+const EMPTY_LEADERBOARD_BOARDS: LeaderboardBoards = {
+  today: [],
+  cumulative: [],
+  average: [],
+  best: [],
+}
 
 export function App() {
   const [savedData, setSavedData] = useState<SavedData>(() => loadSavedData())
@@ -40,10 +49,12 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dailyLoading, setDailyLoading] = useState(false)
   const [dailyError, setDailyError] = useState<string | null>(null)
-  const [dailyNickname, setDailyNickname] = useState('')
-  const [dailyLeaderboard, setDailyLeaderboard] = useState<LeaderboardEntry[]>(
-    savedData.dailyCompletion?.leaderboard ?? [],
+  const [dailyNickname, setDailyNickname] = useState(savedData.lastNickname)
+  const [dailyBoards, setDailyBoards] = useState<LeaderboardBoards>(
+    savedData.dailyCompletion?.boards ?? EMPTY_LEADERBOARD_BOARDS,
   )
+  const [challengeBoards, setChallengeBoards] = useState<LeaderboardBoards | null>(null)
+  const [challengeSubmitted, setChallengeSubmitted] = useState(false)
 
   useEffect(() => {
     saveData(savedData)
@@ -56,10 +67,14 @@ export function App() {
         ? { ...current, dailyGame: game }
         : {
             ...current,
-            unfinishedGame: game.phase === 'results' ? null : game,
+            unfinishedGame:
+              game.phase !== 'results' ||
+              (game.settings.mode === 'challenge' && !challengeSubmitted)
+                ? game
+                : null,
           },
     )
-  }, [game])
+  }, [game, challengeSubmitted])
 
   useEffect(() => {
     if (game?.settings.mode !== 'daily' || !game.dailyChallenge) return
@@ -137,7 +152,7 @@ export function App() {
     if (settings.mode === 'daily') {
       const currentDaily = savedData.dailyGame
       if (currentDaily?.dailyChallenge?.date === getUtcDateKey()) {
-        setDailyLeaderboard(savedData.dailyCompletion?.leaderboard ?? [])
+        setDailyBoards(savedData.dailyCompletion?.boards ?? EMPTY_LEADERBOARD_BOARDS)
         setDailyNickname(savedData.dailyCompletion?.nickname ?? '')
         setGame(currentDaily)
         return
@@ -146,8 +161,8 @@ export function App() {
       return
     }
     if (
-      savedData.unfinishedGame?.settings.mode === 'challenge' &&
-      !window.confirm('Start a new game and abandon the saved ten-round challenge?')
+      ['challenge', 'practice'].includes(savedData.unfinishedGame?.settings.mode ?? '') &&
+      !window.confirm('Start a new game and abandon the saved 10-round game?')
     ) {
       return
     }
@@ -157,6 +172,8 @@ export function App() {
   async function confirmGameStart() {
     if (settings.mode !== 'daily') {
       const newGame = buildNewGame(settings)
+      setChallengeBoards(null)
+      setChallengeSubmitted(false)
       setGame(newGame)
       setShowGuide(false)
       setSavedData((current) => ({
@@ -189,6 +206,8 @@ export function App() {
 
   function resumeGame() {
     if (savedData.unfinishedGame) {
+      setChallengeBoards(null)
+      setChallengeSubmitted(false)
       setShowGuide(false)
       setSettings(savedData.unfinishedGame.settings)
       setGame(savedData.unfinishedGame)
@@ -241,7 +260,7 @@ export function App() {
 
   function submitGuess(guess: string) {
     if (!game || !currentPlayer || game.phase !== 'playing') return
-    const result = matchAnswer(guess, currentPlayer, activePool)
+    const result = matchAnswer(guess, currentPlayer, playerSearch)
     if (result.status === 'invalid') {
       setGame({ ...game, round: { ...game.round, statusMessage: result.message } })
       return
@@ -272,13 +291,24 @@ export function App() {
 
   function nextPlayer() {
     if (!game || game.phase !== 'review' || game.settings.mode === 'daily') return
-    if (game.settings.mode === 'challenge' && game.results.length >= GAME_CONFIG.challengeRounds) {
-      const best = Math.max(savedData.highScores[game.settings.pool], game.totalScore)
+    if (
+      (game.settings.mode === 'challenge' || game.settings.mode === 'practice') &&
+      game.results.length >= GAME_CONFIG.challengeRounds
+    ) {
       const finished = { ...game, phase: 'results' as const }
       setGame(finished)
       setSavedData((current) => ({
         ...current,
-        highScores: { ...current.highScores, [game.settings.pool]: best },
+        highScores:
+          game.settings.mode === 'challenge'
+            ? {
+                ...current.highScores,
+                [game.settings.pool]: Math.max(
+                  current.highScores[game.settings.pool],
+                  game.totalScore,
+                ),
+              }
+            : current.highScores,
         unfinishedGame: null,
       }))
       return
@@ -297,6 +327,56 @@ export function App() {
         ? 'Every player in this pool has appeared. The rotation has reset.'
         : null,
     })
+  }
+
+  async function submitChallengeScore() {
+    if (
+      !game ||
+      game.settings.mode !== 'challenge' ||
+      game.phase !== 'results' ||
+      game.results.length !== GAME_CONFIG.challengeRounds ||
+      !isValidNickname(dailyNickname)
+    ) {
+      return
+    }
+    setDailyLoading(true)
+    setDailyError(null)
+    try {
+      const response = await submitChallengeResult({
+        nickname: dailyNickname.trim(),
+        pool: game.settings.pool,
+        rounds: game.results.map((result) => ({
+          outcome: result.outcome,
+          cluesUsed: result.cluesUsed,
+          incorrectGuesses: result.incorrectGuesses.length,
+        })),
+      })
+      setChallengeBoards(response.boards)
+      setChallengeSubmitted(true)
+      setSavedData((current) => ({
+        ...current,
+        lastNickname: dailyNickname.trim(),
+        unfinishedGame: null,
+      }))
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not submit this game.')
+    } finally {
+      setDailyLoading(false)
+    }
+  }
+
+  async function refreshChallengeLeaderboard() {
+    if (!game || game.settings.mode !== 'challenge') return
+    setDailyLoading(true)
+    setDailyError(null)
+    try {
+      const response = await getChallengeLeaderboard(game.settings.pool)
+      setChallengeBoards(response.boards)
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not refresh the leaderboard.')
+    } finally {
+      setDailyLoading(false)
+    }
   }
 
   async function submitDailyScore() {
@@ -327,14 +407,16 @@ export function App() {
         points: response.points,
         rank: response.rank,
         leaderboard: response.leaderboard,
+        boards: response.boards,
       }
       const finished: GameState = { ...game, phase: 'results', totalScore: response.points }
-      setDailyLeaderboard(response.leaderboard)
+      setDailyBoards(response.boards)
       setGame(finished)
       setSavedData((current) => ({
         ...current,
         dailyGame: finished,
         dailyCompletion: completion,
+        lastNickname: dailyNickname.trim(),
       }))
     } catch (error) {
       setDailyError(error instanceof Error ? error.message : 'Could not submit your result.')
@@ -353,7 +435,7 @@ export function App() {
         expireDailyGame()
         return
       }
-      setDailyLeaderboard(response.leaderboard)
+      setDailyBoards(response.boards)
       setSavedData((current) =>
         current.dailyCompletion
           ? {
@@ -361,6 +443,7 @@ export function App() {
               dailyCompletion: {
                 ...current.dailyCompletion,
                 leaderboard: response.leaderboard,
+                boards: response.boards,
               },
             }
           : current,
@@ -375,7 +458,7 @@ export function App() {
   function expireDailyGame() {
     setGame(null)
     setShowGuide(false)
-    setDailyLeaderboard([])
+    setDailyBoards(EMPTY_LEADERBOARD_BOARDS)
     setDailyNickname('')
     setDailyError('A new Player of the day is now available.')
     setSavedData((current) => ({
@@ -387,9 +470,9 @@ export function App() {
 
   function exitGame() {
     if (
-      game?.settings.mode === 'challenge' &&
+      (game?.settings.mode === 'challenge' || game?.settings.mode === 'practice') &&
       game.phase !== 'results' &&
-      !window.confirm('Leave this active ten-round game? Your progress will remain saved.')
+      !window.confirm('Leave this active 10-round game? Your progress will remain saved.')
     ) {
       return
     }
@@ -398,6 +481,17 @@ export function App() {
   }
 
   function playAgain() {
+    if (
+      game?.settings.mode === 'challenge' &&
+      game.phase === 'results' &&
+      !challengeSubmitted &&
+      !window.confirm('Play again without submitting this score to the leaderboard?')
+    ) {
+      return
+    }
+    setChallengeBoards(null)
+    setChallengeSubmitted(false)
+    setDailyError(null)
     setGame(buildNewGame(game?.settings ?? settings))
   }
 
@@ -448,7 +542,7 @@ export function App() {
         <GameScreen
           game={game}
           player={currentPlayer}
-          activePool={activePool}
+          suggestionCatalog={playerSearch}
           onSubmit={submitGuess}
           onReveal={revealClue}
           onGiveUp={giveUp}
@@ -467,13 +561,21 @@ export function App() {
           highScore={savedData.highScores[game.settings.pool]}
           onPlayAgain={playAgain}
           onSwitchPool={switchPool}
+          nickname={dailyNickname}
+          submitting={dailyLoading}
+          error={dailyError}
+          boards={challengeBoards}
+          submitted={challengeSubmitted}
+          onNicknameChange={setDailyNickname}
+          onSubmit={submitChallengeScore}
+          onRefresh={refreshChallengeLeaderboard}
         />
       )}
       {game?.phase === 'results' && game.settings.mode === 'daily' && dailyCompletion && (
         <DailyResultsScreen
           game={game}
           completion={dailyCompletion}
-          leaderboard={dailyLeaderboard}
+          boards={dailyBoards}
           loading={dailyLoading}
           error={dailyError}
           onRefresh={refreshDailyLeaderboard}

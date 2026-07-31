@@ -1,9 +1,10 @@
-import type { DailyCompletion, GameState, LeaderboardEntry } from '../game/types'
+import type { DailyCompletion, GameState, LeaderboardBoards } from '../game/types'
+import { LeaderboardTabs } from './LeaderboardTabs'
 
 interface DailyResultsScreenProps {
   game: GameState
   completion: DailyCompletion
-  leaderboard: LeaderboardEntry[]
+  boards: LeaderboardBoards
   loading: boolean
   error: string | null
   onRefresh: () => void
@@ -13,7 +14,7 @@ interface DailyResultsScreenProps {
 export function DailyResultsScreen({
   game,
   completion,
-  leaderboard,
+  boards,
   loading,
   error,
   onRefresh,
@@ -37,41 +38,13 @@ export function DailyResultsScreen({
         </p>
       </header>
 
-      <section className="daily-leaderboard" aria-labelledby="daily-leaderboard-title">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">Same player · same clues</span>
-            <h2 id="daily-leaderboard-title">Today’s leaderboard</h2>
-          </div>
-          <button className="text-button" type="button" onClick={onRefresh} disabled={loading}>
-            {loading ? 'Refreshing…' : 'Refresh'}
-          </button>
-        </div>
-        {error && <p className="daily-service-error" role="alert">{error}</p>}
-        <div className="daily-table" role="table" aria-label="Daily leaderboard">
-          <div className="daily-table__row daily-table__row--head" role="row">
-            <span>Rank</span><span>Player</span><span>Points</span>
-          </div>
-          {leaderboard.map((entry, index) => (
-            <div
-              className={`daily-table__row ${
-                entry.nickname === completion.nickname && entry.points === completion.points
-                  ? 'daily-table__row--current'
-                  : ''
-              }`}
-              role="row"
-              key={`${entry.nickname}-${entry.submittedAt}-${index}`}
-            >
-              <strong>#{entry.rank}</strong>
-              <span>{entry.nickname}</span>
-              <b>{entry.points}</b>
-            </div>
-          ))}
-        </div>
-        {!leaderboard.length && !loading && (
-          <p className="daily-empty">You are the first name on today’s board.</p>
-        )}
-      </section>
+      <div className="leaderboard-refresh-row">
+        <button className="text-button" type="button" onClick={onRefresh} disabled={loading}>
+          {loading ? 'Refreshing…' : 'Refresh leaderboards'}
+        </button>
+      </div>
+      {error && <p className="daily-service-error" role="alert">{error}</p>}
+      <LeaderboardTabs mode="daily" boards={boards} currentNickname={completion.nickname} />
 
       <div className="daily-results-actions">
         <button className="primary-button primary-button--large" type="button" onClick={onExit}>

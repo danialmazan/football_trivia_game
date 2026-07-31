@@ -1,4 +1,4 @@
-import { GAME_CONFIG, MODE_LABELS, POOL_LABELS, PRACTICE_LEAGUES } from '../game/config'
+import { GAME_CONFIG, MODE_LABELS, POOL_LABELS } from '../game/config'
 import type { GameSettings } from '../game/types'
 
 interface GameGuideProps {
@@ -19,15 +19,9 @@ export function GameGuide({
   const runLength =
     settings.mode === 'daily'
       ? 'One player'
-      : settings.mode === 'challenge'
+      : settings.mode === 'challenge' || settings.mode === 'practice'
       ? `${GAME_CONFIG.challengeRounds} players`
-      : settings.mode === 'practice'
-        ? `Unlimited ${
-            settings.practiceFilter.kind === 'decade'
-              ? settings.practiceFilter.value
-              : PRACTICE_LEAGUES[settings.practiceFilter.value]
-          } players`
-        : 'Unlimited players'
+      : 'Unlimited players'
 
   return (
     <main className="guide-shell">
@@ -97,7 +91,12 @@ export function GameGuide({
 
           {settings.mode === 'daily' && (
             <p className="guide-daily-note">
-              Your score can be submitted once with a public nickname after the player is revealed.
+              The first result submitted under a nickname locks that nickname for today’s player.
+            </p>
+          )}
+          {settings.mode === 'challenge' && (
+            <p className="guide-daily-note">
+              Submit every completed game under the same nickname to keep its challenge history together.
             </p>
           )}
           {error && <p className="guide-error" role="alert">{error}</p>}

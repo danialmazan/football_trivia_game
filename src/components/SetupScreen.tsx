@@ -104,7 +104,7 @@ export function SetupScreen({
                   ? '10 players · 1,000 max'
                   : mode === 'endless'
                     ? 'Play through the pool'
-                    : 'Train by decade or league'}
+                    : '10 players from your chosen filter'}
               </small>
             </button>
           ))}

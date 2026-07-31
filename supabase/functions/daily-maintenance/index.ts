@@ -32,6 +32,62 @@ function createCsv(date: string, rows: StoredResult[]): string {
   return `${[header, ...body].join('\n')}\n`
 }
 
+const PAGE_SIZE = 1_000
+
+async function getPendingChallengeDates(
+  client: ReturnType<typeof createAdminClient>,
+  today: string,
+): Promise<string[]> {
+  const challengeDates: string[] = []
+  const archivedDates = new Set<string>()
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const result = await client
+      .from('daily_challenges')
+      .select('challenge_date')
+      .lt('challenge_date', today)
+      .order('challenge_date')
+      .range(from, from + PAGE_SIZE - 1)
+    if (result.error) throw result.error
+    const page = result.data ?? []
+    challengeDates.push(...page.map((row) => row.challenge_date as string))
+    if (page.length < PAGE_SIZE) break
+  }
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const result = await client
+      .from('daily_archives')
+      .select('challenge_date')
+      .order('challenge_date')
+      .range(from, from + PAGE_SIZE - 1)
+    if (result.error) throw result.error
+    const page = result.data ?? []
+    page.forEach((row) => archivedDates.add(row.challenge_date as string))
+    if (page.length < PAGE_SIZE) break
+  }
+  return challengeDates.filter((date) => !archivedDates.has(date))
+}
+
+async function getResultsForDate(
+  client: ReturnType<typeof createAdminClient>,
+  date: string,
+): Promise<StoredResult[]> {
+  const rows: StoredResult[] = []
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const result = await client
+      .from('daily_results')
+      .select(
+        'challenge_date,participant_hash,nickname,normalized_nickname,points,outcome,clues_used,incorrect_guesses,submitted_at',
+      )
+      .eq('challenge_date', date)
+      .order('points', { ascending: false })
+      .order('submitted_at', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
+    if (result.error) throw result.error
+    const page = (result.data ?? []) as StoredResult[]
+    rows.push(...page)
+    if (page.length < PAGE_SIZE) return rows
+  }
+}
+
 Deno.serve(async (request) => {
   const maintenanceSecret = Deno.env.get('DAILY_MAINTENANCE_SECRET')
   if (
@@ -46,32 +102,11 @@ Deno.serve(async (request) => {
     const today = utcDateKey()
     await getOrCreateChallenge(client, today)
 
-    const challenges = await client
-      .from('daily_challenges')
-      .select('challenge_date')
-      .lt('challenge_date', today)
-      .order('challenge_date')
-    if (challenges.error) throw challenges.error
-
-    const archives = await client.from('daily_archives').select('challenge_date')
-    if (archives.error) throw archives.error
-    const archived = new Set((archives.data ?? []).map((row) => row.challenge_date as string))
-    const pending = (challenges.data ?? [])
-      .map((row) => row.challenge_date as string)
-      .filter((date) => !archived.has(date))
+    const pending = await getPendingChallengeDates(client, today)
 
     const created: Array<{ date: string; rows: number; path: string }> = []
     for (const date of pending) {
-      const results = await client
-        .from('daily_results')
-        .select(
-          'participant_hash,nickname,points,outcome,clues_used,incorrect_guesses,submitted_at',
-        )
-        .eq('challenge_date', date)
-        .order('points', { ascending: false })
-        .order('submitted_at', { ascending: true })
-      if (results.error) throw results.error
-      const rows = (results.data ?? []) as StoredResult[]
+      const rows = await getResultsForDate(client, date)
       const objectPath = `daily-leaderboards/${date}.csv`
       const upload = await client.storage
         .from('daily-leaderboard-archives')

@@ -1,8 +1,12 @@
 import type {
   DailyChallenge,
+  ChallengeResultResponse,
+  ChallengeResultSubmission,
   DailyResultResponse,
   DailyResultSubmission,
   LeaderboardEntry,
+  LeaderboardBoards,
+  Pool,
 } from './types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
@@ -53,6 +57,26 @@ export function submitDailyResult(
 export async function getDailyLeaderboard(): Promise<{
   date: string
   leaderboard: LeaderboardEntry[]
+  boards: LeaderboardBoards
 }> {
   return request(endpoint('leaderboard'))
+}
+
+export function submitChallengeResult(
+  submission: ChallengeResultSubmission,
+): Promise<ChallengeResultResponse> {
+  return request<ChallengeResultResponse>(endpoint('challenge-result'), {
+    method: 'POST',
+    body: JSON.stringify(submission),
+  })
+}
+
+export function getChallengeLeaderboard(pool: Pool): Promise<{
+  date: string
+  pool: Pool
+  boards: LeaderboardBoards
+}> {
+  const url = new URL(endpoint('challenge-leaderboard'))
+  url.searchParams.set('pool', pool)
+  return request(url.toString())
 }

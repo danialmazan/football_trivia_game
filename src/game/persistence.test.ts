@@ -62,11 +62,12 @@ describe('saved-data migration', () => {
     )
 
     const saved = loadSavedData()
-    expect(saved.schemaVersion).toBe(2)
+    expect(saved.schemaVersion).toBe(3)
     expect(saved.highScores).toEqual({ normal: 730, hardcore: 410 })
     expect(saved.unfinishedGame?.settings.mode).toBe('challenge')
     expect(saved.lastSettings).toMatchObject({ mode: 'daily', pool: 'normal' })
     expect(saved.installationId).not.toBe('')
+    expect(saved.lastNickname).toBe('')
   })
 
   it('drops stale daily state without touching local records', () => {
@@ -100,5 +101,6 @@ describe('saved-data migration', () => {
     expect(saved.dailyGame).toBeNull()
     expect(saved.dailyCompletion).toBeNull()
     expect(saved.installationId).toBe('stable-browser-id')
+    expect(saved.lastNickname).toBe('Old score')
   })
 })

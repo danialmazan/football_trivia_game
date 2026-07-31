@@ -5,9 +5,9 @@
 Leo Guessi is a browser-based football player guessing game covering the
 top divisions of England, Spain, Italy, Germany, and France. Each round reveals
 five progressively easier clues while the available score falls from 100 to 20.
-The 800-player snapshot and 189 club badges are bundled with the project. Only
-Player of the day uses an online service, for its shared UTC fixture and
-leaderboard.
+The generated answer catalog and club badges are bundled with the project.
+Player of the day and 10-round challenge use the online leaderboard service;
+the remaining modes continue to work locally.
 
 ## Run locally
 
@@ -64,28 +64,37 @@ costs a cumulative 10 points. Empty, duplicated, invalid, or genuinely ambiguous
 answers are not penalized.
 
 Full names, unique surnames, common football names, mononyms, accent-insensitive
-spellings, and curated aliases are accepted. Ambiguous names such as `Ronaldo`
-require a more specific answer.
+spellings, and curated aliases are accepted. A one-word display name is expanded
+when it would collide with a word in another player’s name—for example,
+`Ronaldo Nazario` and `Cristiano Ronaldo`.
 
 ## Modes and pools
 
 - **Player of the day:** one Normal-pool player and one clue seed shared by
-  everyone from 00:00:00 UTC to the next UTC midnight. A browser can submit one
-  scored result and public nickname per day.
-- **Challenge:** ten repeat-free rounds, maximum 1,000 points.
+  everyone from 00:00:00 UTC to the next UTC midnight. The first submission
+  locks that normalized nickname for the day, regardless of browser.
+- **10-round challenge:** ten repeat-free rounds, maximum 1,000 points. A
+  nickname can submit unlimited games from any browser; matching nicknames
+  share one history.
 - **Endless:** no repeats until the selected pool is exhausted, then a clearly
   announced new cycle begins.
-- **Practice by decade or league:** an endless session filtered by the player's
-  busiest eligible decade or by a league in which the player made at least 50
-  appearances. A league practice round always uses a Clue 1 club from that
-  league.
-- **Normal:** the top 250 players in the deterministic recognition ranking.
+- **By decade or league:** ten rounds from a filter-specific roster. A player
+  needs 50 appearances inside the chosen decade or league. Normal uses the top
+  100 filtered players and Hardcore the top 300; ranking uses only UCL
+  appearances and eligible titles attributable to that filter.
+- **Normal:** the top 250 players with at least 50 Big-Five appearances in
+  seasons starting in 1995 or later.
 - **Hardcore:** the top 800 players, including all 250 Normal players.
 
-Every player has at least 150 combined Big-Five league appearances, a 50-match
-club, a senior international cap, and at least one Big-Five appearance in
-1995–96 or later. Eligible appearances before 1995–96 remain part of the career
-total.
+Main-pool players have at least 150 combined Big-Five league appearances, a
+50-match club, a senior international cap, and at least one Big-Five appearance
+in 1995–96 or later. Eligible appearances before 1995–96 remain in career clues
+and totals, but only post-1995 UCL appearances, eligible title campaigns and
+Big-Five appearances influence the main-pool ranking.
+
+Autocomplete always searches the expanded eligible catalog, even in Normal
+mode. A suggested player outside the active answer roster is a valid incorrect
+guess rather than an unavailable name.
 
 ## Architecture
 
@@ -99,8 +108,8 @@ total.
   function, and the generated 250-player Normal pool.
 - `e2e`: desktop and mobile user-flow tests.
 
-Scores, preferences, anonymous installation ID, daily progress, endless totals,
-and unfinished games use the football-only local-storage key
+Scores, nickname preference, anonymous installation ID, daily progress, endless
+totals, completed-but-unsubmitted challenges, and unfinished games use the football-only local-storage key
 `leo-guessi:football-trivia:v1`. Existing v1 saves migrate additively and retain
 personal records and unfinished challenges.
 
@@ -108,6 +117,21 @@ personal records and unfinished challenges.
 
 The Supabase project needs the CLI, a linked project, and the values from
 `supabase/.env.example`.
+
+Before applying the migrations, record the existing totals in the Supabase SQL
+editor and compare them again immediately afterwards:
+
+```sql
+select count(*) as daily_results from public.daily_results;
+select count(*) as daily_challenges from public.daily_challenges;
+select count(*) as daily_archives from public.daily_archives;
+```
+
+The new migrations are additive: they retain the original result, challenge,
+archive, and player rows; add normalized nickname history and challenge tables;
+and add a new version of the 250-player daily roster. Deploy the database first,
+then the two Edge Functions, and the Pages frontend last so every frontend
+response shape is supported when it goes live.
 
 ```bash
 npm run daily:pool
@@ -140,7 +164,7 @@ Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as GitHub Actions
 repository variables before the Pages build. The service-role key and selection
 secrets never belong in GitHub Pages or any `VITE_` variable.
 
-The cron function creates private, non-overwriting objects at
+The cron function creates private, non-overwriting Player-of-the-Day reports at
 `daily-leaderboards/YYYY-MM-DD.csv` in the
 `daily-leaderboard-archives` Storage bucket. Inspect or download them through
 the Supabase Storage dashboard. The database retains the original dated rows

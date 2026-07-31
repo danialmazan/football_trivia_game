@@ -21,13 +21,14 @@ test.beforeEach(async ({ page }) => {
 })
 
 async function startGame(page: import('@playwright/test').Page) {
-  await page.getByRole('button', { name: /ten-round challenge/i }).click()
+  await page.getByRole('button', { name: /10-round challenge/i }).click()
   await page.getByRole('button', { name: /kick off/i }).click()
   await expect(page.getByRole('heading', { name: /know your three moves/i })).toBeVisible()
   await page.getByRole('button', { name: /let's go/i }).click()
 }
 
 test('plays the shared daily player once and restores its leaderboard after reload', async ({ page }) => {
+  const dailyDate = new Date().toISOString().slice(0, 10)
   const leaderboard = [
     {
       rank: 1,
@@ -42,6 +43,12 @@ test('plays the shared daily player once and restores its leaderboard after relo
       submittedAt: '2026-07-29T09:00:00.000Z',
     },
   ]
+  const boards = {
+    today: leaderboard.map((entry) => ({ ...entry, value: entry.points, gamesPlayed: 1 })),
+    cumulative: leaderboard.map((entry) => ({ ...entry, value: entry.points, gamesPlayed: 1 })),
+    average: [],
+    best: leaderboard.map((entry) => ({ ...entry, value: entry.points, gamesPlayed: 1 })),
+  }
   await page.route('**/api/functions/v1/daily-game**', async (route) => {
     const request = route.request()
     const action = new URL(request.url()).searchParams.get('action')
@@ -50,7 +57,7 @@ test('plays the shared daily player once and restores its leaderboard after relo
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          date: '2026-07-29',
+          date: dailyDate,
           expiresAt: '2099-07-30T00:00:00.000Z',
           playerId: 'lionel-messi-28003',
           clueSeed: 0,
@@ -63,7 +70,7 @@ test('plays the shared daily player once and restores its leaderboard after relo
     if (action === 'result') {
       const body = request.postDataJSON()
       expect(body).toMatchObject({
-        challengeDate: '2026-07-29',
+        challengeDate: dailyDate,
         nickname: 'LeoFan',
         outcome: 'correct',
         cluesUsed: 1,
@@ -73,10 +80,11 @@ test('plays the shared daily player once and restores its leaderboard after relo
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          date: '2026-07-29',
+          date: dailyDate,
           points: 100,
           rank: 1,
           leaderboard,
+          boards,
         }),
       })
       return
@@ -84,7 +92,7 @@ test('plays the shared daily player once and restores its leaderboard after relo
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ date: '2026-07-29', leaderboard }),
+      body: JSON.stringify({ date: dailyDate, leaderboard, boards }),
     })
   })
 
@@ -101,17 +109,17 @@ test('plays the shared daily player once and restores its leaderboard after relo
 
   await page.getByLabel(/guess now/i).fill('Lionel Messi')
   await page.getByRole('button', { name: 'Submit' }).click()
-  await page.getByLabel(/join today’s leaderboard/i).fill('LeoFan')
+  await page.getByLabel(/claim your place on today’s board/i).fill('LeoFan')
   await page.getByRole('button', { name: /submit score/i }).click()
 
   await expect(page.getByRole('heading', { name: /score submitted/i })).toBeVisible()
-  await expect(page.getByRole('table', { name: /daily leaderboard/i })).toContainText('LeoFan')
+  await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('LeoFan')
   await expect(page.getByText(/rank #1/i)).toBeVisible()
 
   await page.reload()
   await page.getByRole('button', { name: /kick off/i }).click()
   await expect(page.getByRole('heading', { name: /score submitted/i })).toBeVisible()
-  await expect(page.getByRole('table', { name: /daily leaderboard/i })).toContainText('AwayDays')
+  await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('AwayDays')
 })
 
 test('keeps daily errors inside the guide and leaves local modes available', async ({ page }) => {
@@ -127,7 +135,7 @@ test('keeps daily errors inside the guide and leaves local modes available', asy
   await page.getByRole('button', { name: /let's go/i }).click()
   await expect(page.getByRole('alert')).toHaveText('Daily service is offline for maintenance.')
   await page.getByRole('button', { name: /back/i }).click()
-  await page.getByRole('button', { name: /ten-round challenge/i }).click()
+  await page.getByRole('button', { name: /10-round challenge/i }).click()
   await expect(page.getByRole('button', { name: /hardcore/i })).toBeEnabled()
 })
 
@@ -247,7 +255,39 @@ test('persists and resumes an unfinished game under the football save', async ({
   await expect(page.locator('.previous-guesses-inline')).toContainText('David Beckham')
 })
 
-test('completes ten rounds and persists a high score', async ({ page }) => {
+test('completes ten rounds, submits its nickname and persists a high score', async ({ page }) => {
+  const challengeBoards = {
+    today: [{ rank: 1, nickname: 'LeoFan', value: 1000, gamesPlayed: 1 }],
+    gamesPlayed: [{ rank: 1, nickname: 'LeoFan', value: 1, gamesPlayed: 1 }],
+    average: [],
+    best: [{ rank: 1, nickname: 'LeoFan', value: 1000, gamesPlayed: 1 }],
+  }
+  await page.route('**/api/functions/v1/daily-game**', async (route) => {
+    const request = route.request()
+    if (new URL(request.url()).searchParams.get('action') !== 'challenge-result') {
+      await route.fallback()
+      return
+    }
+    expect(request.postDataJSON()).toMatchObject({
+      nickname: 'LeoFan',
+      pool: 'normal',
+      rounds: Array.from({ length: 10 }, () => ({
+        outcome: 'correct',
+        cluesUsed: 1,
+        incorrectGuesses: 0,
+      })),
+    })
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        date: new Date().toISOString().slice(0, 10),
+        pool: 'normal',
+        points: 1000,
+        boards: challengeBoards,
+      }),
+    })
+  })
   await startGame(page)
   for (const [index, answer] of firstTenAnswers.entries()) {
     await page.getByLabel(/guess now/i).fill(answer)
@@ -259,6 +299,10 @@ test('completes ten rounds and persists a high score', async ({ page }) => {
   await expect(page.getByText("That’s the final whistle.")).toBeVisible()
   await expect(page.getByText('/ 1000')).toBeVisible()
   await expect(page.getByText('New personal best.')).toBeVisible()
+  await page.getByLabel('Public nickname').fill('LeoFan')
+  await page.getByRole('button', { name: /submit & view boards/i }).click()
+  await expect(page.getByRole('heading', { name: /you’re on the board/i })).toBeVisible()
+  await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('LeoFan')
 
   await page.reload()
   await expect(page.getByText('Normal best').locator('..')).toContainText('1000')

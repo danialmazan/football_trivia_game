@@ -1,6 +1,9 @@
 import {
+  buildChallengeLeaderboardBoards,
+  buildDailyLeaderboardBoards,
   calculateDailyScore,
   isValidDailyNickname,
+  normalizeLeaderboardNickname,
   rankDailyResults,
 } from '../_shared/rules.ts'
 
@@ -13,6 +16,32 @@ Deno.test('daily scores use the shared clue and miss rules', () => {
   assert(calculateDailyScore('correct', 2, 1) === 70, 'second clue with one miss should be 70')
   assert(calculateDailyScore('correct', 5, 4) === 0, 'scores should not fall below zero')
   assert(calculateDailyScore('gave-up', 1, 0) === 0, 'giving up should score zero')
+})
+
+Deno.test('nickname history is normalized without browser ownership', () => {
+  assert(normalizeLeaderboardNickname('  Dani   FC ') === 'dani fc', 'nickname should be normalized')
+})
+
+Deno.test('daily history uses one best score per nickname and day', () => {
+  const boards = buildDailyLeaderboardBoards([
+    { challenge_date: '2026-07-30', nickname: 'Dani', normalized_nickname: 'dani', points: 80, submitted_at: '2026-07-30T09:00:00Z' },
+    { challenge_date: '2026-07-30', nickname: 'dani', normalized_nickname: 'dani', points: 100, submitted_at: '2026-07-30T10:00:00Z' },
+    { challenge_date: '2026-07-31', nickname: 'Dani', normalized_nickname: 'dani', points: 60, submitted_at: '2026-07-31T09:00:00Z' },
+  ], '2026-07-31')
+  assert(boards.today[0].value === 60, 'today should use the current-day result')
+  assert(boards.cumulative?.[0].value === 160, 'history should use the best result per day')
+})
+
+Deno.test('challenge boards count every game but use the daily best for Today', () => {
+  const rows = [
+    { challenge_date: '2026-07-31', nickname: 'Dani', normalized_nickname: 'dani', points: 600, submitted_at: '2026-07-31T09:00:00Z' },
+    { challenge_date: '2026-07-31', nickname: 'Dani', normalized_nickname: 'dani', points: 750, submitted_at: '2026-07-31T10:00:00Z' },
+    { challenge_date: '2026-07-30', nickname: 'Dani', normalized_nickname: 'dani', points: 450, submitted_at: '2026-07-30T10:00:00Z' },
+  ]
+  const boards = buildChallengeLeaderboardBoards(rows, '2026-07-31')
+  assert(boards.today[0].value === 750, 'Today should show the best same-day attempt')
+  assert(boards.gamesPlayed?.[0].value === 3, 'all completed games should count')
+  assert(boards.average[0].value === 600, 'average should unlock after three games')
 })
 
 Deno.test('daily nickname validation supports Unicode and enforces length', () => {

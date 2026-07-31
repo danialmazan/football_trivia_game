@@ -12,6 +12,8 @@ const badgeOverrides = new Map([
     '236',
     'https://upload.wikimedia.org/wikipedia/commons/c/cd/CD_Logro%C3%B1%C3%A9s.png',
   ],
+  ['114309', 'https://tmssl.akamaized.net/images/wappen/head/114309.png'],
+  ['811', 'https://tmssl.akamaized.net/images/wappen/head/811.png'],
 ])
 
 function parseCsvLine(line) {

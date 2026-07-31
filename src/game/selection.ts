@@ -15,18 +15,18 @@ export function assignDecade(player: Player): string {
 }
 
 export function qualifiesForPractice(player: Player, filter: PracticeFilter): boolean {
-  if (filter.kind === 'decade') return assignDecade(player) === filter.value
-  return player.clubs.some(
-    (club) =>
-      club.leagueId === filter.value &&
-      club.appearances >= GAME_CONFIG.minimumClueClubAppearances,
-  )
+  const key = `${filter.kind}:${filter.value}`
+  return (player.practiceRanks[key] ?? Number.POSITIVE_INFINITY) <= GAME_CONFIG.practiceHardcorePoolSize
 }
 
 export function getActivePool(players: Player[], pool: Pool, practiceFilter?: PracticeFilter): Player[] {
-  return players.filter(
-    (player) => isInPool(player, pool) && (!practiceFilter || qualifiesForPractice(player, practiceFilter)),
-  )
+  if (!practiceFilter) return players.filter((player) => isInPool(player, pool))
+  const key = `${practiceFilter.kind}:${practiceFilter.value}`
+  const maximumRank =
+    pool === 'normal' ? GAME_CONFIG.practiceNormalPoolSize : GAME_CONFIG.practiceHardcorePoolSize
+  return players
+    .filter((player) => (player.practiceRanks[key] ?? Number.POSITIVE_INFINITY) <= maximumRank)
+    .sort((left, right) => left.practiceRanks[key] - right.practiceRanks[key])
 }
 
 export interface SelectionResult {

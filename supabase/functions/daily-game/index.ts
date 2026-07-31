@@ -11,7 +11,14 @@ import {
   verifyAttemptToken,
   type StoredResult,
 } from '../_shared/daily.ts'
-import { calculateDailyScore, isValidDailyNickname } from '../_shared/rules.ts'
+import {
+  buildChallengeLeaderboardBoards,
+  buildDailyLeaderboardBoards,
+  calculateDailyScore,
+  isValidDailyNickname,
+  normalizeLeaderboardNickname,
+  type HistoricalResult,
+} from '../_shared/rules.ts'
 
 function publicLeaderboard(results: StoredResult[]) {
   return rankResults(results).map((result) => ({
@@ -22,17 +29,51 @@ function publicLeaderboard(results: StoredResult[]) {
   }))
 }
 
-async function getResults(client: ReturnType<typeof createAdminClient>, date: string) {
-  const result = await client
-    .from('daily_results')
-    .select(
-      'participant_hash,nickname,points,outcome,clues_used,incorrect_guesses,submitted_at',
-    )
-    .eq('challenge_date', date)
-    .order('points', { ascending: false })
-    .order('submitted_at', { ascending: true })
-  if (result.error) throw result.error
-  return (result.data ?? []) as StoredResult[]
+const DAILY_FIELDS =
+  'challenge_date,participant_hash,nickname,normalized_nickname,points,outcome,clues_used,incorrect_guesses,submitted_at'
+
+async function getDailyResults(
+  client: ReturnType<typeof createAdminClient>,
+  date?: string,
+) {
+  const rows: StoredResult[] = []
+  const pageSize = 1_000
+  for (let from = 0; ; from += pageSize) {
+    let query = client
+      .from('daily_results')
+      .select(DAILY_FIELDS)
+      .order('submitted_at', { ascending: true })
+    if (date) query = query.eq('challenge_date', date)
+    const result = await query.range(from, from + pageSize - 1)
+    if (result.error) throw result.error
+    const page = (result.data ?? []) as StoredResult[]
+    rows.push(...page)
+    if (page.length < pageSize) return rows
+  }
+}
+
+async function getChallengeResults(
+  client: ReturnType<typeof createAdminClient>,
+  pool: 'normal' | 'hardcore',
+) {
+  const rows: HistoricalResult[] = []
+  const pageSize = 1_000
+  for (let from = 0; ; from += pageSize) {
+    const result = await client
+      .from('challenge_results')
+      .select('challenge_date,nickname,normalized_nickname,points,submitted_at')
+      .eq('pool', pool)
+      .order('submitted_at', { ascending: true })
+      .range(from, from + pageSize - 1)
+    if (result.error) throw result.error
+    const page = (result.data ?? []) as HistoricalResult[]
+    rows.push(...page)
+    if (page.length < pageSize) return rows
+  }
+}
+
+function isPool(value: unknown): value is 'normal' | 'hardcore' {
+  return value === 'normal' || value === 'hardcore'
 }
 
 Deno.serve(async (request) => {
@@ -68,9 +109,21 @@ Deno.serve(async (request) => {
 
     if (request.method === 'GET' && action === 'leaderboard') {
       await getOrCreateChallenge(client, today)
+      const allResults = await getDailyResults(client)
       return json(request, {
         date: today,
-        leaderboard: publicLeaderboard(await getResults(client, today)),
+        leaderboard: publicLeaderboard(allResults.filter((row) => row.challenge_date === today)),
+        boards: buildDailyLeaderboardBoards(allResults, today),
+      })
+    }
+
+    if (request.method === 'GET' && action === 'challenge-leaderboard') {
+      const pool = url.searchParams.get('pool')
+      if (!isPool(pool)) return json(request, { error: 'A valid player pool is required.' }, 400)
+      return json(request, {
+        date: today,
+        pool,
+        boards: buildChallengeLeaderboardBoards(await getChallengeResults(client, pool), today),
       })
     }
 
@@ -94,10 +147,7 @@ Deno.serve(async (request) => {
         return json(request, { error: 'The submitted round statistics are invalid.' }, 400)
       }
 
-      const participantHash = await verifyAttemptToken(
-        today,
-        String(body.attemptToken ?? ''),
-      )
+      const participantHash = await verifyAttemptToken(today, String(body.attemptToken ?? ''))
       if (!participantHash) {
         return json(request, { error: 'The daily attempt token is invalid.' }, 401)
       }
@@ -106,19 +156,26 @@ Deno.serve(async (request) => {
       const cluesUsed = Number(body.cluesUsed)
       const incorrectGuesses = Number(body.incorrectGuesses)
       const points = calculateDailyScore(body.outcome, cluesUsed, incorrectGuesses)
-      const inserted = await client.from('daily_results').insert({
-        challenge_date: today,
-        participant_hash: participantHash,
-        nickname: body.nickname.trim(),
-        points,
-        outcome: body.outcome,
-        clues_used: cluesUsed,
-        incorrect_guesses: incorrectGuesses,
+      const inserted = await client.rpc('submit_locked_daily_result', {
+        p_challenge_date: today,
+        p_participant_hash: participantHash,
+        p_nickname: body.nickname.trim(),
+        p_points: points,
+        p_outcome: body.outcome,
+        p_clues_used: cluesUsed,
+        p_incorrect_guesses: incorrectGuesses,
       })
-      if (inserted.error && inserted.error.code !== '23505') throw inserted.error
+      if (inserted.error) throw inserted.error
+      if (inserted.data === 'nickname-used') {
+        return json(request, { error: 'That nickname has already submitted today.' }, 409)
+      }
+      if (inserted.data === 'participant-used') {
+        return json(request, { error: 'This browser has already submitted today.' }, 409)
+      }
 
-      const results = await getResults(client, today)
-      const ranked = rankResults(results)
+      const allResults = await getDailyResults(client)
+      const todayResults = allResults.filter((row) => row.challenge_date === today)
+      const ranked = rankResults(todayResults)
       const ownResult = ranked.find((result) => result.participant_hash === participantHash)
       if (!ownResult) throw new Error('The saved daily result could not be read back.')
 
@@ -126,13 +183,65 @@ Deno.serve(async (request) => {
         date: today,
         points: ownResult.points,
         rank: ownResult.rank,
-        leaderboard: publicLeaderboard(results),
+        leaderboard: publicLeaderboard(todayResults),
+        boards: buildDailyLeaderboardBoards(allResults, today),
+      })
+    }
+
+    if (request.method === 'POST' && action === 'challenge-result') {
+      const body = await request.json().catch(() => null) as Record<string, unknown> | null
+      if (!body || !isPool(body.pool) || !isValidDailyNickname(body.nickname)) {
+        return json(request, { error: 'A valid nickname and player pool are required.' }, 400)
+      }
+      if (!Array.isArray(body.rounds) || body.rounds.length !== 10) {
+        return json(request, { error: 'A completed 10-round game is required.' }, 400)
+      }
+      const rounds = body.rounds as Array<Record<string, unknown>>
+      const invalid = rounds.some(
+        (round) =>
+          (round.outcome !== 'correct' && round.outcome !== 'gave-up') ||
+          !Number.isInteger(round.cluesUsed) ||
+          Number(round.cluesUsed) < 1 ||
+          Number(round.cluesUsed) > 5 ||
+          !Number.isInteger(round.incorrectGuesses) ||
+          Number(round.incorrectGuesses) < 0 ||
+          Number(round.incorrectGuesses) > 50,
+      )
+      if (invalid) return json(request, { error: 'One or more rounds are invalid.' }, 400)
+
+      const publicRounds = rounds.map((round) => ({
+        outcome: round.outcome,
+        cluesUsed: Number(round.cluesUsed),
+        incorrectGuesses: Number(round.incorrectGuesses),
+      }))
+      const points = publicRounds.reduce(
+        (sum, round) =>
+          sum + calculateDailyScore(round.outcome as 'correct' | 'gave-up', round.cluesUsed, round.incorrectGuesses),
+        0,
+      )
+      const inserted = await client.from('challenge_results').insert({
+        challenge_date: today,
+        pool: body.pool,
+        nickname: body.nickname.trim(),
+        normalized_nickname: normalizeLeaderboardNickname(body.nickname),
+        points,
+        rounds: publicRounds,
+      })
+      if (inserted.error) throw inserted.error
+      return json(request, {
+        date: today,
+        pool: body.pool,
+        points,
+        boards: buildChallengeLeaderboardBoards(
+          await getChallengeResults(client, body.pool),
+          today,
+        ),
       })
     }
 
     return json(request, { error: 'Unknown daily-game action.' }, 404)
   } catch (error) {
     console.error(error)
-    return json(request, { error: 'The daily game service is temporarily unavailable.' }, 500)
+    return json(request, { error: 'The game service is temporarily unavailable.' }, 500)
   }
 })

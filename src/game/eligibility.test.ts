@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { players } from '../data/players'
 import type { Player } from '../data/types'
-import { meetsEraCutoff, meetsHardcoreCriteria } from './eligibility'
+import { meetsEraCutoff, meetsHardcoreCriteria, meetsNormalCriteria } from './eligibility'
 
 describe('football pool eligibility', () => {
   it('requires an eligible appearance in 1995-96 or later', () => {
@@ -42,6 +42,12 @@ describe('football pool eligibility', () => {
   it('requires a senior international cap', () => {
     const base = players[0]
     expect(meetsHardcoreCriteria({ ...base, nationalTeam: { ...base.nationalTeam, caps: 0 } })).toBe(false)
+  })
+
+  it('requires 50 post-1995 Big-Five appearances for Normal', () => {
+    const base = players.find((player) => player.normalPool)!
+    expect(meetsNormalCriteria(base)).toBe(true)
+    expect(meetsNormalCriteria({ ...base, postCutoffBigFiveAppearances: 49 })).toBe(false)
   })
 
   it('keeps the 250-player Normal pool inside the 800-player Hardcore pool', () => {
