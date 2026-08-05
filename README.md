@@ -2,12 +2,12 @@
 
 **Can you become the G.O.A.T. of player guessing?**
 
-Leo Guessi is a browser-based football player guessing game covering the
+Leo Guessi is a browser-based football player and lineup guessing game covering the
 top divisions of England, Spain, Italy, Germany, and France. Each round reveals
 five progressively easier clues while the available score falls from 100 to 20.
 The generated answer catalog and club badges are bundled with the project.
-Player of the day and 10-round challenge use the online leaderboard service;
-the remaining modes continue to work locally.
+Player of the day, Lineup of the day, and both 10-round challenges use the online
+leaderboard services; the remaining modes continue to work locally.
 
 ## Run locally
 
@@ -20,7 +20,7 @@ npm run dev
 
 Open `http://localhost:5173`.
 
-The three local modes work without configuration. To use Player of the day,
+The local modes work without configuration. To use either daily mode,
 copy `.env.example` to `.env.local` and supply the connected Supabase project
 URL and publishable key.
 
@@ -42,7 +42,7 @@ npx playwright install chromium
 With Deno, Docker, and the Supabase CLI installed, verify the online layer:
 
 ```bash
-deno test supabase/functions/tests/ --allow-env
+deno test supabase/functions/tests/daily-rules-test.ts --allow-env
 supabase start
 supabase test db
 ```
@@ -76,6 +76,10 @@ when it would collide with a word in another player’s name—for example,
 - **10-round challenge:** ten repeat-free rounds, maximum 1,000 points. A
   nickname can submit unlimited games from any browser; matching nicknames
   share one history.
+- **Lineup of the day:** one historical semifinal or final and one missing
+  starter shared worldwide from 00:00:00 UTC to the next UTC midnight.
+- **10-round lineup challenge:** ten distinct historical matches with an
+  independently selected missing starter in each, maximum 1,000 points.
 - **Endless:** no repeats until the selected pool is exhausted, then a clearly
   announced new cycle begins.
 - **By decade or league:** ten rounds from a filter-specific roster. A player
@@ -96,6 +100,11 @@ Autocomplete always searches the expanded eligible catalog, even in Normal
 mode. A suggested player outside the active answer roster is a valid incorrect
 guess rather than an unavailable name.
 
+Lineup modes use a separate 201-match snapshot: 153 Champions League matches,
+24 EURO matches, and 24 World Cup matches. Every starter is equally eligible;
+substitutes are included in lineup autocomplete but never appear on the pitch.
+Each distinct wrong lineup guess costs 20 points and Give up scores zero.
+
 ## Architecture
 
 - `src/data`: football types, the generated snapshot, provenance, and validation.
@@ -104,14 +113,15 @@ guess rather than an unavailable name.
   construction.
 - `src/components`: accessible responsive screens and clue presentation.
 - `scripts`: deterministic data generation and local asset bundling.
-- `supabase`: database migrations, the shared daily API, the midnight archive
-  function, and the generated 250-player Normal pool.
+- `supabase`: additive database migrations, separate player and lineup APIs,
+  midnight archives, and generated daily pools.
 - `e2e`: desktop and mobile user-flow tests.
 
-Scores, nickname preference, anonymous installation ID, daily progress, endless
+Scores, nickname preference, anonymous installation ID, both daily games, endless
 totals, completed-but-unsubmitted challenges, and unfinished games use the football-only local-storage key
 `leo-guessi:football-trivia:v1`. Existing v1 saves migrate additively and retain
-personal records and unfinished challenges.
+personal records and unfinished challenges. Lineup state uses separate additive
+fields so existing player saves are preserved.
 
 ## Deploy the daily service
 
@@ -125,6 +135,7 @@ editor and compare them again immediately afterwards:
 select count(*) as daily_results from public.daily_results;
 select count(*) as daily_challenges from public.daily_challenges;
 select count(*) as daily_archives from public.daily_archives;
+select count(*) as challenge_results from public.challenge_results;
 ```
 
 The new migrations are additive: they retain the original result, challenge,
@@ -139,6 +150,7 @@ supabase link --project-ref YOUR_PROJECT_REF
 supabase db push
 supabase secrets set --env-file supabase/.env
 supabase functions deploy daily-game
+supabase functions deploy lineup-game
 supabase functions deploy daily-maintenance
 ```
 
@@ -170,5 +182,8 @@ The cron function creates private, non-overwriting Player-of-the-Day reports at
 the Supabase Storage dashboard. The database retains the original dated rows
 and `daily_archives` records, including header-only files for days with no
 submissions.
+Lineup-of-the-Day reports are independently archived at
+`lineup-daily-leaderboards/YYYY-MM-DD.csv` in the same private bucket and tracked
+in `lineup_daily_archives`.
 
 See [DATA_SOURCES.md](DATA_SOURCES.md) for the source and refresh methodology.

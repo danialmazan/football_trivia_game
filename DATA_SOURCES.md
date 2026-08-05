@@ -105,3 +105,43 @@ main counts, exact 100/300 counts for every filter, the Normal subset invariant,
 post-1995 and slice-specific thresholds, senior-team representation, title
 records, deterministic ranking order, five clues, name uniqueness, autocomplete
 coverage, and every required badge.
+
+## Historical lineup snapshot
+
+`src/data/lineupMatches.json` and `src/data/lineupSearch.json` are versioned
+runtime snapshots generated on **2026-08-05**. The match snapshot contains 201
+semifinal/final fixtures:
+
+- 153 UEFA Champions League matches from 1995/96 through 2025/26. Every season
+  contributes both semifinal legs and the final except 2019/20, whose Lisbon
+  semifinals were single-leg matches.
+- 24 EURO matches from 1996 through 2024.
+- 24 FIFA World Cup matches from 1998 through 2026.
+
+The primary source for fixture metadata, formations, starters, substitutes, and
+shirt numbers is each public Transfermarkt match sheet. Every match retains its
+match-sheet and competition-season URLs plus its verification date. Player names
+are expanded from the CC0
+[Transfermarkt datasets](https://github.com/dcaribou/transfermarkt-datasets)
+player table where available. The 2,048-player autocomplete snapshot is the
+union of all starters and registered substitutes in the included match sheets.
+
+Pitch coordinates are the source formation coordinates normalized to the game's
+0–100 pitch system. Kickoff values are source-local times. The IANA timezone is
+derived from the named venue's location and retained instead of a fixed UTC
+offset so historical daylight-saving rules remain valid.
+
+Refresh the committed snapshots with:
+
+```bash
+npm run lineups:build
+npm run lineups:validate
+```
+
+The builder caches source pages under the ignored `.cache/football/lineups`
+directory and requires its cached CC0 `players.csv.gz` source or
+`LINEUP_PLAYERS_CSV_GZ`. Validation enforces the exact 153/24/24 competition
+counts, the 2019/20 single-leg exception, unique match IDs, two teams, 11 unique
+starters per team, non-empty registered benches, formations, coordinates,
+complete metadata, valid IANA zones, provenance URLs, and full autocomplete
+coverage. The same build emits the versioned server-side daily pool migration.

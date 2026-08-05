@@ -4,7 +4,7 @@ import type { LeaderboardBoards, LeaderboardMetricEntry } from '../game/types'
 type BoardKey = 'today' | 'cumulative' | 'gamesPlayed' | 'average' | 'best'
 
 interface LeaderboardTabsProps {
-  mode: 'daily' | 'challenge'
+  mode: 'daily' | 'challenge' | 'lineup-daily' | 'lineup-challenge'
   boards: LeaderboardBoards
   currentNickname: string
 }
@@ -31,10 +31,10 @@ function normalized(value: string): string {
 
 export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTabsProps) {
   const tabs: BoardKey[] =
-    mode === 'daily'
+    mode === 'daily' || mode === 'lineup-daily'
       ? ['today', 'cumulative', 'average', 'best']
       : ['today', 'gamesPlayed', 'average', 'best']
-  const labels = mode === 'daily' ? DAILY_LABELS : CHALLENGE_LABELS
+  const labels = mode === 'daily' || mode === 'lineup-daily' ? DAILY_LABELS : CHALLENGE_LABELS
   const [active, setActive] = useState<BoardKey>('today')
   const entries = useMemo(
     () => ((boards[active] ?? []) as LeaderboardMetricEntry[]),
@@ -48,7 +48,13 @@ export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTa
         <div>
           <span className="eyebrow">Nickname history</span>
           <h2 id="leaderboard-tabs-title">
-            {mode === 'daily' ? 'Player of the day' : '10-round challenge'} leaderboard
+            {mode === 'daily'
+              ? 'Player of the day'
+              : mode === 'lineup-daily'
+                ? 'Lineup of the day'
+                : mode === 'lineup-challenge'
+                  ? '10-round lineup challenge'
+                  : '10-round challenge'} leaderboard
           </h2>
         </div>
       </div>
@@ -66,7 +72,7 @@ export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTa
           </button>
         ))}
       </div>
-      {mode === 'challenge' && (
+      {(mode === 'challenge' || mode === 'lineup-challenge') && (
         <p className="leaderboard-era-note">
           Shared 10-round records began on 31 July 2026. Earlier games stayed only in each browser.
         </p>

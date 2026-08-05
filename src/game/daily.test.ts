@@ -5,7 +5,14 @@ import { DEFAULT_SETTINGS } from './persistence'
 
 describe('daily game rules', () => {
   it('is the first and default mode while keeping the existing mode order', () => {
-    expect(GAME_MODES).toEqual(['daily', 'challenge', 'endless', 'practice'])
+    expect(GAME_MODES).toEqual([
+      'daily',
+      'challenge',
+      'lineup-daily',
+      'lineup-challenge',
+      'endless',
+      'practice',
+    ])
     expect(DEFAULT_SETTINGS).toMatchObject({ mode: 'daily', pool: 'normal' })
     expect(MODE_LABELS.challenge).toBe('10-round challenge')
     expect(MODE_LABELS.practice).toBe('By decade or league')

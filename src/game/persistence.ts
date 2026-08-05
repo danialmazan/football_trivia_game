@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
 }
 
 export const DEFAULT_SAVED_DATA: SavedData = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   highScores: { normal: 0, hardcore: 0 },
   endlessStats: {
     normal: { totalScore: 0, solved: 0, rounds: 0 },
@@ -20,6 +20,10 @@ export const DEFAULT_SAVED_DATA: SavedData = {
   unfinishedGame: null,
   dailyGame: null,
   dailyCompletion: null,
+  unfinishedLineupGame: null,
+  lineupDailyGame: null,
+  lineupDailyCompletion: null,
+  lineupBestScore: 0,
   installationId: '',
   lastNickname: '',
 }
@@ -34,6 +38,13 @@ function createInstallationId(): string {
 function isCurrentDailyGame(game: SavedData['dailyGame']): boolean {
   return Boolean(
     game?.settings.mode === 'daily' &&
+      game.dailyChallenge?.date === getUtcDateKey(),
+  )
+}
+
+function isCurrentLineupDailyGame(game: SavedData['lineupDailyGame']): boolean {
+  return Boolean(
+    game?.mode === 'lineup-daily' &&
       game.dailyChallenge?.date === getUtcDateKey(),
   )
 }
@@ -54,10 +65,17 @@ export function loadSavedData(): SavedData {
       : null
     const parsedDailyCompletion =
       parsed.dailyCompletion?.date === getUtcDateKey() ? parsed.dailyCompletion : null
+    const parsedLineupDailyGame = isCurrentLineupDailyGame(parsed.lineupDailyGame ?? null)
+      ? parsed.lineupDailyGame ?? null
+      : null
+    const parsedLineupDailyCompletion =
+      parsed.lineupDailyCompletion?.date === getUtcDateKey()
+        ? parsed.lineupDailyCompletion
+        : null
     return {
       ...DEFAULT_SAVED_DATA,
       ...parsed,
-      schemaVersion: 3,
+      schemaVersion: 4,
       highScores: { ...DEFAULT_SAVED_DATA.highScores, ...parsed.highScores },
       endlessStats: { ...DEFAULT_SAVED_DATA.endlessStats, ...parsed.endlessStats },
       lastSettings: migrated
@@ -69,6 +87,10 @@ export function loadSavedData(): SavedData {
           },
       dailyGame: parsedDailyGame,
       dailyCompletion: parsedDailyCompletion,
+      lineupDailyGame: parsedLineupDailyGame,
+      lineupDailyCompletion: parsedLineupDailyCompletion,
+      unfinishedLineupGame: parsed.unfinishedLineupGame ?? null,
+      lineupBestScore: parsed.lineupBestScore ?? 0,
       installationId: parsed.installationId || createInstallationId(),
       lastNickname: parsed.lastNickname ?? parsed.dailyCompletion?.nickname ?? '',
     }

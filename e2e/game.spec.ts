@@ -208,12 +208,13 @@ test('gates the homepage leaderboard by today’s nickname and switches game and
   await expect(savedScores).toContainText('000')
   await page.getByRole('button', { name: /check the leaderboard/i }).click()
   await expect(page.getByRole('heading', { name: /check the leaderboard/i })).toBeVisible()
+  await page.getByRole('button', { name: /guess the player/i }).click()
   await expect(page.getByLabel('Public nickname')).toHaveValue('')
   await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
 
   await page.getByLabel('Public nickname').fill('Unknown')
   await page.getByRole('button', { name: /check the leaderboard/i }).click()
-  await expect(page.getByText('Guess today’s Player of the Day to see the leaderboard!')).toBeVisible()
+  await expect(page.getByText('Guess today’s Player of the Day to see this leaderboard!')).toBeVisible()
   await expect(page.getByLabel('Unlocked leaderboards')).toHaveCount(0)
   await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
 
@@ -249,6 +250,139 @@ test('gates the homepage leaderboard by today’s nickname and switches game and
   await expect(page.getByLabel('Unlocked leaderboards')).toHaveCount(0)
   await page.getByRole('button', { name: /back to home page/i }).click()
   await expect(page.getByRole('heading', { name: /game format/i })).toBeVisible()
+})
+
+test('keeps secondary formats collapsed and plays the shared lineup daily with bench autocomplete', async ({ page }) => {
+  const dailyDate = new Date().toISOString().slice(0, 10)
+  const boards = {
+    today: [{ rank: 1, nickname: 'ShapeReader', value: 80, gamesPlayed: 1 }],
+    cumulative: [{ rank: 1, nickname: 'ShapeReader', value: 80, gamesPlayed: 1 }],
+    average: [],
+    best: [{ rank: 1, nickname: 'ShapeReader', value: 80, gamesPlayed: 1 }],
+  }
+  await page.route('**/api/functions/v1/lineup-game**', async (route) => {
+    const request = route.request()
+    const action = new URL(request.url()).searchParams.get('action')
+    if (action === 'challenge') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        date: dailyDate,
+        expiresAt: '2099-08-06T00:00:00.000Z',
+        matchId: 'tm-1067642',
+        missingPlayerId: 'tm-player-5826',
+        rosterVersion: 'lineups-test',
+        attemptToken: `${'c'.repeat(64)}.${'d'.repeat(64)}`,
+      }) })
+      return
+    }
+    if (action === 'result') {
+      expect(request.postDataJSON()).toMatchObject({
+        challengeDate: dailyDate,
+        nickname: 'ShapeReader',
+        outcome: 'correct',
+        incorrectGuesses: 1,
+      })
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        date: dailyDate,
+        points: 80,
+        rank: 1,
+        leaderboard: [{ rank: 1, nickname: 'ShapeReader', points: 80, submittedAt: '2026-08-05T12:00:00Z' }],
+        boards,
+      }) })
+      return
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ date: dailyDate, leaderboard: [], boards }) })
+  })
+
+  await expect(page.getByRole('button', { name: /^Endless mode/i })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^By decade or league/i })).toHaveCount(0)
+  const more = page.getByRole('button', { name: /more game formats/i })
+  await expect(more).toHaveAttribute('aria-expanded', 'false')
+  await more.click()
+  await expect(page.getByRole('button', { name: /^Endless mode/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^By decade or league/i })).toBeVisible()
+
+  await page.getByRole('button', { name: /^Lineup of the day/i }).click()
+  await expect(page.getByText('historic matches available')).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Hardcore/i })).toHaveCount(0)
+  await page.getByRole('button', { name: /kick off/i }).click()
+  await expect(page.getByRole('heading', { name: /read the shape/i })).toBeVisible()
+  await page.getByRole('button', { name: /let's go/i }).click()
+
+  await expect(page.getByRole('heading', { name: /Juventus FC.*FC Nantes/i })).toBeVisible()
+  await expect(page.getByLabel(/Juventus FC and FC Nantes starting lineups/i)).toBeVisible()
+  await expect(page.getByLabel(/missing Juventus FC starter/i)).toBeVisible()
+  await expect(page.getByText(/CEST \(Europe\/Rome\)/)).toBeVisible()
+
+  const input = page.getByLabel(/who is missing/i)
+  await input.fill('Ramp')
+  await expect(page.getByRole('option', { name: /Michelangelo Rampulla/i })).toBeVisible()
+  await page.getByRole('option', { name: /Michelangelo Rampulla/i }).click()
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(page.getByTestId('lineup-available-score')).toHaveText('80')
+  await input.fill('Michelangelo Rampulla')
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(page.getByTestId('lineup-available-score')).toHaveText('80')
+  await expect(page.getByRole('status')).toContainText('Already guessed')
+
+  await input.fill('Peruzzi')
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(page.getByTestId('lineup-answer-reveal')).toContainText('Peruzzi')
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
+  await page.getByLabel(/enter your nickname to save this result/i).fill('ShapeReader')
+  await page.getByRole('button', { name: /save score/i }).click()
+  await expect(page.getByRole('heading', { name: /lineup score saved/i })).toBeVisible()
+  await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('ShapeReader')
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
+})
+
+test('plays ten distinct lineup matches and submits the lineup challenge', async ({ page }) => {
+  const boards = {
+    today: [{ rank: 1, nickname: 'Tactics', value: 0, gamesPlayed: 1 }],
+    gamesPlayed: [{ rank: 1, nickname: 'Tactics', value: 1, gamesPlayed: 1 }],
+    average: [],
+    best: [{ rank: 1, nickname: 'Tactics', value: 0, gamesPlayed: 1 }],
+  }
+  await page.route('**/api/functions/v1/lineup-game**', async (route) => {
+    const request = route.request()
+    expect(new URL(request.url()).searchParams.get('action')).toBe('challenge-result')
+    const body = request.postDataJSON()
+    expect(body.nickname).toBe('Tactics')
+    expect(body.rounds).toHaveLength(10)
+    expect(body.rounds.every((round: { outcome: string }) => round.outcome === 'gave-up')).toBe(true)
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ date: '2026-08-05', points: 0, boards }) })
+  })
+
+  await page.getByRole('button', { name: /^10-round lineup challenge/i }).click()
+  await page.getByRole('button', { name: /kick off/i }).click()
+  await page.getByRole('button', { name: /let's go/i }).click()
+  const matches = new Set<string>()
+  for (let round = 0; round < 10; round += 1) {
+    matches.add(await page.locator('.lineup-match-card h1').innerText())
+    await page.getByRole('button', { name: /give up and reveal/i }).click()
+    await expect(page.getByTestId('lineup-answer-reveal')).toBeVisible()
+    await page.getByRole('button', { name: round === 9 ? /see final results/i : /next lineup/i }).click()
+  }
+  expect(matches.size).toBe(10)
+  await expect(page.getByRole('heading', { name: /ten teamsheets completed/i })).toBeVisible()
+  await page.getByLabel('Public nickname').fill('Tactics')
+  await page.getByRole('button', { name: /save score & view boards/i }).click()
+  await expect(page.getByText('Lineup history updated.')).toBeVisible()
+  await expect(page.getByRole('table', { name: /lineup round results/i }).getByRole('row')).toHaveCount(11)
+  await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('Tactics')
+})
+
+test('keeps the portrait lineup pitch inside a 390px viewport without autofocus', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.getByRole('button', { name: /^10-round lineup challenge/i }).click()
+  await page.getByRole('button', { name: /kick off/i }).click()
+  await page.getByRole('button', { name: /let's go/i }).click()
+  const bounds = await page.locator('.lineup-pitch').boundingBox()
+  expect(bounds).not.toBeNull()
+  expect(bounds!.x).toBeGreaterThanOrEqual(0)
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390)
+  await expect(page.getByLabel(/who is missing/i)).not.toBeFocused()
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  expect(overflow).toBe(0)
 })
 
 test('keeps daily errors inside the guide and leaves local modes available', async ({ page }) => {

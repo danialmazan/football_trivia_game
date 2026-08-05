@@ -2,6 +2,7 @@ import {
   buildChallengeLeaderboardBoards,
   buildDailyLeaderboardBoards,
   calculateDailyScore,
+  calculateLineupScore,
   findTodayNicknameResult,
   isValidDailyNickname,
   normalizeLeaderboardNickname,
@@ -17,6 +18,13 @@ Deno.test('daily scores use the shared clue and miss rules', () => {
   assert(calculateDailyScore('correct', 2, 1) === 70, 'second clue with one miss should be 70')
   assert(calculateDailyScore('correct', 5, 4) === 0, 'scores should not fall below zero')
   assert(calculateDailyScore('gave-up', 1, 0) === 0, 'giving up should score zero')
+})
+
+Deno.test('lineup scores subtract distinct misses and floor at zero', () => {
+  assert(calculateLineupScore('correct', 0) === 100, 'first try should score 100')
+  assert(calculateLineupScore('correct', 3) === 40, 'three misses should score 40')
+  assert(calculateLineupScore('correct', 8) === 0, 'scores should floor at zero')
+  assert(calculateLineupScore('gave-up', 0) === 0, 'giving up should score zero')
 })
 
 Deno.test('nickname history is normalized without browser ownership', () => {

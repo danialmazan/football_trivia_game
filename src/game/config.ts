@@ -13,6 +13,8 @@ export const GAME_CONFIG = {
   hardcorePoolSize: 800,
   practiceNormalPoolSize: 100,
   practiceHardcorePoolSize: 300,
+  lineupMatchCount: 201,
+  lineupWrongGuessPenalty: 20,
 } as const
 
 export const POOL_RULES: Record<Pool, string> = {
@@ -24,11 +26,20 @@ export const POOL_RULES: Record<Pool, string> = {
 export const MODE_LABELS: Record<GameMode, string> = {
   daily: 'Player of the day',
   challenge: '10-round challenge',
+  'lineup-daily': 'Lineup of the day',
+  'lineup-challenge': '10-round lineup challenge',
   endless: 'Endless mode',
   practice: 'By decade or league',
 }
 
-export const GAME_MODES: GameMode[] = ['daily', 'challenge', 'endless', 'practice']
+export const GAME_MODES: GameMode[] = [
+  'daily',
+  'challenge',
+  'lineup-daily',
+  'lineup-challenge',
+  'endless',
+  'practice',
+]
 
 export const POOL_LABELS: Record<Pool, string> = {
   normal: 'Normal',

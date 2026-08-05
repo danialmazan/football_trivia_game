@@ -2,10 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { DailyResultsScreen } from './components/DailyResultsScreen'
 import { GameGuide } from './components/GameGuide'
 import { GameScreen } from './components/GameScreen'
-import { LeaderboardHubScreen } from './components/LeaderboardHubScreen'
+import { LeaderboardHubScreen, type LeaderboardFamily } from './components/LeaderboardHubScreen'
+import { LineupDailyResultsScreen } from './components/LineupDailyResultsScreen'
+import { LineupGameScreen } from './components/LineupGameScreen'
+import { LineupGuide } from './components/LineupGuide'
+import { LineupResultsScreen } from './components/LineupResultsScreen'
 import { ResultsScreen } from './components/ResultsScreen'
 import { SetupScreen } from './components/SetupScreen'
 import { playerSearch, players } from './data/players'
+import { loadLineupDataset } from './data/lineups'
+import type { LineupDataset, LineupMatch } from './data/lineupTypes'
+import type { SearchPlayer } from './data/types'
 import { matchAnswer, normalizeAnswer } from './game/answerMatching'
 import { GAME_CONFIG } from './game/config'
 import { getUtcDateKey, isValidNickname } from './game/daily'
@@ -24,6 +31,21 @@ import {
 } from './game/persistence'
 import { createRound, recordIncorrectGuess, revealNextClue } from './game/round'
 import { calculateAvailableScore } from './game/scoring'
+import {
+  buildLineupChallenge,
+  calculateLineupScore,
+  createLineupRound,
+  recordLineupIncorrectGuess,
+  selectLineupMatch,
+} from './game/lineups'
+import {
+  getLineupChallengeLeaderboard,
+  getLineupDailyChallenge,
+  getLineupDailyLeaderboard,
+  getLineupLeaderboardHub,
+  submitLineupChallengeResult,
+  submitLineupDailyResult,
+} from './game/lineupApi'
 import { getActivePool, selectNextPlayer } from './game/selection'
 import type {
   DailyChallenge,
@@ -32,6 +54,9 @@ import type {
   GameState,
   LeaderboardBoards,
   LeaderboardHubResponse,
+  LineupDailyChallenge,
+  LineupGameState,
+  LineupLeaderboardHubResponse,
   RoundOutcome,
   RoundResult,
   SavedData,
@@ -48,6 +73,9 @@ export function App() {
   const [savedData, setSavedData] = useState<SavedData>(() => loadSavedData())
   const [settings, setSettings] = useState<GameSettings>(savedData.lastSettings)
   const [game, setGame] = useState<GameState | null>(null)
+  const [lineupGame, setLineupGame] = useState<LineupGameState | null>(null)
+  const [lineupDataset, setLineupDataset] = useState<LineupDataset | null>(null)
+  const [lineupSearch, setLineupSearch] = useState<SearchPlayer[]>([])
   const [showGuide, setShowGuide] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dailyLoading, setDailyLoading] = useState(false)
@@ -58,10 +86,18 @@ export function App() {
   )
   const [challengeBoards, setChallengeBoards] = useState<LeaderboardBoards | null>(null)
   const [challengeSubmitted, setChallengeSubmitted] = useState(false)
+  const [lineupChallengeBoards, setLineupChallengeBoards] = useState<LeaderboardBoards | null>(null)
+  const [lineupChallengeSubmitted, setLineupChallengeSubmitted] = useState(false)
+  const [lineupDailyBoards, setLineupDailyBoards] = useState<LeaderboardBoards>(
+    savedData.lineupDailyCompletion?.boards ?? EMPTY_LEADERBOARD_BOARDS,
+  )
   const [leaderboardHubOpen, setLeaderboardHubOpen] = useState(false)
   const [leaderboardHubNickname, setLeaderboardHubNickname] = useState('')
   const [leaderboardHubResponse, setLeaderboardHubResponse] =
     useState<LeaderboardHubResponse | null>(null)
+  const [lineupLeaderboardHubResponse, setLineupLeaderboardHubResponse] =
+    useState<LineupLeaderboardHubResponse | null>(null)
+  const [leaderboardFamily, setLeaderboardFamily] = useState<LeaderboardFamily | null>(null)
 
   useEffect(() => {
     saveData(savedData)
@@ -84,6 +120,19 @@ export function App() {
   }, [game, challengeSubmitted])
 
   useEffect(() => {
+    if (!lineupGame) return
+    setSavedData((current) =>
+      lineupGame.mode === 'lineup-daily'
+        ? { ...current, lineupDailyGame: lineupGame }
+        : {
+            ...current,
+            unfinishedLineupGame:
+              lineupGame.phase !== 'results' || !lineupChallengeSubmitted ? lineupGame : null,
+          },
+    )
+  }, [lineupGame, lineupChallengeSubmitted])
+
+  useEffect(() => {
     if (game?.settings.mode !== 'daily' || !game.dailyChallenge) return
     const delay = new Date(game.dailyChallenge.expiresAt).getTime() - Date.now()
     if (delay <= 0) {
@@ -93,6 +142,17 @@ export function App() {
     const timer = window.setTimeout(expireDailyGame, Math.min(delay, 2_147_000_000))
     return () => window.clearTimeout(timer)
   }, [game?.dailyChallenge?.expiresAt])
+
+  useEffect(() => {
+    if (lineupGame?.mode !== 'lineup-daily' || !lineupGame.dailyChallenge) return
+    const delay = new Date(lineupGame.dailyChallenge.expiresAt).getTime() - Date.now()
+    if (delay <= 0) {
+      expireLineupDailyGame()
+      return
+    }
+    const timer = window.setTimeout(expireLineupDailyGame, Math.min(delay, 2_147_000_000))
+    return () => window.clearTimeout(timer)
+  }, [lineupGame?.dailyChallenge?.expiresAt])
 
   useEffect(() => {
     if (game?.settings.mode === 'daily' && game.phase === 'results') {
@@ -112,6 +172,23 @@ export function App() {
   const currentPlayer = game
     ? players.find((player) => player.id === game.round.playerId)
     : undefined
+
+  const currentLineupMatch = lineupGame && lineupDataset
+    ? lineupDataset.matches.find((match) => match.id === lineupGame.round.matchId)
+    : undefined
+  const currentMissingPlayer = currentLineupMatch
+    ? currentLineupMatch.teams.flatMap((team) => team.starters).find(
+        (player) => player.id === lineupGame?.round.missingPlayerId,
+      )
+    : undefined
+
+  async function ensureLineupData(): Promise<{ dataset: LineupDataset; search: SearchPlayer[] }> {
+    if (lineupDataset) return { dataset: lineupDataset, search: lineupSearch }
+    const loaded = await loadLineupDataset()
+    setLineupDataset(loaded.dataset)
+    setLineupSearch(loaded.search)
+    return loaded
+  }
 
   function buildNewGame(nextSettings: GameSettings): GameState {
     const pool = getActivePool(
@@ -154,8 +231,79 @@ export function App() {
     }
   }
 
+  function buildLineupDailyGame(challenge: LineupDailyChallenge, matches: LineupMatch[]): LineupGameState {
+    const match = matches.find((candidate) => candidate.id === challenge.matchId)
+    if (!match) throw new Error('Today’s lineup is not available in this game version. Please reload.')
+    return {
+      version: 1,
+      mode: 'lineup-daily',
+      phase: 'playing',
+      round: createLineupRound(match, Math.random, challenge.missingPlayerId),
+      results: [],
+      usedMatchIds: [match.id],
+      totalScore: 0,
+      startedAt: new Date().toISOString(),
+      dailyChallenge: challenge,
+    }
+  }
+
+  async function confirmLineupGameStart() {
+    setDailyLoading(true)
+    setDailyError(null)
+    try {
+      const loaded = await ensureLineupData()
+      const newGame = settings.mode === 'lineup-daily'
+        ? buildLineupDailyGame(
+            await getLineupDailyChallenge(savedData.installationId),
+            loaded.dataset.matches,
+          )
+        : buildLineupChallenge(loaded.dataset.matches)
+      setLineupChallengeBoards(null)
+      setLineupChallengeSubmitted(false)
+      setLineupGame(newGame)
+      setShowGuide(false)
+      setSavedData((current) => ({
+        ...current,
+        lastSettings: settings,
+        lineupDailyGame: newGame.mode === 'lineup-daily' ? newGame : current.lineupDailyGame,
+        lineupDailyCompletion:
+          newGame.mode === 'lineup-daily' ? null : current.lineupDailyCompletion,
+        unfinishedLineupGame:
+          newGame.mode === 'lineup-challenge' ? newGame : current.unfinishedLineupGame,
+      }))
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not load the lineup game.')
+    } finally {
+      setDailyLoading(false)
+    }
+  }
+
   function startGame() {
     setDailyError(null)
+    if (settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge') {
+      if (settings.mode === 'lineup-daily') {
+        const currentDaily = savedData.lineupDailyGame
+        if (currentDaily?.dailyChallenge?.date === getUtcDateKey()) {
+          setDailyLoading(true)
+          void ensureLineupData()
+            .then(() => {
+              setLineupDailyBoards(savedData.lineupDailyCompletion?.boards ?? EMPTY_LEADERBOARD_BOARDS)
+              setDailyNickname(savedData.lineupDailyCompletion?.nickname ?? savedData.lastNickname)
+              setLineupGame(currentDaily)
+            })
+            .catch((error) => setDailyError(error instanceof Error ? error.message : 'Could not load lineup data.'))
+            .finally(() => setDailyLoading(false))
+          return
+        }
+      }
+      if (
+        settings.mode === 'lineup-challenge' &&
+        savedData.unfinishedLineupGame &&
+        !window.confirm('Start a new lineup challenge and abandon the saved one?')
+      ) return
+      setShowGuide(true)
+      return
+    }
     if (settings.mode === 'daily') {
       const currentDaily = savedData.dailyGame
       if (currentDaily?.dailyChallenge?.date === getUtcDateKey()) {
@@ -177,6 +325,10 @@ export function App() {
   }
 
   async function confirmGameStart() {
+    if (settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge') {
+      await confirmLineupGameStart()
+      return
+    }
     if (settings.mode !== 'daily') {
       const newGame = buildNewGame(settings)
       setChallengeBoards(null)
@@ -219,6 +371,22 @@ export function App() {
       setSettings(savedData.unfinishedGame.settings)
       setGame(savedData.unfinishedGame)
     }
+  }
+
+  function resumeLineupGame() {
+    const unfinished = savedData.unfinishedLineupGame
+    if (!unfinished) return
+    setDailyLoading(true)
+    void ensureLineupData()
+      .then(() => {
+        setLineupChallengeBoards(null)
+        setLineupChallengeSubmitted(false)
+        setShowGuide(false)
+        setSettings((current) => ({ ...current, mode: 'lineup-challenge' }))
+        setLineupGame(unfinished)
+      })
+      .catch((error) => setDailyError(error instanceof Error ? error.message : 'Could not load lineup data.'))
+      .finally(() => setDailyLoading(false))
   }
 
   function updateSettings(nextSettings: GameSettings) {
@@ -334,6 +502,155 @@ export function App() {
         ? 'Every player in this pool has appeared. The rotation has reset.'
         : null,
     })
+  }
+
+  function finalizeLineupRound(outcome: RoundOutcome) {
+    if (!lineupGame || !currentLineupMatch || !currentMissingPlayer || lineupGame.phase !== 'playing') return
+    const points = outcome === 'correct'
+      ? calculateLineupScore(lineupGame.round.incorrectGuesses.length)
+      : 0
+    setLineupGame({
+      ...lineupGame,
+      phase: 'review',
+      round: { ...lineupGame.round, outcome, pointsEarned: points, statusMessage: '' },
+      results: [
+        ...lineupGame.results,
+        {
+          matchId: currentLineupMatch.id,
+          matchLabel: `${currentLineupMatch.homeTeam.name} vs ${currentLineupMatch.awayTeam.name}`,
+          playerId: currentMissingPlayer.id,
+          playerName: currentMissingPlayer.displayName,
+          outcome,
+          points,
+          incorrectGuesses: lineupGame.round.incorrectGuesses,
+        },
+      ],
+      totalScore: lineupGame.totalScore + points,
+    })
+  }
+
+  function submitLineupGuess(guess: string) {
+    if (!lineupGame || !currentMissingPlayer || lineupGame.phase !== 'playing') return
+    const result = matchAnswer(guess, currentMissingPlayer, lineupSearch)
+    if (result.status === 'invalid') {
+      setLineupGame({ ...lineupGame, round: { ...lineupGame.round, statusMessage: result.message } })
+      return
+    }
+    if (result.status === 'ambiguous') {
+      setLineupGame({ ...lineupGame, round: { ...lineupGame.round, statusMessage: 'Please be more specific.' } })
+      return
+    }
+    if (result.status === 'correct') {
+      finalizeLineupRound('correct')
+      return
+    }
+    const update = recordLineupIncorrectGuess(lineupGame.round, guess, normalizeAnswer(guess))
+    setLineupGame({ ...lineupGame, round: update.round })
+  }
+
+  function nextLineup() {
+    if (!lineupGame || lineupGame.phase !== 'review' || lineupGame.mode !== 'lineup-challenge' || !lineupDataset) return
+    if (lineupGame.results.length >= GAME_CONFIG.challengeRounds) {
+      const finished = { ...lineupGame, phase: 'results' as const }
+      setLineupGame(finished)
+      setSavedData((current) => ({
+        ...current,
+        lineupBestScore: Math.max(current.lineupBestScore, lineupGame.totalScore),
+        unfinishedLineupGame: null,
+      }))
+      return
+    }
+    const match = selectLineupMatch(lineupDataset.matches, lineupGame.usedMatchIds)
+    setLineupGame({
+      ...lineupGame,
+      phase: 'playing',
+      round: createLineupRound(match),
+      usedMatchIds: [...lineupGame.usedMatchIds, match.id],
+    })
+  }
+
+  async function submitLineupChallengeScore() {
+    if (!lineupGame || lineupGame.mode !== 'lineup-challenge' || lineupGame.phase !== 'results' || lineupGame.results.length !== GAME_CONFIG.challengeRounds || !isValidNickname(dailyNickname)) return
+    setDailyLoading(true)
+    setDailyError(null)
+    try {
+      const response = await submitLineupChallengeResult({
+        nickname: dailyNickname.trim(),
+        rounds: lineupGame.results.map((result) => ({
+          outcome: result.outcome,
+          incorrectGuesses: result.incorrectGuesses.length,
+        })),
+      })
+      setLineupChallengeBoards(response.boards)
+      setLineupChallengeSubmitted(true)
+      setSavedData((current) => ({ ...current, lastNickname: dailyNickname.trim(), unfinishedLineupGame: null }))
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not submit this lineup game.')
+    } finally {
+      setDailyLoading(false)
+    }
+  }
+
+  async function refreshLineupChallengeLeaderboard() {
+    setDailyLoading(true)
+    setDailyError(null)
+    try {
+      setLineupChallengeBoards((await getLineupChallengeLeaderboard()).boards)
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not refresh the lineup leaderboard.')
+    } finally {
+      setDailyLoading(false)
+    }
+  }
+
+  async function submitLineupDailyScore() {
+    if (!lineupGame || lineupGame.mode !== 'lineup-daily' || lineupGame.phase !== 'review' || !lineupGame.dailyChallenge || !lineupGame.round.outcome || !isValidNickname(dailyNickname)) return
+    setDailyLoading(true)
+    setDailyError(null)
+    try {
+      const response = await submitLineupDailyResult({
+        challengeDate: lineupGame.dailyChallenge.date,
+        attemptToken: lineupGame.dailyChallenge.attemptToken,
+        nickname: dailyNickname.trim(),
+        outcome: lineupGame.round.outcome,
+        incorrectGuesses: lineupGame.round.incorrectGuesses.length,
+      })
+      const completion: DailyCompletion = {
+        date: response.date,
+        nickname: dailyNickname.trim(),
+        points: response.points,
+        rank: response.rank,
+        leaderboard: response.leaderboard,
+        boards: response.boards,
+      }
+      const finished: LineupGameState = { ...lineupGame, phase: 'results', totalScore: response.points }
+      setLineupDailyBoards(response.boards)
+      setLineupGame(finished)
+      setSavedData((current) => ({ ...current, lineupDailyGame: finished, lineupDailyCompletion: completion, lastNickname: dailyNickname.trim() }))
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not submit your lineup result.')
+    } finally {
+      setDailyLoading(false)
+    }
+  }
+
+  async function refreshLineupDailyLeaderboard() {
+    if (lineupGame?.mode !== 'lineup-daily') return
+    setDailyLoading(true)
+    setDailyError(null)
+    try {
+      const response = await getLineupDailyLeaderboard()
+      if (response.date !== lineupGame.dailyChallenge?.date) {
+        expireLineupDailyGame()
+        return
+      }
+      setLineupDailyBoards(response.boards)
+      setSavedData((current) => current.lineupDailyCompletion ? { ...current, lineupDailyCompletion: { ...current.lineupDailyCompletion, leaderboard: response.leaderboard, boards: response.boards } } : current)
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not refresh the lineup leaderboard.')
+    } finally {
+      setDailyLoading(false)
+    }
   }
 
   async function submitChallengeScore() {
@@ -475,6 +792,15 @@ export function App() {
     }))
   }
 
+  function expireLineupDailyGame() {
+    setLineupGame(null)
+    setShowGuide(false)
+    setLineupDailyBoards(EMPTY_LEADERBOARD_BOARDS)
+    setDailyNickname('')
+    setDailyError('A new Lineup of the day is now available.')
+    setSavedData((current) => ({ ...current, lineupDailyGame: null, lineupDailyCompletion: null }))
+  }
+
   function exitGame() {
     if (game?.settings.mode === 'challenge') {
       const confirmation =
@@ -495,6 +821,19 @@ export function App() {
     setShowGuide(false)
   }
 
+  function exitLineupGame() {
+    if (lineupGame?.mode === 'lineup-challenge') {
+      const confirmation = lineupGame.phase === 'results' && !lineupChallengeSubmitted
+        ? 'Return home without submitting this lineup score?'
+        : lineupGame.phase !== 'results'
+          ? 'Leave this active lineup challenge? Your progress will remain saved.'
+          : null
+      if (confirmation && !window.confirm(confirmation)) return
+    }
+    setLineupGame(null)
+    setShowGuide(false)
+  }
+
   function playAgain() {
     if (
       game?.settings.mode === 'challenge' &&
@@ -510,9 +849,20 @@ export function App() {
     setGame(buildNewGame(game?.settings ?? settings))
   }
 
+  function playLineupsAgain() {
+    if (!lineupDataset) return
+    if (lineupGame?.phase === 'results' && !lineupChallengeSubmitted && !window.confirm('Play again without submitting this lineup score?')) return
+    setLineupChallengeBoards(null)
+    setLineupChallengeSubmitted(false)
+    setDailyError(null)
+    setLineupGame(buildLineupChallenge(lineupDataset.matches))
+  }
+
   function openLeaderboardHub() {
     setLeaderboardHubNickname('')
     setLeaderboardHubResponse(null)
+    setLineupLeaderboardHubResponse(null)
+    setLeaderboardFamily(null)
     setDailyError(null)
     setLeaderboardHubOpen(true)
   }
@@ -521,28 +871,35 @@ export function App() {
     setLeaderboardHubOpen(false)
     setLeaderboardHubNickname('')
     setLeaderboardHubResponse(null)
+    setLineupLeaderboardHubResponse(null)
+    setLeaderboardFamily(null)
     setDailyError(null)
   }
 
-  function resetLeaderboardAccess() {
+  function resetLeaderboardAccess(family: LeaderboardFamily) {
     setLeaderboardHubNickname('')
-    setLeaderboardHubResponse(null)
+    if (family === 'player') setLeaderboardHubResponse(null)
+    else setLineupLeaderboardHubResponse(null)
     setDailyError(null)
   }
 
-  async function loadLeaderboardHub() {
+  async function loadLeaderboardHub(family: LeaderboardFamily) {
     if (!isValidNickname(leaderboardHubNickname)) return
     setDailyLoading(true)
     setDailyError(null)
     try {
-      const response = await getLeaderboardHub(leaderboardHubNickname.trim())
-      setLeaderboardHubResponse(response)
+      const response = family === 'player'
+        ? await getLeaderboardHub(leaderboardHubNickname.trim())
+        : await getLineupLeaderboardHub(leaderboardHubNickname.trim())
+      if (family === 'player') setLeaderboardHubResponse(response as LeaderboardHubResponse)
+      else setLineupLeaderboardHubResponse(response as LineupLeaderboardHubResponse)
       if (response.eligible) {
         setLeaderboardHubNickname(response.nickname)
         setSavedData((current) => ({ ...current, lastNickname: response.nickname }))
       }
     } catch (error) {
-      setLeaderboardHubResponse(null)
+      if (family === 'player') setLeaderboardHubResponse(null)
+      else setLineupLeaderboardHubResponse(null)
       setDailyError(error instanceof Error ? error.message : 'Could not load the leaderboards.')
     } finally {
       setDailyLoading(false)
@@ -563,7 +920,7 @@ export function App() {
 
   return (
     <div className="app">
-      {!game && !showGuide && !leaderboardHubOpen && (
+      {!game && !lineupGame && !showGuide && !leaderboardHubOpen && (
         <SetupScreen
           settings={settings}
           savedData={savedData}
@@ -571,30 +928,34 @@ export function App() {
           onSettingsChange={updateSettings}
           onStart={startGame}
           onResume={resumeGame}
+          onResumeLineup={resumeLineupGame}
           onOpenLeaderboard={openLeaderboardHub}
         />
       )}
-      {!game && !showGuide && leaderboardHubOpen && (
+      {!game && !lineupGame && !showGuide && leaderboardHubOpen && (
         <LeaderboardHubScreen
+          family={leaderboardFamily}
           nickname={leaderboardHubNickname}
-          response={leaderboardHubResponse}
+          playerResponse={leaderboardHubResponse}
+          lineupResponse={lineupLeaderboardHubResponse}
           loading={dailyLoading}
           error={dailyError}
           onNicknameChange={setLeaderboardHubNickname}
+          onFamilyChange={(family) => {
+            setLeaderboardFamily(family)
+            setLeaderboardHubNickname('')
+            setDailyError(null)
+          }}
           onSubmit={loadLeaderboardHub}
           onRefresh={loadLeaderboardHub}
           onResetAccess={resetLeaderboardAccess}
           onExit={closeLeaderboardHub}
         />
       )}
-      {!game && showGuide && (
-        <GameGuide
-          settings={settings}
-          loading={dailyLoading}
-          error={dailyError}
-          onBack={() => setShowGuide(false)}
-          onConfirm={confirmGameStart}
-        />
+      {!game && !lineupGame && showGuide && (
+        settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge'
+          ? <LineupGuide settings={settings} loading={dailyLoading} error={dailyError} onBack={() => setShowGuide(false)} onConfirm={confirmGameStart} />
+          : <GameGuide settings={settings} loading={dailyLoading} error={dailyError} onBack={() => setShowGuide(false)} onConfirm={confirmGameStart} />
       )}
       {game && game.phase !== 'results' && currentPlayer && (
         <GameScreen
@@ -640,6 +1001,50 @@ export function App() {
           onExit={exitGame}
         />
       )}
+      {lineupGame && lineupGame.phase !== 'results' && currentLineupMatch && currentMissingPlayer && (
+        <LineupGameScreen
+          game={lineupGame}
+          match={currentLineupMatch}
+          missingPlayer={currentMissingPlayer}
+          search={lineupSearch}
+          onSubmit={submitLineupGuess}
+          onGiveUp={() => finalizeLineupRound('gave-up')}
+          onNext={nextLineup}
+          onExit={exitLineupGame}
+          nickname={dailyNickname}
+          submitting={dailyLoading}
+          error={dailyError}
+          onNicknameChange={setDailyNickname}
+          onDailySubmit={submitLineupDailyScore}
+        />
+      )}
+      {lineupGame?.phase === 'results' && lineupGame.mode === 'lineup-challenge' && (
+        <LineupResultsScreen
+          game={lineupGame}
+          highScore={savedData.lineupBestScore}
+          nickname={dailyNickname}
+          submitting={dailyLoading}
+          submitted={lineupChallengeSubmitted}
+          error={dailyError}
+          boards={lineupChallengeBoards}
+          onNicknameChange={setDailyNickname}
+          onSubmit={submitLineupChallengeScore}
+          onRefresh={refreshLineupChallengeLeaderboard}
+          onPlayAgain={playLineupsAgain}
+          onHome={exitLineupGame}
+        />
+      )}
+      {lineupGame?.phase === 'results' && lineupGame.mode === 'lineup-daily' && savedData.lineupDailyCompletion && (
+        <LineupDailyResultsScreen
+          game={lineupGame}
+          completion={savedData.lineupDailyCompletion}
+          boards={lineupDailyBoards}
+          loading={dailyLoading}
+          error={dailyError}
+          onRefresh={refreshLineupDailyLeaderboard}
+          onExit={exitLineupGame}
+        />
+      )}
 
       <button
         className="settings-trigger"
@@ -673,12 +1078,13 @@ export function App() {
             <span className="eyebrow">Preferences and records</span>
             <h2 id="settings-title">Settings</h2>
             <p>
-              Game progress and personal records live in this browser. Submitted daily
-              nicknames and scores join the shared leaderboard.
+              Player and lineup progress and personal records live in this browser. Submitted
+              nicknames and scores join their matching shared leaderboard.
             </p>
             <div className="settings-records">
               <span>Normal high score <strong>{savedData.highScores.normal}</strong></span>
               <span>Hardcore high score <strong>{savedData.highScores.hardcore}</strong></span>
+              <span>Lineup challenge best <strong>{savedData.lineupBestScore}</strong></span>
             </div>
             <button className="danger-button" type="button" onClick={handleResetSavedData}>
               Reset saved data

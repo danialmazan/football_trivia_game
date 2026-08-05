@@ -10,12 +10,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "data:validate": "vitest run src/data/players.validation.test.ts",
+    "data:validate": "vitest run src/data/*.validation.test.ts",
     "data:refresh": "node scripts/build-football-data.mjs",
     "data:manifest": "node scripts/build-football-data.mjs --manifest-only",
     "data:achievements": "node scripts/fetch-achievements.mjs",
     "data:badges": "node scripts/fetch-club-badges.mjs",
-    "daily:pool": "node scripts/build-daily-pool.mjs"
+    "daily:pool": "node scripts/build-daily-pool.mjs",
+    "lineups:build": "node scripts/build-lineup-data.mjs",
+    "lineups:validate": "vitest run src/data/lineups.validation.test.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
