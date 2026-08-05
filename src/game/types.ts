@@ -60,7 +60,7 @@ export interface EndlessStats {
 }
 
 export interface SavedData {
-  schemaVersion: 4
+  schemaVersion: 5
   highScores: Record<Pool, number>
   endlessStats: Record<Pool, EndlessStats>
   lastSettings: GameSettings
@@ -78,6 +78,8 @@ export interface SavedData {
 export interface LineupRoundState {
   matchId: string
   missingPlayerId: string
+  cluesUsed: number
+  clueIncorrectGuessCounts: number[]
   incorrectGuesses: string[]
   normalizedIncorrectGuesses: string[]
   statusMessage: string
@@ -92,11 +94,13 @@ export interface LineupRoundResult {
   playerName: string
   outcome: RoundOutcome
   points: number
+  cluesUsed: number
+  clueIncorrectGuessCounts: number[]
   incorrectGuesses: string[]
 }
 
 export interface LineupGameState {
-  version: 1
+  version: 1 | 2
   mode: 'lineup-daily' | 'lineup-challenge'
   phase: 'playing' | 'review' | 'results'
   round: LineupRoundState
@@ -218,6 +222,8 @@ export interface LineupDailyResultSubmission {
   attemptToken: string
   nickname: string
   outcome: RoundOutcome
+  cluesUsed: number
+  clueIncorrectGuessCounts: number[]
   incorrectGuesses: number
 }
 
@@ -225,6 +231,8 @@ export interface LineupChallengeResultSubmission {
   nickname: string
   rounds: Array<{
     outcome: RoundOutcome
+    cluesUsed: number
+    clueIncorrectGuessCounts: number[]
     incorrectGuesses: number
   }>
 }

@@ -15,6 +15,7 @@ interface LineupGameScreenProps {
   search: SearchPlayer[]
   onSubmit: (guess: string) => void
   onGiveUp: () => void
+  onClue: () => void
   onNext: () => void
   onExit: () => void
   nickname: string
@@ -43,6 +44,7 @@ export function LineupGameScreen({
   search,
   onSubmit,
   onGiveUp,
+  onClue,
   onNext,
   onExit,
   nickname,
@@ -60,7 +62,28 @@ export function LineupGameScreen({
   const suggestions = getPlayerSuggestions(guess, search)
   const showSuggestions = suggestionsOpen && suggestions.length > 0
   const roundNumber = game.results.length + (review ? 0 : 1)
-  const available = calculateLineupScore(game.round.incorrectGuesses.length)
+  const available = calculateLineupScore(
+    game.round.incorrectGuesses.length,
+    game.round.cluesUsed,
+    game.round.clueIncorrectGuessCounts,
+  )
+  const missingStarter = match.teams
+    .flatMap((team) => team.starters)
+    .find((player) => player.id === game.round.missingPlayerId)
+  const primaryClueLabel = match.competition === 'ucl' ? 'Nationality' : 'Most-played club that season'
+  const primaryClue = match.competition === 'ucl' ? missingStarter?.nationality : missingStarter?.seasonClub
+  const initials = missingPlayer.displayName
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .map((part) => `${part[0]?.toLocaleUpperCase()}.`)
+    .join('')
+  const stageLabel = match.stage.replace('Semi-final', 'Semi-Final').replace(' · ', ' - ')
+  const tournamentLabel = match.competition === 'ucl'
+    ? 'UCL'
+    : match.competition === 'euro' ? 'UEFA EURO' : 'FIFA World Cup'
+  const editionLabel = match.competition === 'ucl'
+    ? match.edition
+    : match.edition.replace(/^EURO\s+/, '').replace(/^World Cup\s+/, '')
 
   useEffect(() => {
     setGuess('')
@@ -121,7 +144,9 @@ export function LineupGameScreen({
       </section>
 
       <section className="lineup-match-card">
-        <div className="lineup-match-card__competition"><span>{match.edition}</span><strong>{match.stage}</strong></div>
+        <div className="lineup-match-card__competition" data-testid="lineup-competition-label">
+          {editionLabel} / {tournamentLabel} {stageLabel}
+        </div>
         <h1>{match.homeTeam.name} <span>vs</span> {match.awayTeam.name}</h1>
         <p><time dateTime={match.date}>{new Date(`${match.date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</time><i />{match.kickoffLocal} {timezoneLabel(match.date, match.timezone)}<i />{match.venue}</p>
       </section>
@@ -165,6 +190,21 @@ export function LineupGameScreen({
               </form>
               {game.round.statusMessage && <p className="guess-feedback" role="status">{game.round.statusMessage}</p>}
               {game.round.incorrectGuesses.length > 0 && <div className="previous-guesses-inline"><span>Previous guesses</span><p>{game.round.incorrectGuesses.join(' · ')}.</p></div>}
+              <div className="lineup-clues" aria-label="Lineup clues">
+                {game.round.cluesUsed >= 1 && (
+                  <div className="lineup-clue" data-testid="lineup-primary-clue"><span>{primaryClueLabel}</span><strong>{primaryClue}</strong></div>
+                )}
+                {game.round.cluesUsed >= 2 && (
+                  <div className="lineup-clue" data-testid="lineup-initials-clue"><span>Player initials</span><strong>{initials}</strong></div>
+                )}
+                {game.round.cluesUsed < 2 && (
+                  <button className="lineup-clue-button" type="button" onClick={onClue}>
+                    {game.round.cluesUsed === 0
+                      ? `Get ${match.competition === 'ucl' ? 'nationality' : 'club'} clue — max 40 pts`
+                      : 'Get initials clue — max 20 pts'}
+                  </button>
+                )}
+              </div>
               <button className="give-up-button" type="button" onClick={onGiveUp}>Give up and reveal</button>
             </>
           )}

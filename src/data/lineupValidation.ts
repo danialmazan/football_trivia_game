@@ -52,6 +52,12 @@ export function validateLineups(dataset: LineupDataset, search: SearchPlayer[]):
         if (starter.x < 0 || starter.x > 100 || starter.y < 0 || starter.y > 100) {
           errors.push(`${prefix} ${starter.id} has invalid pitch coordinates`)
         }
+        if (!starter.nationality?.trim()) {
+          errors.push(`${prefix} ${starter.id} is missing a nationality clue`)
+        }
+        if (match.competition !== 'ucl' && !starter.seasonClub?.trim()) {
+          errors.push(`${prefix} ${starter.id} is missing a season-club clue`)
+        }
       }
     }
   }

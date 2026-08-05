@@ -35,9 +35,9 @@ function createCsv(date: string, rows: StoredResult[]): string {
 }
 
 function createLineupCsv(date: string, rows: StoredLineupResult[]): string {
-  const header = 'date,rank,nickname,points,outcome,incorrect_guesses,submitted_at'
+  const header = 'date,rank,nickname,points,outcome,clues_used,clue_incorrect_guess_counts,incorrect_guesses,submitted_at'
   const body = rankResults(rows).map((row) =>
-    [date, row.rank, row.nickname, row.points, row.outcome, row.incorrect_guesses, row.submitted_at]
+    [date, row.rank, row.nickname, row.points, row.outcome, row.clues_used, JSON.stringify(row.clue_incorrect_guess_counts), row.incorrect_guesses, row.submitted_at]
       .map(csvCell)
       .join(','),
   )
@@ -132,7 +132,7 @@ async function getLineupResultsForDate(
   const rows: StoredLineupResult[] = []
   for (let from = 0; ; from += PAGE_SIZE) {
     const result = await client.from('lineup_daily_results')
-      .select('challenge_date,participant_hash,nickname,normalized_nickname,points,outcome,incorrect_guesses,submitted_at')
+      .select('challenge_date,participant_hash,nickname,normalized_nickname,points,outcome,clues_used,clue_incorrect_guess_counts,incorrect_guesses,submitted_at')
       .eq('challenge_date', date).order('points', { ascending: false })
       .order('submitted_at', { ascending: true }).range(from, from + PAGE_SIZE - 1)
     if (result.error) throw result.error

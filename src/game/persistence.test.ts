@@ -62,7 +62,7 @@ describe('saved-data migration', () => {
     )
 
     const saved = loadSavedData()
-    expect(saved.schemaVersion).toBe(4)
+    expect(saved.schemaVersion).toBe(5)
     expect(saved.highScores).toEqual({ normal: 730, hardcore: 410 })
     expect(saved.unfinishedGame?.settings.mode).toBe('challenge')
     expect(saved.lastSettings).toMatchObject({ mode: 'daily', pool: 'normal' })
@@ -86,7 +86,7 @@ describe('saved-data migration', () => {
       }),
     )
     const saved = loadSavedData()
-    expect(saved.schemaVersion).toBe(4)
+    expect(saved.schemaVersion).toBe(5)
     expect(saved.highScores).toEqual({ normal: 640, hardcore: 210 })
     expect(saved.lineupBestScore).toBe(800)
     expect(saved.lineupDailyGame).toBeNull()

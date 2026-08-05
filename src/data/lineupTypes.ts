@@ -7,6 +7,8 @@ export interface LineupStarter extends SearchPlayer {
   shirtNumber: string
   x: number
   y: number
+  nationality: string
+  seasonClub: string
 }
 
 export interface LineupBenchPlayer extends SearchPlayer {

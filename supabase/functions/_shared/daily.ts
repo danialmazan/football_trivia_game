@@ -27,7 +27,9 @@ export interface StoredLineupChallenge {
   roster_version: string
 }
 
-export interface StoredLineupResult extends Omit<StoredResult, 'clues_used'> {}
+export interface StoredLineupResult extends StoredResult {
+  clue_incorrect_guess_counts: number[]
+}
 
 export function createAdminClient(): SupabaseClient {
   const url = Deno.env.get('SUPABASE_URL')

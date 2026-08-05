@@ -36,6 +36,7 @@ import {
   calculateLineupScore,
   createLineupRound,
   recordLineupIncorrectGuess,
+  revealNextLineupClue,
   selectLineupMatch,
 } from './game/lineups'
 import {
@@ -507,7 +508,11 @@ export function App() {
   function finalizeLineupRound(outcome: RoundOutcome) {
     if (!lineupGame || !currentLineupMatch || !currentMissingPlayer || lineupGame.phase !== 'playing') return
     const points = outcome === 'correct'
-      ? calculateLineupScore(lineupGame.round.incorrectGuesses.length)
+      ? calculateLineupScore(
+          lineupGame.round.incorrectGuesses.length,
+          lineupGame.round.cluesUsed,
+          lineupGame.round.clueIncorrectGuessCounts,
+        )
       : 0
     setLineupGame({
       ...lineupGame,
@@ -522,6 +527,8 @@ export function App() {
           playerName: currentMissingPlayer.displayName,
           outcome,
           points,
+          cluesUsed: lineupGame.round.cluesUsed,
+          clueIncorrectGuessCounts: lineupGame.round.clueIncorrectGuessCounts,
           incorrectGuesses: lineupGame.round.incorrectGuesses,
         },
       ],
@@ -546,6 +553,11 @@ export function App() {
     }
     const update = recordLineupIncorrectGuess(lineupGame.round, guess, normalizeAnswer(guess))
     setLineupGame({ ...lineupGame, round: update.round })
+  }
+
+  function revealLineupClue() {
+    if (!lineupGame || lineupGame.phase !== 'playing') return
+    setLineupGame({ ...lineupGame, round: revealNextLineupClue(lineupGame.round) })
   }
 
   function nextLineup() {
@@ -578,6 +590,8 @@ export function App() {
         nickname: dailyNickname.trim(),
         rounds: lineupGame.results.map((result) => ({
           outcome: result.outcome,
+          cluesUsed: result.cluesUsed,
+          clueIncorrectGuessCounts: result.clueIncorrectGuessCounts,
           incorrectGuesses: result.incorrectGuesses.length,
         })),
       })
@@ -613,6 +627,8 @@ export function App() {
         attemptToken: lineupGame.dailyChallenge.attemptToken,
         nickname: dailyNickname.trim(),
         outcome: lineupGame.round.outcome,
+        cluesUsed: lineupGame.round.cluesUsed,
+        clueIncorrectGuessCounts: lineupGame.round.clueIncorrectGuessCounts,
         incorrectGuesses: lineupGame.round.incorrectGuesses.length,
       })
       const completion: DailyCompletion = {
@@ -1009,6 +1025,7 @@ export function App() {
           search={lineupSearch}
           onSubmit={submitLineupGuess}
           onGiveUp={() => finalizeLineupRound('gave-up')}
+          onClue={revealLineupClue}
           onNext={nextLineup}
           onExit={exitLineupGame}
           nickname={dailyNickname}

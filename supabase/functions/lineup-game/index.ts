@@ -22,7 +22,7 @@ import {
 } from '../_shared/rules.ts'
 
 const DAILY_FIELDS =
-  'challenge_date,participant_hash,nickname,normalized_nickname,points,outcome,incorrect_guesses,submitted_at'
+  'challenge_date,participant_hash,nickname,normalized_nickname,points,outcome,clues_used,clue_incorrect_guess_counts,incorrect_guesses,submitted_at'
 
 async function getDailyResults(
   client: ReturnType<typeof createAdminClient>,
@@ -70,11 +70,25 @@ function publicLeaderboard(results: StoredLineupResult[]) {
 }
 
 function validRound(round: Record<string, unknown>): boolean {
+  const cluesUsed = Number(round.cluesUsed)
+  const incorrectGuesses = Number(round.incorrectGuesses)
+  const clueCounts = round.clueIncorrectGuessCounts
   return (
     (round.outcome === 'correct' || round.outcome === 'gave-up') &&
     Number.isInteger(round.incorrectGuesses) &&
-    Number(round.incorrectGuesses) >= 0 &&
-    Number(round.incorrectGuesses) <= 50
+    incorrectGuesses >= 0 &&
+    incorrectGuesses <= 50 &&
+    Number.isInteger(cluesUsed) &&
+    cluesUsed >= 0 &&
+    cluesUsed <= 2 &&
+    Array.isArray(clueCounts) &&
+    clueCounts.length === cluesUsed &&
+    clueCounts.every((count, index) =>
+      Number.isInteger(count) &&
+      Number(count) >= 0 &&
+      Number(count) <= incorrectGuesses &&
+      (index === 0 || Number(count) >= Number(clueCounts[index - 1]))
+    )
   )
 }
 
@@ -158,6 +172,8 @@ Deno.serve(async (request) => {
       }
       const candidate = {
         outcome: body.outcome,
+        cluesUsed: body.cluesUsed,
+        clueIncorrectGuessCounts: body.clueIncorrectGuessCounts,
         incorrectGuesses: body.incorrectGuesses,
       }
       if (!validRound(candidate)) {
@@ -168,13 +184,17 @@ Deno.serve(async (request) => {
 
       await getOrCreateLineupChallenge(client, today)
       const incorrectGuesses = Number(body.incorrectGuesses)
-      const points = calculateLineupScore(body.outcome as 'correct' | 'gave-up', incorrectGuesses)
+      const cluesUsed = Number(body.cluesUsed)
+      const clueIncorrectGuessCounts = (body.clueIncorrectGuessCounts as number[]).map(Number)
+      const points = calculateLineupScore(body.outcome as 'correct' | 'gave-up', incorrectGuesses, cluesUsed, clueIncorrectGuessCounts)
       const inserted = await client.rpc('submit_locked_lineup_daily_result', {
         p_challenge_date: today,
         p_participant_hash: participantHash,
         p_nickname: body.nickname.trim(),
         p_points: points,
         p_outcome: body.outcome,
+        p_clues_used: cluesUsed,
+        p_clue_incorrect_guess_counts: clueIncorrectGuessCounts,
         p_incorrect_guesses: incorrectGuesses,
       })
       if (inserted.error) throw inserted.error
@@ -209,10 +229,12 @@ Deno.serve(async (request) => {
       }
       const publicRounds = rounds.map((round) => ({
         outcome: round.outcome,
+        cluesUsed: Number(round.cluesUsed),
+        clueIncorrectGuessCounts: (round.clueIncorrectGuessCounts as number[]).map(Number),
         incorrectGuesses: Number(round.incorrectGuesses),
       }))
       const points = publicRounds.reduce(
-        (sum, round) => sum + calculateLineupScore(round.outcome as 'correct' | 'gave-up', round.incorrectGuesses),
+        (sum, round) => sum + calculateLineupScore(round.outcome as 'correct' | 'gave-up', round.incorrectGuesses, round.cluesUsed, round.clueIncorrectGuessCounts),
         0,
       )
       if (points > 1_000) return json(request, { error: 'The submitted score is invalid.' }, 400)

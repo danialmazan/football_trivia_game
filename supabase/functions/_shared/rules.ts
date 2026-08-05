@@ -61,9 +61,20 @@ export function calculateDailyScore(
 export function calculateLineupScore(
   outcome: 'correct' | 'gave-up',
   distinctIncorrectGuesses: number,
+  cluesUsed = 0,
+  clueIncorrectGuessCounts: number[] = [],
 ): number {
   if (outcome === 'gave-up') return 0
-  return Math.max(0, 100 - distinctIncorrectGuesses * 20)
+  const clueCaps = [40, 20]
+  let score = 100
+  let accountedFor = 0
+  for (let index = 0; index < Math.min(cluesUsed, clueCaps.length); index += 1) {
+    const guessesAtClue = Math.max(accountedFor, Math.min(distinctIncorrectGuesses, clueIncorrectGuessCounts[index] ?? distinctIncorrectGuesses))
+    score = Math.max(0, score - (guessesAtClue - accountedFor) * 20)
+    score = Math.min(score, clueCaps[index])
+    accountedFor = guessesAtClue
+  }
+  return Math.max(0, score - (distinctIncorrectGuesses - accountedFor) * 20)
 }
 
 export function rankDailyResults<T extends RankableDailyResult>(

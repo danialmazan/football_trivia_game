@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
 }
 
 export const DEFAULT_SAVED_DATA: SavedData = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   highScores: { normal: 0, hardcore: 0 },
   endlessStats: {
     normal: { totalScore: 0, solved: 0, rounds: 0 },
@@ -49,6 +49,26 @@ function isCurrentLineupDailyGame(game: SavedData['lineupDailyGame']): boolean {
   )
 }
 
+function migrateLineupGame(game: SavedData['lineupDailyGame']): SavedData['lineupDailyGame']
+function migrateLineupGame(game: SavedData['unfinishedLineupGame']): SavedData['unfinishedLineupGame']
+function migrateLineupGame(game: SavedData['lineupDailyGame'] | SavedData['unfinishedLineupGame']) {
+  if (!game) return null
+  return {
+    ...game,
+    version: 2 as const,
+    round: {
+      ...game.round,
+      cluesUsed: game.round.cluesUsed ?? 0,
+      clueIncorrectGuessCounts: game.round.clueIncorrectGuessCounts ?? [],
+    },
+    results: game.results.map((result) => ({
+      ...result,
+      cluesUsed: result.cluesUsed ?? 0,
+      clueIncorrectGuessCounts: result.clueIncorrectGuessCounts ?? [],
+    })),
+  }
+}
+
 export function loadSavedData(): SavedData {
   if (typeof window === 'undefined') {
     return { ...DEFAULT_SAVED_DATA, installationId: createInstallationId() }
@@ -66,7 +86,7 @@ export function loadSavedData(): SavedData {
     const parsedDailyCompletion =
       parsed.dailyCompletion?.date === getUtcDateKey() ? parsed.dailyCompletion : null
     const parsedLineupDailyGame = isCurrentLineupDailyGame(parsed.lineupDailyGame ?? null)
-      ? parsed.lineupDailyGame ?? null
+      ? migrateLineupGame(parsed.lineupDailyGame ?? null)
       : null
     const parsedLineupDailyCompletion =
       parsed.lineupDailyCompletion?.date === getUtcDateKey()
@@ -75,7 +95,7 @@ export function loadSavedData(): SavedData {
     return {
       ...DEFAULT_SAVED_DATA,
       ...parsed,
-      schemaVersion: 4,
+      schemaVersion: 5,
       highScores: { ...DEFAULT_SAVED_DATA.highScores, ...parsed.highScores },
       endlessStats: { ...DEFAULT_SAVED_DATA.endlessStats, ...parsed.endlessStats },
       lastSettings: migrated
@@ -89,7 +109,7 @@ export function loadSavedData(): SavedData {
       dailyCompletion: parsedDailyCompletion,
       lineupDailyGame: parsedLineupDailyGame,
       lineupDailyCompletion: parsedLineupDailyCompletion,
-      unfinishedLineupGame: parsed.unfinishedLineupGame ?? null,
+      unfinishedLineupGame: migrateLineupGame(parsed.unfinishedLineupGame ?? null),
       lineupBestScore: parsed.lineupBestScore ?? 0,
       installationId: parsed.installationId || createInstallationId(),
       lastNickname: parsed.lastNickname ?? parsed.dailyCompletion?.nickname ?? '',

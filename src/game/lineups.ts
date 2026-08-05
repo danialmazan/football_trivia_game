@@ -2,12 +2,34 @@ import type { LineupMatch } from '../data/lineupTypes'
 import type { LineupGameState, LineupRoundState } from './types'
 import { GAME_CONFIG } from './config'
 
-export function calculateLineupScore(incorrectGuesses: number): number {
-  return Math.max(0, 100 - incorrectGuesses * GAME_CONFIG.lineupWrongGuessPenalty)
+export function calculateLineupScore(
+  incorrectGuesses: number,
+  cluesUsed = 0,
+  clueIncorrectGuessCounts: number[] = [],
+): number {
+  let score = 100
+  let accountedFor = 0
+  for (let index = 0; index < Math.min(cluesUsed, GAME_CONFIG.lineupClueScoreCaps.length); index += 1) {
+    const guessesAtClue = Math.max(accountedFor, Math.min(incorrectGuesses, clueIncorrectGuessCounts[index] ?? incorrectGuesses))
+    score = Math.max(0, score - (guessesAtClue - accountedFor) * GAME_CONFIG.lineupWrongGuessPenalty)
+    score = Math.min(score, GAME_CONFIG.lineupClueScoreCaps[index])
+    accountedFor = guessesAtClue
+  }
+  return Math.max(0, score - (incorrectGuesses - accountedFor) * GAME_CONFIG.lineupWrongGuessPenalty)
 }
 
 function randomIndex(length: number, random: () => number): number {
   return Math.min(length - 1, Math.floor(Math.max(0, random()) * length))
+}
+
+export function positionLineupStarter(
+  x: number,
+  y: number,
+  teamIndex: number,
+): { left: number; top: number } {
+  return teamIndex === 0
+    ? { left: x, top: 50 + y / 2 }
+    : { left: 100 - x, top: (100 - y) / 2 }
 }
 
 export function selectLineupMatch(
@@ -33,6 +55,8 @@ export function createLineupRound(
   return {
     matchId: match.id,
     missingPlayerId: selectedId,
+    cluesUsed: 0,
+    clueIncorrectGuessCounts: [],
     incorrectGuesses: [],
     normalizedIncorrectGuesses: [],
     statusMessage: '',
@@ -47,7 +71,7 @@ export function buildLineupChallenge(
 ): LineupGameState {
   const match = selectLineupMatch(matches, [], random)
   return {
-    version: 1,
+    version: 2,
     mode: 'lineup-challenge',
     phase: 'playing',
     round: createLineupRound(match, random),
@@ -55,6 +79,19 @@ export function buildLineupChallenge(
     usedMatchIds: [match.id],
     totalScore: 0,
     startedAt: new Date().toISOString(),
+  }
+}
+
+export function revealNextLineupClue(round: LineupRoundState): LineupRoundState {
+  if (round.cluesUsed >= GAME_CONFIG.lineupClueScoreCaps.length) return round
+  return {
+    ...round,
+    cluesUsed: round.cluesUsed + 1,
+    clueIncorrectGuessCounts: [
+      ...round.clueIncorrectGuessCounts,
+      round.incorrectGuesses.length,
+    ],
+    statusMessage: '',
   }
 }
 

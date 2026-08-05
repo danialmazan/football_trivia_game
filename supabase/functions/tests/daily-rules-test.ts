@@ -25,6 +25,9 @@ Deno.test('lineup scores subtract distinct misses and floor at zero', () => {
   assert(calculateLineupScore('correct', 3) === 40, 'three misses should score 40')
   assert(calculateLineupScore('correct', 8) === 0, 'scores should floor at zero')
   assert(calculateLineupScore('gave-up', 0) === 0, 'giving up should score zero')
+  assert(calculateLineupScore('correct', 0, 1, [0]) === 40, 'first clue should cap at 40')
+  assert(calculateLineupScore('correct', 1, 1, [0]) === 20, 'misses after clue one should still cost 20')
+  assert(calculateLineupScore('correct', 2, 2, [1, 2]) === 20, 'initials should cap at 20')
 })
 
 Deno.test('nickname history is normalized without browser ownership', () => {

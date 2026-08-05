@@ -15,6 +15,7 @@ export const GAME_CONFIG = {
   practiceHardcorePoolSize: 300,
   lineupMatchCount: 201,
   lineupWrongGuessPenalty: 20,
+  lineupClueScoreCaps: [40, 20] as const,
 } as const
 
 export const POOL_RULES: Record<Pool, string> = {

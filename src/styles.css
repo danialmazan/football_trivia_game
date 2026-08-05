@@ -2919,12 +2919,6 @@ button:disabled {
   text-transform: uppercase;
 }
 
-.lineup-match-card__competition span::after {
-  margin-left: 0.65rem;
-  color: var(--muted);
-  content: '/';
-}
-
 .lineup-match-card h1 {
   margin: 0.35rem 0 0.55rem;
   font-family: var(--display);
@@ -3120,6 +3114,55 @@ button:disabled {
 .lineup-answer-zone .give-up-button { width: 100%; margin-top: 1rem; padding: 0.8rem; border: 1px solid var(--line); background: transparent; color: var(--muted); }
 .lineup-answer-zone .give-up-button:hover { border-color: var(--orange); color: var(--paper); }
 .lineup-answer-zone .guess-feedback { color: var(--lime); }
+.lineup-clues {
+  display: grid;
+  margin-top: 1rem;
+  gap: 0.55rem;
+}
+
+.lineup-clue {
+  display: grid;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--lime);
+  background: rgba(217, 255, 67, 0.075);
+  gap: 0.2rem;
+}
+
+.lineup-clue span {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.lineup-clue strong {
+  color: var(--paper);
+  font-family: var(--display);
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.lineup-clue-button {
+  min-height: 3.2rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(217, 255, 67, 0.45);
+  background: rgba(217, 255, 67, 0.04);
+  color: var(--lime);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.lineup-clue-button:hover {
+  background: var(--lime);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
 .lineup-answer-reveal h2 { margin: 0.55rem 0 0.8rem; font-family: var(--display); font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -0.05em; line-height: 0.95; text-transform: uppercase; }
 .lineup-answer-reveal > p { color: var(--muted); line-height: 1.5; }
 .lineup-answer-reveal .earned-stamp { margin-block: 1.2rem; }

@@ -32,7 +32,7 @@ export function LineupGuide({ settings, loading, error, onBack, onConfirm }: Lin
           <div className="guide-rules">
             <article><span className="guide-rule__number">01</span><div><strong>Both XIs, one shared pitch</strong><p>The actual starting formations face each other. The highlighted question mark is the only missing player.</p></div></article>
             <article><span className="guide-rule__number">02</span><div><strong>100 points on the board</strong><p>Each distinct wrong guess costs {GAME_CONFIG.lineupWrongGuessPenalty} points. At zero you can still identify the player.</p></div></article>
-            <article><span className="guide-rule__number">03</span><div><strong>No clues</strong><div className="guide-actions"><span>Guess</span><span>Autocomplete</span><span>Give up</span></div></div></article>
+            <article><span className="guide-rule__number">03</span><div><strong>Two optional clues</strong><p>Reveal the player’s nationality in UCL games, or their most-played club that season in EURO and World Cup games, for a maximum of 40 points. Initials cap the round at 20.</p><div className="guide-actions"><span>Guess</span><span>2 clues</span><span>Give up</span></div></div></article>
           </div>
           {daily && <p className="guide-daily-note">Complete the lineup and save a public nickname to unlock the Guess the lineup leaderboards.</p>}
           {error && <p className="guide-error" role="alert">{error}</p>}

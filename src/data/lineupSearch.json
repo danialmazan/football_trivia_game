@@ -195,11 +195,13 @@
   },
   {
     "id": "tm-player-34495",
-    "displayName": "Adriano",
+    "displayName": "Adriano Correia",
     "acceptedNames": [
-      "Adriano"
+      "Adriano",
+      "Correia",
+      "Adriano Correia"
     ],
-    "lastName": "Adriano"
+    "lastName": "Correia"
   },
   {
     "id": "tm-player-182913",
@@ -252,6 +254,15 @@
       "Aitor Karanka"
     ],
     "lastName": "Karanka"
+  },
+  {
+    "id": "tm-player-5302",
+    "displayName": "Akis Zikos",
+    "acceptedNames": [
+      "Zikos",
+      "Akis Zikos"
+    ],
+    "lastName": "Zikos"
   },
   {
     "id": "tm-player-6876",
@@ -317,7 +328,8 @@
     "id": "tm-player-7521",
     "displayName": "Albert Celades",
     "acceptedNames": [
-      "Albert Celades"
+      "Albert Celades",
+      "Celades"
     ],
     "lastName": "Celades"
   },
@@ -328,6 +340,15 @@
       "Albert Jorquera"
     ],
     "lastName": "Jorquera"
+  },
+  {
+    "id": "tm-player-7506",
+    "displayName": "Albert Luque",
+    "acceptedNames": [
+      "Luque",
+      "Albert Luque"
+    ],
+    "lastName": "Luque"
   },
   {
     "id": "tm-player-3390",
@@ -461,6 +482,15 @@
     "lastName": "Smertin"
   },
   {
+    "id": "tm-player-3571",
+    "displayName": "Alen Bokšić",
+    "acceptedNames": [
+      "Bokšić",
+      "Alen Bokšić"
+    ],
+    "lastName": "Bokšić"
+  },
+  {
     "id": "tm-player-315853",
     "displayName": "Alessandro Bastoni",
     "acceptedNames": [
@@ -492,6 +522,7 @@
     "displayName": "Alessandro Del Piero",
     "acceptedNames": [
       "Del Piero",
+      "Piero",
       "Alessandro Del Piero"
     ],
     "lastName": "Piero"
@@ -542,14 +573,6 @@
     "lastName": "Tacchinardi"
   },
   {
-    "id": "tm-player-15420",
-    "displayName": "Alex",
-    "acceptedNames": [
-      "Alex"
-    ],
-    "lastName": "Alex"
-  },
-  {
     "id": "tm-player-548111",
     "displayName": "Álex Baena",
     "acceptedNames": [
@@ -566,6 +589,16 @@
       "Cordaz"
     ],
     "lastName": "Cordaz"
+  },
+  {
+    "id": "tm-player-15420",
+    "displayName": "Alex Costa",
+    "acceptedNames": [
+      "Alex",
+      "Costa",
+      "Alex Costa"
+    ],
+    "lastName": "Costa"
   },
   {
     "id": "tm-player-240414",
@@ -599,9 +632,10 @@
     "id": "tm-player-79960",
     "displayName": "Alex Sandro",
     "acceptedNames": [
-      "Alex Sandro"
+      "Alex Sandro",
+      "Sandro"
     ],
-    "lastName": "Alex Sandro"
+    "lastName": "Sandro"
   },
   {
     "id": "tm-player-27394",
@@ -683,6 +717,15 @@
       "Pedraza"
     ],
     "lastName": "Pedraza"
+  },
+  {
+    "id": "tm-player-3300",
+    "displayName": "Ali Benarbia",
+    "acceptedNames": [
+      "Benarbia",
+      "Ali Benarbia"
+    ],
+    "lastName": "Benarbia"
   },
   {
     "id": "tm-player-335",
@@ -806,6 +849,15 @@
     "lastName": "Pereira"
   },
   {
+    "id": "tm-player-5796",
+    "displayName": "Álvaro Recoba",
+    "acceptedNames": [
+      "Recoba",
+      "Álvaro Recoba"
+    ],
+    "lastName": "Recoba"
+  },
+  {
     "id": "tm-player-57515",
     "displayName": "Aly Cissokho",
     "acceptedNames": [
@@ -860,14 +912,6 @@
     "lastName": "Herrera"
   },
   {
-    "id": "tm-player-31645",
-    "displayName": "Anderson",
-    "acceptedNames": [
-      "Anderson"
-    ],
-    "lastName": "Anderson"
-  },
-  {
     "id": "tm-player-30083",
     "displayName": "Anderson",
     "acceptedNames": [
@@ -876,20 +920,22 @@
     "lastName": "Anderson"
   },
   {
+    "id": "tm-player-31645",
+    "displayName": "Anderson Oliveira",
+    "acceptedNames": [
+      "Anderson",
+      "Oliveira",
+      "Anderson Oliveira"
+    ],
+    "lastName": "Oliveira"
+  },
+  {
     "id": "tm-player-13882",
     "displayName": "Ânderson Polga",
     "acceptedNames": [
       "Ânderson Polga"
     ],
     "lastName": "Polga"
-  },
-  {
-    "id": "tm-player-3277",
-    "displayName": "Anderton",
-    "acceptedNames": [
-      "Anderton"
-    ],
-    "lastName": "Anderton"
   },
   {
     "id": "tm-player-7491",
@@ -1010,7 +1056,8 @@
     "id": "tm-player-1742",
     "displayName": "Andreas Görlitz",
     "acceptedNames": [
-      "Andreas Görlitz"
+      "Andreas Görlitz",
+      "Görlitz"
     ],
     "lastName": "Görlitz"
   },
@@ -1044,7 +1091,8 @@
     "id": "tm-player-5787",
     "displayName": "Andrés Guglielminpietro",
     "acceptedNames": [
-      "Andrés Guglielminpietro"
+      "Andrés Guglielminpietro",
+      "Guglielminpietro"
     ],
     "lastName": "Guglielminpietro"
   },
@@ -1167,9 +1215,10 @@
     "displayName": "Ángel Di María",
     "acceptedNames": [
       "Di María",
+      "María",
       "Ángel Di María"
     ],
-    "lastName": "Di María"
+    "lastName": "María"
   },
   {
     "id": "tm-player-277179",
@@ -1533,9 +1582,10 @@
     "id": "tm-player-362842",
     "displayName": "Arthur Melo",
     "acceptedNames": [
-      "Arthur Melo"
+      "Arthur Melo",
+      "Melo"
     ],
-    "lastName": "Arthur Melo"
+    "lastName": "Melo"
   },
   {
     "id": "tm-player-4743",
@@ -1714,14 +1764,6 @@
     "lastName": "Babangida"
   },
   {
-    "id": "tm-player-192",
-    "displayName": "Babbel",
-    "acceptedNames": [
-      "Babbel"
-    ],
-    "lastName": "Babbel"
-  },
-  {
     "id": "tm-player-26764",
     "displayName": "Bacary Sagna",
     "acceptedNames": [
@@ -1756,14 +1798,6 @@
     "lastName": "Baía"
   },
   {
-    "id": "tm-player-63",
-    "displayName": "Ballack",
-    "acceptedNames": [
-      "Ballack"
-    ],
-    "lastName": "Ballack"
-  },
-  {
     "id": "tm-player-4191",
     "displayName": "Baraja",
     "acceptedNames": [
@@ -1789,14 +1823,6 @@
     "lastName": "Basinas"
   },
   {
-    "id": "tm-player-2",
-    "displayName": "Basler",
-    "acceptedNames": [
-      "Basler"
-    ],
-    "lastName": "Basler"
-  },
-  {
     "id": "tm-player-2514",
     "displayName": "Bastian Schweinsteiger",
     "acceptedNames": [
@@ -1805,14 +1831,6 @@
       "Schweinste."
     ],
     "lastName": "Schweinsteiger"
-  },
-  {
-    "id": "tm-player-618",
-    "displayName": "Baştürk",
-    "acceptedNames": [
-      "Baştürk"
-    ],
-    "lastName": "Baştürk"
   },
   {
     "id": "tm-player-3295",
@@ -1900,14 +1918,6 @@
     "lastName": "Woodburn"
   },
   {
-    "id": "tm-player-3300",
-    "displayName": "Benarbia",
-    "acceptedNames": [
-      "Benarbia"
-    ],
-    "lastName": "Benarbia"
-  },
-  {
     "id": "tm-player-39020",
     "displayName": "Benedikt Höwedes",
     "acceptedNames": [
@@ -1953,14 +1963,6 @@
     "lastName": "Costil"
   },
   {
-    "id": "tm-player-3823",
-    "displayName": "Berg",
-    "acceptedNames": [
-      "Berg"
-    ],
-    "lastName": "Berg"
-  },
-  {
     "id": "tm-player-175169",
     "displayName": "Bernard",
     "acceptedNames": [
@@ -1984,14 +1986,6 @@
       "Bernard Lama"
     ],
     "lastName": "Lama"
-  },
-  {
-    "id": "tm-player-5294",
-    "displayName": "Bernardi",
-    "acceptedNames": [
-      "Bernardi"
-    ],
-    "lastName": "Bernardi"
   },
   {
     "id": "tm-player-241641",
@@ -2096,6 +2090,15 @@
     "lastName": "Binz"
   },
   {
+    "id": "tm-player-210",
+    "displayName": "Bixente Lizarazu",
+    "acceptedNames": [
+      "Lizarazu",
+      "Bixente Lizarazu"
+    ],
+    "lastName": "Lizarazu"
+  },
+  {
     "id": "tm-player-4027",
     "displayName": "Björn Mehnert",
     "acceptedNames": [
@@ -2111,14 +2114,6 @@
       "Blaise Matuidi"
     ],
     "lastName": "Matuidi"
-  },
-  {
-    "id": "tm-player-3113",
-    "displayName": "Blanc",
-    "acceptedNames": [
-      "Blanc"
-    ],
-    "lastName": "Blanc"
   },
   {
     "id": "tm-player-101044",
@@ -2155,14 +2150,6 @@
     "lastName": "Krkic"
   },
   {
-    "id": "tm-player-3571",
-    "displayName": "Bokšić",
-    "acceptedNames": [
-      "Bokšić"
-    ],
-    "lastName": "Bokšić"
-  },
-  {
     "id": "tm-player-15314",
     "displayName": "Bolf",
     "acceptedNames": [
@@ -2177,6 +2164,24 @@
       "Bonano"
     ],
     "lastName": "Bonano"
+  },
+  {
+    "id": "tm-player-207834",
+    "displayName": "Bono",
+    "acceptedNames": [
+      "Bounou",
+      "Bono"
+    ],
+    "lastName": "Bono"
+  },
+  {
+    "id": "tm-player-94",
+    "displayName": "Boris Zivkovic",
+    "acceptedNames": [
+      "Zivkovic",
+      "Boris Zivkovic"
+    ],
+    "lastName": "Zivkovic"
   },
   {
     "id": "tm-player-278359",
@@ -2282,14 +2287,6 @@
       "Branislav Ivanovic"
     ],
     "lastName": "Ivanovic"
-  },
-  {
-    "id": "tm-player-66",
-    "displayName": "Brdaric",
-    "acceptedNames": [
-      "Brdaric"
-    ],
-    "lastName": "Brdaric"
   },
   {
     "id": "tm-player-473169",
@@ -2448,14 +2445,6 @@
     "lastName": "Hudson-Odoi"
   },
   {
-    "id": "tm-player-5775",
-    "displayName": "Cannavaro",
-    "acceptedNames": [
-      "Cannavaro"
-    ],
-    "lastName": "Cannavaro"
-  },
-  {
     "id": "tm-player-12000",
     "displayName": "Cantona",
     "acceptedNames": [
@@ -2497,14 +2486,6 @@
     "lastName": "Carboni"
   },
   {
-    "id": "tm-player-3570",
-    "displayName": "Carew",
-    "acceptedNames": [
-      "Carew"
-    ],
-    "lastName": "Carew"
-  },
-  {
     "id": "tm-player-284854",
     "displayName": "Carles Aleñá",
     "acceptedNames": [
@@ -2543,9 +2524,10 @@
     "id": "tm-player-585982",
     "displayName": "Carlos Augusto",
     "acceptedNames": [
-      "Carlos Augusto"
+      "Carlos Augusto",
+      "Augusto"
     ],
-    "lastName": "Carlos Augusto"
+    "lastName": "Augusto"
   },
   {
     "id": "tm-player-5779",
@@ -2655,7 +2637,8 @@
     "id": "tm-player-3153",
     "displayName": "Celestine Babayaro",
     "acceptedNames": [
-      "Celestine Babayaro"
+      "Celestine Babayaro",
+      "Babayaro"
     ],
     "lastName": "Babayaro"
   },
@@ -2726,9 +2709,9 @@
     "displayName": "Charles De Ketelaere",
     "acceptedNames": [
       "Charles De Ketelaere",
-      "De Ketelaere"
+      "Ketelaere"
     ],
-    "lastName": "De Ketelaere"
+    "lastName": "Ketelaere"
   },
   {
     "id": "tm-player-5470",
@@ -2844,6 +2827,15 @@
     "lastName": "Nørgaard"
   },
   {
+    "id": "tm-player-5940",
+    "displayName": "Christian Panucci",
+    "acceptedNames": [
+      "Panucci",
+      "Christian Panucci"
+    ],
+    "lastName": "Panucci"
+  },
+  {
     "id": "tm-player-315779",
     "displayName": "Christian Pulisic",
     "acceptedNames": [
@@ -2859,6 +2851,15 @@
       "Christian Timm"
     ],
     "lastName": "Timm"
+  },
+  {
+    "id": "tm-player-5797",
+    "displayName": "Christian Vieri",
+    "acceptedNames": [
+      "Vieri",
+      "Christian Vieri"
+    ],
+    "lastName": "Vieri"
   },
   {
     "id": "tm-player-916",
@@ -2969,6 +2970,15 @@
     "lastName": "Seedorf"
   },
   {
+    "id": "tm-player-4182",
+    "displayName": "Claude Makélélé",
+    "acceptedNames": [
+      "Makélélé",
+      "Claude Makélélé"
+    ],
+    "lastName": "Makélélé"
+  },
+  {
     "id": "tm-player-40423",
     "displayName": "Claudio Bravo",
     "acceptedNames": [
@@ -2976,6 +2986,15 @@
       "Bravo"
     ],
     "lastName": "Bravo"
+  },
+  {
+    "id": "tm-player-3418",
+    "displayName": "Claudio López",
+    "acceptedNames": [
+      "López",
+      "Claudio López"
+    ],
+    "lastName": "López"
   },
   {
     "id": "tm-player-44716",
@@ -3065,14 +3084,6 @@
       "Collins"
     ],
     "lastName": "Collins"
-  },
-  {
-    "id": "tm-player-7912",
-    "displayName": "Conceição",
-    "acceptedNames": [
-      "Conceição"
-    ],
-    "lastName": "Conceição"
   },
   {
     "id": "tm-player-128901",
@@ -3210,9 +3221,19 @@
     "displayName": "Cristiano Ronaldo",
     "acceptedNames": [
       "Cristiano .",
+      "Ronaldo",
       "Cristiano Ronaldo"
     ],
-    "lastName": "Cristiano Ronaldo"
+    "lastName": "Ronaldo"
+  },
+  {
+    "id": "tm-player-5783",
+    "displayName": "Cristiano Zanetti",
+    "acceptedNames": [
+      "Zanetti",
+      "Cristiano Zanetti"
+    ],
+    "lastName": "Zanetti"
   },
   {
     "id": "tm-player-433188",
@@ -3230,14 +3251,6 @@
       "Custódio"
     ],
     "lastName": "Custódio"
-  },
-  {
-    "id": "tm-player-3572",
-    "displayName": "Dacourt",
-    "acceptedNames": [
-      "Dacourt"
-    ],
-    "lastName": "Dacourt"
   },
   {
     "id": "tm-player-4178",
@@ -3439,9 +3452,10 @@
     "displayName": "Daniele De Rossi",
     "acceptedNames": [
       "Daniele De Rossi",
+      "Rossi",
       "De Rossi"
     ],
-    "lastName": "De Rossi"
+    "lastName": "Rossi"
   },
   {
     "id": "tm-player-27807",
@@ -3471,14 +3485,6 @@
     "lastName": "Subasic"
   },
   {
-    "id": "tm-player-145707",
-    "displayName": "Danilo",
-    "acceptedNames": [
-      "Danilo"
-    ],
-    "lastName": "Danilo"
-  },
-  {
     "id": "tm-player-55769",
     "displayName": "Danilo D'Ambrosio",
     "acceptedNames": [
@@ -3486,6 +3492,16 @@
       "D'Ambrosio"
     ],
     "lastName": "D'Ambrosio"
+  },
+  {
+    "id": "tm-player-145707",
+    "displayName": "Danilo Luiz",
+    "acceptedNames": [
+      "Danilo",
+      "Luiz",
+      "Danilo Luiz"
+    ],
+    "lastName": "Luiz"
   },
   {
     "id": "tm-player-141050",
@@ -3556,6 +3572,15 @@
       "Dario Simic"
     ],
     "lastName": "Simic"
+  },
+  {
+    "id": "tm-player-3277",
+    "displayName": "Darren Anderton",
+    "acceptedNames": [
+      "Anderton",
+      "Darren Anderton"
+    ],
+    "lastName": "Anderton"
   },
   {
     "id": "tm-player-3547",
@@ -3640,9 +3665,9 @@
     "displayName": "David de Gea",
     "acceptedNames": [
       "David de Gea",
-      "de Gea"
+      "Gea"
     ],
-    "lastName": "de Gea"
+    "lastName": "Gea"
   },
   {
     "id": "tm-player-54949",
@@ -3665,9 +3690,10 @@
     "id": "tm-player-46741",
     "displayName": "David Luiz",
     "acceptedNames": [
-      "David Luiz"
+      "David Luiz",
+      "Luiz"
     ],
-    "lastName": "David Luiz"
+    "lastName": "Luiz"
   },
   {
     "id": "tm-player-173562",
@@ -3865,13 +3891,12 @@
   },
   {
     "id": "tm-player-3428",
-    "displayName": "Dejan Stankovic",
+    "displayName": "Dejan Stanković",
     "acceptedNames": [
       "Dejan Stanković",
-      "Stankovic",
-      "Dejan Stankovic"
+      "Stanković"
     ],
-    "lastName": "Stankovic"
+    "lastName": "Stanković"
   },
   {
     "id": "tm-player-207929",
@@ -4003,14 +4028,6 @@
     "lastName": "Derlei"
   },
   {
-    "id": "tm-player-3154",
-    "displayName": "Desailly",
-    "acceptedNames": [
-      "Desailly"
-    ],
-    "lastName": "Desailly"
-  },
-  {
     "id": "tm-player-914562",
     "displayName": "Désiré Doué",
     "acceptedNames": [
@@ -4018,14 +4035,6 @@
       "Désiré Doué"
     ],
     "lastName": "Doué"
-  },
-  {
-    "id": "tm-player-7927",
-    "displayName": "Di Biagio",
-    "acceptedNames": [
-      "Di Biagio"
-    ],
-    "lastName": "Biagio"
   },
   {
     "id": "tm-player-171813",
@@ -4060,14 +4069,6 @@
       "Didier Drogba"
     ],
     "lastName": "Drogba"
-  },
-  {
-    "id": "tm-player-4248",
-    "displayName": "Diego",
-    "acceptedNames": [
-      "Diego"
-    ],
-    "lastName": "Diego"
   },
   {
     "id": "tm-player-7868",
@@ -4133,12 +4134,14 @@
   },
   {
     "id": "tm-player-34370",
-    "displayName": "Diego López",
+    "displayName": "Diego López Rodríguez",
     "acceptedNames": [
       "López",
+      "Rodríguez",
+      "Diego López Rodríguez",
       "Diego López"
     ],
-    "lastName": "López"
+    "lastName": "Rodríguez"
   },
   {
     "id": "tm-player-22202",
@@ -4168,10 +4171,21 @@
     "lastName": "Perotti"
   },
   {
+    "id": "tm-player-4248",
+    "displayName": "Diego Ribas",
+    "acceptedNames": [
+      "Diego",
+      "Ribas",
+      "Diego Ribas"
+    ],
+    "lastName": "Ribas"
+  },
+  {
     "id": "tm-player-7504",
     "displayName": "Diego Tristán",
     "acceptedNames": [
-      "Diego Tristán"
+      "Diego Tristán",
+      "Tristán"
     ],
     "lastName": "Tristán"
   },
@@ -4241,9 +4255,10 @@
     "id": "tm-player-340950",
     "displayName": "Diogo Jota",
     "acceptedNames": [
-      "Diogo Jota"
+      "Diogo Jota",
+      "Jota"
     ],
-    "lastName": "Diogo Jota"
+    "lastName": "Jota"
   },
   {
     "id": "tm-player-4010",
@@ -4479,7 +4494,8 @@
     "id": "tm-player-3150",
     "displayName": "Ed de Goey",
     "acceptedNames": [
-      "Ed de Goey"
+      "Ed de Goey",
+      "Goey"
     ],
     "lastName": "Goey"
   },
@@ -4511,19 +4527,23 @@
   },
   {
     "id": "tm-player-29035",
-    "displayName": "Ederson",
+    "displayName": "Ederson Campos",
     "acceptedNames": [
-      "Ederson"
+      "Ederson",
+      "Campos",
+      "Ederson Campos"
     ],
-    "lastName": "Ederson"
+    "lastName": "Campos"
   },
   {
     "id": "tm-player-238223",
-    "displayName": "Ederson",
+    "displayName": "Ederson Moraes",
     "acceptedNames": [
-      "Ederson"
+      "Ederson",
+      "Moraes",
+      "Ederson Moraes"
     ],
-    "lastName": "Ederson"
+    "lastName": "Moraes"
   },
   {
     "id": "tm-player-5758",
@@ -4552,12 +4572,13 @@
   },
   {
     "id": "tm-player-28396",
-    "displayName": "Edin Dzeko",
+    "displayName": "Edin Džeko",
     "acceptedNames": [
       "Dzeko",
-      "Edin Dzeko"
+      "Džeko",
+      "Edin Džeko"
     ],
-    "lastName": "Dzeko"
+    "lastName": "Džeko"
   },
   {
     "id": "tm-player-48280",
@@ -4643,6 +4664,16 @@
       "Camavinga"
     ],
     "lastName": "Camavinga"
+  },
+  {
+    "id": "tm-player-3516",
+    "displayName": "Edwin van der Sar",
+    "acceptedNames": [
+      "van der Sar",
+      "Sar",
+      "Edwin van der Sar"
+    ],
+    "lastName": "Sar"
   },
   {
     "id": "tm-player-4365",
@@ -4765,11 +4796,13 @@
   },
   {
     "id": "tm-player-181778",
-    "displayName": "Emerson",
+    "displayName": "Emerson Santos",
     "acceptedNames": [
-      "Emerson"
+      "Emerson",
+      "Santos",
+      "Emerson Santos"
     ],
-    "lastName": "Emerson"
+    "lastName": "Santos"
   },
   {
     "id": "tm-player-111078",
@@ -4826,14 +4859,12 @@
   },
   {
     "id": "tm-player-5782",
-    "displayName": "Emre Belözoglu",
+    "displayName": "Emre Belözoğlu",
     "acceptedNames": [
       "Belözoğlu",
-      "Belözoglu",
-      "Emre Belözoglu",
       "Emre Belözoğlu"
     ],
-    "lastName": "Belözoglu"
+    "lastName": "Belözoğlu"
   },
   {
     "id": "tm-player-119296",
@@ -5073,14 +5104,6 @@
     "lastName": "Fabinho"
   },
   {
-    "id": "tm-player-61891",
-    "displayName": "Fábio",
-    "acceptedNames": [
-      "Fábio"
-    ],
-    "lastName": "Fábio"
-  },
-  {
     "id": "tm-player-7570",
     "displayName": "Fábio Aurélio",
     "acceptedNames": [
@@ -5099,6 +5122,15 @@
     "lastName": "Borini"
   },
   {
+    "id": "tm-player-5775",
+    "displayName": "Fabio Cannavaro",
+    "acceptedNames": [
+      "Cannavaro",
+      "Fabio Cannavaro"
+    ],
+    "lastName": "Cannavaro"
+  },
+  {
     "id": "tm-player-33648",
     "displayName": "Fábio Coentrão",
     "acceptedNames": [
@@ -5108,12 +5140,31 @@
     "lastName": "Coentrão"
   },
   {
+    "id": "tm-player-6091",
+    "displayName": "Fabio Grosso",
+    "acceptedNames": [
+      "Grosso",
+      "Fabio Grosso"
+    ],
+    "lastName": "Grosso"
+  },
+  {
     "id": "tm-player-16871",
     "displayName": "Fabio Pecchia",
     "acceptedNames": [
       "Fabio Pecchia"
     ],
     "lastName": "Pecchia"
+  },
+  {
+    "id": "tm-player-61891",
+    "displayName": "Fábio Pereira da Silva",
+    "acceptedNames": [
+      "Fábio",
+      "Silva",
+      "Fábio Pereira da Silva"
+    ],
+    "lastName": "Silva"
   },
   {
     "id": "tm-player-474800",
@@ -5131,14 +5182,6 @@
       "Fangzhuo Dong"
     ],
     "lastName": "Dong"
-  },
-  {
-    "id": "tm-player-5785",
-    "displayName": "Farinós",
-    "acceptedNames": [
-      "Farinós"
-    ],
-    "lastName": "Farinós"
   },
   {
     "id": "tm-player-21876",
@@ -5308,6 +5351,15 @@
     "lastName": "Llorente"
   },
   {
+    "id": "tm-player-1432",
+    "displayName": "Fernando Meira",
+    "acceptedNames": [
+      "Meira",
+      "Fernando Meira"
+    ],
+    "lastName": "Meira"
+  },
+  {
     "id": "tm-player-7531",
     "displayName": "Fernando Morientes",
     "acceptedNames": [
@@ -5379,14 +5431,6 @@
     "lastName": "Ferri"
   },
   {
-    "id": "tm-player-3446",
-    "displayName": "Figo",
-    "acceptedNames": [
-      "Figo"
-    ],
-    "lastName": "Figo"
-  },
-  {
     "id": "tm-player-303254",
     "displayName": "Fikayo Tomori",
     "acceptedNames": [
@@ -5426,9 +5470,10 @@
     "id": "tm-player-21725",
     "displayName": "Filipe Luís",
     "acceptedNames": [
-      "Filipe Luís"
+      "Filipe Luís",
+      "Luís"
     ],
-    "lastName": "Filipe Luís"
+    "lastName": "Luís"
   },
   {
     "id": "tm-player-5821",
@@ -5649,14 +5694,6 @@
     "lastName": "Leboeuf"
   },
   {
-    "id": "tm-player-31005",
-    "displayName": "Fred",
-    "acceptedNames": [
-      "Fred"
-    ],
-    "lastName": "Fred"
-  },
-  {
     "id": "tm-player-147727",
     "displayName": "Fred Grim",
     "acceptedNames": [
@@ -5665,10 +5702,30 @@
     "lastName": "Grim"
   },
   {
+    "id": "tm-player-31005",
+    "displayName": "Fred Guedes",
+    "acceptedNames": [
+      "Fred",
+      "Guedes",
+      "Fred Guedes"
+    ],
+    "lastName": "Guedes"
+  },
+  {
+    "id": "tm-player-3134",
+    "displayName": "Freddie Ljungberg",
+    "acceptedNames": [
+      "Ljungberg",
+      "Freddie Ljungberg"
+    ],
+    "lastName": "Ljungberg"
+  },
+  {
     "id": "tm-player-5552",
     "displayName": "Frédéric Déhu",
     "acceptedNames": [
-      "Frédéric Déhu"
+      "Frédéric Déhu",
+      "Déhu"
     ],
     "lastName": "Déhu"
   },
@@ -5686,9 +5743,10 @@
     "displayName": "Frenkie de Jong",
     "acceptedNames": [
       "de Jong",
+      "Jong",
       "Frenkie de Jong"
     ],
-    "lastName": "de Jong"
+    "lastName": "Jong"
   },
   {
     "id": "tm-player-698",
@@ -5723,12 +5781,13 @@
     "lastName": "Gabri"
   },
   {
-    "id": "tm-player-435338",
-    "displayName": "Gabriel",
+    "id": "tm-player-5555",
+    "displayName": "Gabriel Heinze",
     "acceptedNames": [
-      "Gabriel"
+      "Heinze",
+      "Gabriel Heinze"
     ],
-    "lastName": "Gabriel"
+    "lastName": "Heinze"
   },
   {
     "id": "tm-player-363205",
@@ -5738,6 +5797,16 @@
       "Jesus"
     ],
     "lastName": "Jesus"
+  },
+  {
+    "id": "tm-player-435338",
+    "displayName": "Gabriel Magalhães",
+    "acceptedNames": [
+      "Gabriel",
+      "Magalhães",
+      "Gabriel Magalhães"
+    ],
+    "lastName": "Magalhães"
   },
   {
     "id": "tm-player-655488",
@@ -5802,14 +5871,6 @@
     "lastName": "Galasek"
   },
   {
-    "id": "tm-player-7920",
-    "displayName": "García",
-    "acceptedNames": [
-      "García"
-    ],
-    "lastName": "García"
-  },
-  {
     "id": "tm-player-39381",
     "displayName": "Gareth Bale",
     "acceptedNames": [
@@ -5817,6 +5878,15 @@
       "Bale"
     ],
     "lastName": "Bale"
+  },
+  {
+    "id": "tm-player-3744",
+    "displayName": "Gareth Southgate",
+    "acceptedNames": [
+      "Southgate",
+      "Gareth Southgate"
+    ],
+    "lastName": "Southgate"
   },
   {
     "id": "tm-player-460626",
@@ -5840,9 +5910,19 @@
     "id": "tm-player-3631",
     "displayName": "Gary Kelly",
     "acceptedNames": [
-      "Gary Kelly"
+      "Gary Kelly",
+      "Kelly"
     ],
     "lastName": "Kelly"
+  },
+  {
+    "id": "tm-player-3403",
+    "displayName": "Gary Neville",
+    "acceptedNames": [
+      "Neville",
+      "Gary Neville"
+    ],
+    "lastName": "Neville"
   },
   {
     "id": "tm-player-3830",
@@ -5853,20 +5933,21 @@
     "lastName": "Gascoigne"
   },
   {
-    "id": "tm-player-5813",
-    "displayName": "Gattuso",
-    "acceptedNames": [
-      "Gattuso"
-    ],
-    "lastName": "Gattuso"
-  },
-  {
     "id": "tm-player-646740",
     "displayName": "Gavi",
     "acceptedNames": [
       "Gavi"
     ],
     "lastName": "Gavi"
+  },
+  {
+    "id": "tm-player-5813",
+    "displayName": "Gennaro Gattuso",
+    "acceptedNames": [
+      "Gattuso",
+      "Gennaro Gattuso"
+    ],
+    "lastName": "Gattuso"
   },
   {
     "id": "tm-player-13241",
@@ -5953,6 +6034,15 @@
       "Gerald Sibon"
     ],
     "lastName": "Sibon"
+  },
+  {
+    "id": "tm-player-7599",
+    "displayName": "Gerard López",
+    "acceptedNames": [
+      "López",
+      "Gerard López"
+    ],
+    "lastName": "López"
   },
   {
     "id": "tm-player-705395",
@@ -6043,6 +6133,15 @@
     "lastName": "Pessotto"
   },
   {
+    "id": "tm-player-5757",
+    "displayName": "Gianluca Zambrotta",
+    "acceptedNames": [
+      "Zambrotta",
+      "Gianluca Zambrotta"
+    ],
+    "lastName": "Zambrotta"
+  },
+  {
     "id": "tm-player-5023",
     "displayName": "Gianluigi Buffon",
     "acceptedNames": [
@@ -6069,6 +6168,15 @@
     "lastName": "Goumas"
   },
   {
+    "id": "tm-player-3194",
+    "displayName": "Gilberto Silva",
+    "acceptedNames": [
+      "Silva",
+      "Gilberto Silva"
+    ],
+    "lastName": "Silva"
+  },
+  {
     "id": "tm-player-29260",
     "displayName": "Giorgio Chiellini",
     "acceptedNames": [
@@ -6082,18 +6190,19 @@
     "displayName": "Giovani dos Santos",
     "acceptedNames": [
       "Giovani dos Santos",
-      "dos Santos"
+      "Santos"
     ],
-    "lastName": "dos Santos"
+    "lastName": "Santos"
   },
   {
     "id": "tm-player-348795",
     "displayName": "Giovani Lo Celso",
     "acceptedNames": [
       "Lo Celso",
+      "Celso",
       "Giovani Lo Celso"
     ],
-    "lastName": "Lo Celso"
+    "lastName": "Celso"
   },
   {
     "id": "tm-player-8014",
@@ -6108,9 +6217,10 @@
     "displayName": "Giovanni Di Lorenzo",
     "acceptedNames": [
       "Di Lorenzo",
+      "Lorenzo",
       "Giovanni Di Lorenzo"
     ],
-    "lastName": "Di Lorenzo"
+    "lastName": "Lorenzo"
   },
   {
     "id": "tm-player-5793",
@@ -6126,6 +6236,7 @@
     "displayName": "Giovanni van Bronckhorst",
     "acceptedNames": [
       "Giovanni van Bronckhorst",
+      "Bronckhorst",
       "van Bronck."
     ],
     "lastName": "Bronckhorst"
@@ -6200,14 +6311,6 @@
     "lastName": "Gonçalves"
   },
   {
-    "id": "tm-player-7500",
-    "displayName": "González",
-    "acceptedNames": [
-      "González"
-    ],
-    "lastName": "González"
-  },
-  {
     "id": "tm-player-39153",
     "displayName": "Gonzalo Higuaín",
     "acceptedNames": [
@@ -6272,17 +6375,10 @@
     "displayName": "Gregory van der Wiel",
     "acceptedNames": [
       "van der Wiel",
+      "Wiel",
       "Gregory van der Wiel"
     ],
-    "lastName": "van der Wiel"
-  },
-  {
-    "id": "tm-player-6091",
-    "displayName": "Grosso",
-    "acceptedNames": [
-      "Grosso"
-    ],
-    "lastName": "Grosso"
+    "lastName": "Wiel"
   },
   {
     "id": "tm-player-6833",
@@ -6414,14 +6510,12 @@
   },
   {
     "id": "tm-player-1792",
-    "displayName": "Hamit Altintop",
+    "displayName": "Hamit Altıntop",
     "acceptedNames": [
       "Altıntop",
-      "Altintop",
-      "Hamit Altintop",
       "Hamit Altıntop"
     ],
-    "lastName": "Altintop"
+    "lastName": "Altıntop"
   },
   {
     "id": "tm-player-294",
@@ -6555,14 +6649,6 @@
     "lastName": "Heinrich"
   },
   {
-    "id": "tm-player-5555",
-    "displayName": "Heinze",
-    "acceptedNames": [
-      "Heinze"
-    ],
-    "lastName": "Heinze"
-  },
-  {
     "id": "tm-player-5169",
     "displayName": "Hélder Postiga",
     "acceptedNames": [
@@ -6572,12 +6658,13 @@
     "lastName": "Postiga"
   },
   {
-    "id": "tm-player-7514",
-    "displayName": "Helguera",
+    "id": "tm-player-3823",
+    "displayName": "Henning Berg",
     "acceptedNames": [
-      "Helguera"
+      "Berg",
+      "Henning Berg"
     ],
-    "lastName": "Helguera"
+    "lastName": "Berg"
   },
   {
     "id": "tm-player-3514",
@@ -6773,7 +6860,8 @@
     "id": "tm-player-4137",
     "displayName": "Ian Walker",
     "acceptedNames": [
-      "Ian Walker"
+      "Ian Walker",
+      "Walker"
     ],
     "lastName": "Walker"
   },
@@ -6867,6 +6955,15 @@
     "lastName": "Semshov"
   },
   {
+    "id": "tm-player-103812",
+    "displayName": "Igor Stimac",
+    "acceptedNames": [
+      "Stimac",
+      "Igor Stimac"
+    ],
+    "lastName": "Stimac"
+  },
+  {
     "id": "tm-player-5752",
     "displayName": "Igor Tudor",
     "acceptedNames": [
@@ -6934,14 +7031,6 @@
       "Peña"
     ],
     "lastName": "Peña"
-  },
-  {
-    "id": "tm-player-3248",
-    "displayName": "Ince",
-    "acceptedNames": [
-      "Ince"
-    ],
-    "lastName": "Ince"
   },
   {
     "id": "tm-player-158863",
@@ -7015,6 +7104,15 @@
     "lastName": "Córdoba"
   },
   {
+    "id": "tm-player-7514",
+    "displayName": "Iván Helguera",
+    "acceptedNames": [
+      "Helguera",
+      "Iván Helguera"
+    ],
+    "lastName": "Helguera"
+  },
+  {
     "id": "tm-player-42460",
     "displayName": "Ivan Perišić",
     "acceptedNames": [
@@ -7086,6 +7184,15 @@
       "Grbic"
     ],
     "lastName": "Grbic"
+  },
+  {
+    "id": "tm-player-3557",
+    "displayName": "Jaap Stam",
+    "acceptedNames": [
+      "Stam",
+      "Jaap Stam"
+    ],
+    "lastName": "Stam"
   },
   {
     "id": "tm-player-128899",
@@ -7249,6 +7356,15 @@
     "lastName": "Vardy"
   },
   {
+    "id": "tm-player-1157",
+    "displayName": "Jan Koller",
+    "acceptedNames": [
+      "Koller",
+      "Jan Koller"
+    ],
+    "lastName": "Koller"
+  },
+  {
     "id": "tm-player-121483",
     "displayName": "Jan Oblak",
     "acceptedNames": [
@@ -7276,14 +7392,6 @@
     "lastName": "Vertonghen"
   },
   {
-    "id": "tm-player-3532",
-    "displayName": "Jankulovski",
-    "acceptedNames": [
-      "Jankulovski"
-    ],
-    "lastName": "Jankulovski"
-  },
-  {
     "id": "tm-player-99331",
     "displayName": "Jannik Vestergaard",
     "acceptedNames": [
@@ -7300,14 +7408,6 @@
       "Jari Litmanen"
     ],
     "lastName": "Litmanen"
-  },
-  {
-    "id": "tm-player-29556",
-    "displayName": "Jarni",
-    "acceptedNames": [
-      "Jarni"
-    ],
-    "lastName": "Jarni"
   },
   {
     "id": "tm-player-9674",
@@ -7348,7 +7448,8 @@
     "id": "tm-player-3320",
     "displayName": "Jason Wilcox",
     "acceptedNames": [
-      "Jason Wilcox"
+      "Jason Wilcox",
+      "Wilcox"
     ],
     "lastName": "Wilcox"
   },
@@ -7394,6 +7495,15 @@
       "Javier Calleja"
     ],
     "lastName": "Calleja"
+  },
+  {
+    "id": "tm-player-5785",
+    "displayName": "Javier Farinós",
+    "acceptedNames": [
+      "Farinós",
+      "Javier Farinós"
+    ],
+    "lastName": "Farinós"
   },
   {
     "id": "tm-player-7824",
@@ -7469,9 +7579,10 @@
     "id": "tm-player-578872",
     "displayName": "Jean Lucas",
     "acceptedNames": [
-      "Jean Lucas"
+      "Jean Lucas",
+      "Lucas"
     ],
-    "lastName": "Jean Lucas"
+    "lastName": "Lucas"
   },
   {
     "id": "tm-player-5648",
@@ -7739,6 +7850,15 @@
     "lastName": "Hasselbaink"
   },
   {
+    "id": "tm-player-274",
+    "displayName": "Jiri Nemec",
+    "acceptedNames": [
+      "Nemec",
+      "Jiri Nemec"
+    ],
+    "lastName": "Nemec"
+  },
+  {
     "id": "tm-player-34156",
     "displayName": "Jô",
     "acceptedNames": [
@@ -7978,6 +8098,15 @@
     "lastName": "Riise"
   },
   {
+    "id": "tm-player-3570",
+    "displayName": "John Carew",
+    "acceptedNames": [
+      "Carew",
+      "John Carew"
+    ],
+    "lastName": "Carew"
+  },
+  {
     "id": "tm-player-3540",
     "displayName": "John O'Shea",
     "acceptedNames": [
@@ -7985,6 +8114,15 @@
       "O'Shea"
     ],
     "lastName": "O'Shea"
+  },
+  {
+    "id": "tm-player-30739",
+    "displayName": "John Obi Mikel",
+    "acceptedNames": [
+      "Mikel",
+      "John Obi Mikel"
+    ],
+    "lastName": "Mikel"
   },
   {
     "id": "tm-player-186590",
@@ -8035,7 +8173,8 @@
     "id": "tm-player-4169",
     "displayName": "Jon Dahl Tomasson",
     "acceptedNames": [
-      "Jon Dahl Tomasson"
+      "Jon Dahl Tomasson",
+      "Tomasson"
     ],
     "lastName": "Tomasson"
   },
@@ -8098,9 +8237,9 @@
     "displayName": "Jonathan dos Santos",
     "acceptedNames": [
       "Jonathan dos Santos",
-      "dos Santos"
+      "Santos"
     ],
-    "lastName": "dos Santos"
+    "lastName": "Santos"
   },
   {
     "id": "tm-player-3865",
@@ -8341,7 +8480,8 @@
     "id": "tm-player-6194",
     "displayName": "José Mari",
     "acceptedNames": [
-      "José Mari"
+      "José Mari",
+      "Mari"
     ],
     "lastName": "Mari"
   },
@@ -8549,9 +8689,10 @@
     "id": "tm-player-121985",
     "displayName": "Juan Jesus",
     "acceptedNames": [
-      "Juan Jesus"
+      "Juan Jesus",
+      "Jesus"
     ],
-    "lastName": "Juan Jesus"
+    "lastName": "Jesus"
   },
   {
     "id": "tm-player-7806",
@@ -8579,6 +8720,15 @@
       "Musso"
     ],
     "lastName": "Musso"
+  },
+  {
+    "id": "tm-player-3854",
+    "displayName": "Juan Román Riquelme",
+    "acceptedNames": [
+      "Riquelme",
+      "Juan Román Riquelme"
+    ],
+    "lastName": "Riquelme"
   },
   {
     "id": "tm-player-7585",
@@ -8742,7 +8892,8 @@
     "id": "tm-player-3505",
     "displayName": "Juninho Paulista",
     "acceptedNames": [
-      "Juninho Paulista"
+      "Juninho Paulista",
+      "Paulista"
     ],
     "lastName": "Paulista"
   },
@@ -8775,7 +8926,8 @@
     "id": "tm-player-92",
     "displayName": "Jurica Vranjes",
     "acceptedNames": [
-      "Jurica Vranjes"
+      "Jurica Vranjes",
+      "Vranjes"
     ],
     "lastName": "Vranjes"
   },
@@ -8865,14 +9017,6 @@
       "Lee"
     ],
     "lastName": "Lee"
-  },
-  {
-    "id": "tm-player-3133",
-    "displayName": "Kanu",
-    "acceptedNames": [
-      "Kanu"
-    ],
-    "lastName": "Kanu"
   },
   {
     "id": "tm-player-173873",
@@ -8994,9 +9138,10 @@
     "displayName": "Kevin De Bruyne",
     "acceptedNames": [
       "De Bruyne",
+      "Bruyne",
       "Kevin De Bruyne"
     ],
-    "lastName": "De Bruyne"
+    "lastName": "Bruyne"
   },
   {
     "id": "tm-player-27389",
@@ -9277,14 +9422,6 @@
     "lastName": "Kolitsidakis"
   },
   {
-    "id": "tm-player-1157",
-    "displayName": "Koller",
-    "acceptedNames": [
-      "Koller"
-    ],
-    "lastName": "Koller"
-  },
-  {
     "id": "tm-player-3202",
     "displayName": "Kolo Touré",
     "acceptedNames": [
@@ -9535,9 +9672,10 @@
     "id": "tm-player-937958",
     "displayName": "Lamine Yamal",
     "acceptedNames": [
-      "Lamine Yamal"
+      "Lamine Yamal",
+      "Yamal"
     ],
-    "lastName": "Lamine Yamal"
+    "lastName": "Yamal"
   },
   {
     "id": "tm-player-5872",
@@ -9609,6 +9747,15 @@
       "Traoré"
     ],
     "lastName": "Traoré"
+  },
+  {
+    "id": "tm-player-3113",
+    "displayName": "Laurent Blanc",
+    "acceptedNames": [
+      "Blanc",
+      "Laurent Blanc"
+    ],
+    "lastName": "Blanc"
   },
   {
     "id": "tm-player-155593",
@@ -9740,20 +9887,14 @@
     "lastName": "Goretzka"
   },
   {
-    "id": "tm-player-5289",
-    "displayName": "Léonard",
-    "acceptedNames": [
-      "Léonard"
-    ],
-    "lastName": "Léonard"
-  },
-  {
     "id": "tm-player-102586",
-    "displayName": "Leonardo",
+    "displayName": "Leonardo Araújo",
     "acceptedNames": [
-      "Leonardo"
+      "Leonardo",
+      "Araújo",
+      "Leonardo Araújo"
     ],
-    "lastName": "Leonardo"
+    "lastName": "Araújo"
   },
   {
     "id": "tm-player-39983",
@@ -9821,7 +9962,8 @@
     "id": "tm-player-102754",
     "displayName": "Lionel Charbonnier",
     "acceptedNames": [
-      "Lionel Charbonnier"
+      "Lionel Charbonnier",
+      "Charbonnier"
     ],
     "lastName": "Charbonnier"
   },
@@ -9871,44 +10013,12 @@
     "lastName": "Martínez"
   },
   {
-    "id": "tm-player-210",
-    "displayName": "Lizarazu",
-    "acceptedNames": [
-      "Lizarazu"
-    ],
-    "lastName": "Lizarazu"
-  },
-  {
-    "id": "tm-player-3134",
-    "displayName": "Ljungberg",
-    "acceptedNames": [
-      "Ljungberg"
-    ],
-    "lastName": "Ljungberg"
-  },
-  {
     "id": "tm-player-15787",
     "displayName": "Loko",
     "acceptedNames": [
       "Loko"
     ],
     "lastName": "Loko"
-  },
-  {
-    "id": "tm-player-7599",
-    "displayName": "López",
-    "acceptedNames": [
-      "López"
-    ],
-    "lastName": "López"
-  },
-  {
-    "id": "tm-player-3418",
-    "displayName": "López",
-    "acceptedNames": [
-      "López"
-    ],
-    "lastName": "López"
   },
   {
     "id": "tm-player-133964",
@@ -9991,6 +10101,15 @@
     "lastName": "Beraldo"
   },
   {
+    "id": "tm-player-5294",
+    "displayName": "Lucas Bernardi",
+    "acceptedNames": [
+      "Bernardi",
+      "Lucas Bernardi"
+    ],
+    "lastName": "Bernardi"
+  },
+  {
     "id": "tm-player-26721",
     "displayName": "Lucas Biglia",
     "acceptedNames": [
@@ -10030,17 +10149,19 @@
     "id": "tm-player-41414",
     "displayName": "Lucas Leiva",
     "acceptedNames": [
-      "Lucas Leiva"
+      "Lucas Leiva",
+      "Leiva"
     ],
-    "lastName": "Lucas Leiva"
+    "lastName": "Leiva"
   },
   {
     "id": "tm-player-77100",
     "displayName": "Lucas Moura",
     "acceptedNames": [
-      "Lucas Moura"
+      "Lucas Moura",
+      "Moura"
     ],
-    "lastName": "Lucas Moura"
+    "lastName": "Moura"
   },
   {
     "id": "tm-player-218118",
@@ -10087,6 +10208,26 @@
     "lastName": "Giuly"
   },
   {
+    "id": "tm-player-7927",
+    "displayName": "Luigi Di Biagio",
+    "acceptedNames": [
+      "Di Biagio",
+      "Biagio",
+      "Luigi Di Biagio"
+    ],
+    "lastName": "Biagio"
+  },
+  {
+    "id": "tm-player-44352",
+    "displayName": "Luis Alberto Suárez Díaz",
+    "acceptedNames": [
+      "Suárez",
+      "Díaz",
+      "Luis Alberto Suárez Díaz"
+    ],
+    "lastName": "Díaz"
+  },
+  {
     "id": "tm-player-3422",
     "displayName": "Luís Boa Morte",
     "acceptedNames": [
@@ -10112,6 +10253,25 @@
     "lastName": "Enrique"
   },
   {
+    "id": "tm-player-3446",
+    "displayName": "Luís Figo",
+    "acceptedNames": [
+      "Figo",
+      "Luís Figo"
+    ],
+    "lastName": "Figo"
+  },
+  {
+    "id": "tm-player-7920",
+    "displayName": "Luis Javier García Sanz",
+    "acceptedNames": [
+      "García",
+      "Sanz",
+      "Luis Javier García Sanz"
+    ],
+    "lastName": "Sanz"
+  },
+  {
     "id": "tm-player-623525",
     "displayName": "Luis López",
     "acceptedNames": [
@@ -10129,21 +10289,13 @@
     "lastName": "Milla"
   },
   {
-    "id": "tm-player-44352",
-    "displayName": "Luis Suárez",
-    "acceptedNames": [
-      "Suárez",
-      "Luis Suárez"
-    ],
-    "lastName": "Suárez"
-  },
-  {
     "id": "tm-player-10471",
     "displayName": "Luiz Gustavo",
     "acceptedNames": [
-      "Luiz Gustavo"
+      "Luiz Gustavo",
+      "Gustavo"
     ],
-    "lastName": "Luiz Gustavo"
+    "lastName": "Gustavo"
   },
   {
     "id": "tm-player-1727",
@@ -10272,14 +10424,6 @@
     "lastName": "Shaw"
   },
   {
-    "id": "tm-player-7506",
-    "displayName": "Luque",
-    "acceptedNames": [
-      "Luque"
-    ],
-    "lastName": "Luque"
-  },
-  {
     "id": "tm-player-420210",
     "displayName": "Lutsharel Geertruida",
     "acceptedNames": [
@@ -10321,14 +10465,6 @@
       "Maicon"
     ],
     "lastName": "Maicon"
-  },
-  {
-    "id": "tm-player-4182",
-    "displayName": "Makélélé",
-    "acceptedNames": [
-      "Makélélé"
-    ],
-    "lastName": "Makélélé"
   },
   {
     "id": "tm-player-323704",
@@ -10431,9 +10567,10 @@
     "id": "tm-player-7492",
     "displayName": "Manuel Pablo",
     "acceptedNames": [
-      "Manuel Pablo"
+      "Manuel Pablo",
+      "Pablo"
     ],
-    "lastName": "Manuel Pablo"
+    "lastName": "Pablo"
   },
   {
     "id": "tm-player-476701",
@@ -10457,9 +10594,10 @@
     "displayName": "Marc-André ter Stegen",
     "acceptedNames": [
       "ter Stegen",
+      "Stegen",
       "Marc-André ter Stegen"
     ],
-    "lastName": "ter Stegen"
+    "lastName": "Stegen"
   },
   {
     "id": "tm-player-99922",
@@ -10524,6 +10662,15 @@
     "lastName": "Marçal"
   },
   {
+    "id": "tm-player-3154",
+    "displayName": "Marcel Desailly",
+    "acceptedNames": [
+      "Desailly",
+      "Marcel Desailly"
+    ],
+    "lastName": "Desailly"
+  },
+  {
     "id": "tm-player-70243",
     "displayName": "Marcel Halstenberg",
     "acceptedNames": [
@@ -10569,14 +10716,6 @@
     "lastName": "Jansen"
   },
   {
-    "id": "tm-player-44501",
-    "displayName": "Marcelo",
-    "acceptedNames": [
-      "Marcelo"
-    ],
-    "lastName": "Marcelo"
-  },
-  {
     "id": "tm-player-52920",
     "displayName": "Marcelo",
     "acceptedNames": [
@@ -10594,10 +10733,21 @@
     "lastName": "Brozović"
   },
   {
+    "id": "tm-player-44501",
+    "displayName": "Marcelo Vieira",
+    "acceptedNames": [
+      "Marcelo",
+      "Vieira",
+      "Marcelo Vieira"
+    ],
+    "lastName": "Vieira"
+  },
+  {
     "id": "tm-player-5767",
     "displayName": "Marcelo Zalayeta",
     "acceptedNames": [
-      "Marcelo Zalayeta"
+      "Marcelo Zalayeta",
+      "Zalayeta"
     ],
     "lastName": "Zalayeta"
   },
@@ -10675,7 +10825,8 @@
     "id": "tm-player-4170",
     "displayName": "Marco Di Vaio",
     "acceptedNames": [
-      "Marco Di Vaio"
+      "Marco Di Vaio",
+      "Vaio"
     ],
     "lastName": "Vaio"
   },
@@ -10786,6 +10937,15 @@
     "lastName": "Senesi"
   },
   {
+    "id": "tm-player-7840",
+    "displayName": "Marcos Senna",
+    "acceptedNames": [
+      "Senna",
+      "Marcos Senna"
+    ],
+    "lastName": "Senna"
+  },
+  {
     "id": "tm-player-258923",
     "displayName": "Marcus Rashford",
     "acceptedNames": [
@@ -10810,6 +10970,15 @@
       "Marek Heinz"
     ],
     "lastName": "Heinz"
+  },
+  {
+    "id": "tm-player-3532",
+    "displayName": "Marek Jankulovski",
+    "acceptedNames": [
+      "Jankulovski",
+      "Marek Jankulovski"
+    ],
+    "lastName": "Jankulovski"
   },
   {
     "id": "tm-player-35491",
@@ -10865,6 +11034,15 @@
     "lastName": "Balotelli"
   },
   {
+    "id": "tm-player-2",
+    "displayName": "Mario Basler",
+    "acceptedNames": [
+      "Basler",
+      "Mario Basler"
+    ],
+    "lastName": "Basler"
+  },
+  {
     "id": "tm-player-73250",
     "displayName": "Mario Gaspar",
     "acceptedNames": [
@@ -10902,22 +11080,22 @@
   },
   {
     "id": "tm-player-34572",
-    "displayName": "Mario Mandzukic",
+    "displayName": "Mario Mandžukić",
     "acceptedNames": [
       "Mandžukić",
-      "Mandzukic",
-      "Mario Mandzukic"
+      "Mario Mandžukić"
     ],
-    "lastName": "Mandzukic"
+    "lastName": "Mandžukić"
   },
   {
     "id": "tm-player-205938",
-    "displayName": "Mario Pašalić",
+    "displayName": "Mario Pasalić",
     "acceptedNames": [
       "Pašalić",
-      "Mario Pašalić"
+      "Pasalić",
+      "Mario Pasalić"
     ],
-    "lastName": "Pašalić"
+    "lastName": "Pasalić"
   },
   {
     "id": "tm-player-51412",
@@ -11020,7 +11198,8 @@
     "id": "tm-player-62",
     "displayName": "Marko Babic",
     "acceptedNames": [
-      "Marko Babic"
+      "Marko Babic",
+      "Babic"
     ],
     "lastName": "Babic"
   },
@@ -11058,6 +11237,15 @@
       "Marko Rehmer"
     ],
     "lastName": "Rehmer"
+  },
+  {
+    "id": "tm-player-192",
+    "displayName": "Markus Babbel",
+    "acceptedNames": [
+      "Babbel",
+      "Markus Babbel"
+    ],
+    "lastName": "Babbel"
   },
   {
     "id": "tm-player-1294399",
@@ -11176,7 +11364,8 @@
     "id": "tm-player-3503",
     "displayName": "Martin Laursen",
     "acceptedNames": [
-      "Martin Laursen"
+      "Martin Laursen",
+      "Laursen"
     ],
     "lastName": "Laursen"
   },
@@ -11404,9 +11593,10 @@
     "displayName": "Matthijs de Ligt",
     "acceptedNames": [
       "de Ligt",
+      "Ligt",
       "Matthijs de Ligt"
     ],
-    "lastName": "de Ligt"
+    "lastName": "Ligt"
   },
   {
     "id": "tm-player-582353",
@@ -11425,6 +11615,15 @@
       "Safonov"
     ],
     "lastName": "Safonov"
+  },
+  {
+    "id": "tm-player-7573",
+    "displayName": "Mauricio Pellegrino",
+    "acceptedNames": [
+      "Pellegrino",
+      "Mauricio Pellegrino"
+    ],
+    "lastName": "Pellegrino"
   },
   {
     "id": "tm-player-5762",
@@ -11586,14 +11785,6 @@
     "lastName": "Topal"
   },
   {
-    "id": "tm-player-1432",
-    "displayName": "Meira",
-    "acceptedNames": [
-      "Meira"
-    ],
-    "lastName": "Meira"
-  },
-  {
     "id": "tm-player-3158",
     "displayName": "Melchiot",
     "acceptedNames": [
@@ -11638,13 +11829,21 @@
   },
   {
     "id": "tm-player-38360",
-    "displayName": "Mevlüt Erdinc",
+    "displayName": "Mevlüt Erdinç",
     "acceptedNames": [
       "Mevlüt Erdinç",
-      "Erdinc",
-      "Mevlüt Erdinc"
+      "Erdinç"
     ],
-    "lastName": "Erdinc"
+    "lastName": "Erdinç"
+  },
+  {
+    "id": "tm-player-63",
+    "displayName": "Michael Ballack",
+    "acceptedNames": [
+      "Ballack",
+      "Michael Ballack"
+    ],
+    "lastName": "Ballack"
   },
   {
     "id": "tm-player-3878",
@@ -11761,6 +11960,15 @@
     "lastName": "Bastos"
   },
   {
+    "id": "tm-player-7515",
+    "displayName": "Míchel Salgado",
+    "acceptedNames": [
+      "Salgado",
+      "Míchel Salgado"
+    ],
+    "lastName": "Salgado"
+  },
+  {
     "id": "tm-player-26276",
     "displayName": "Michel Vorm",
     "acceptedNames": [
@@ -11822,14 +12030,6 @@
     "lastName": "van de Ven"
   },
   {
-    "id": "tm-player-13225",
-    "displayName": "Miguel",
-    "acceptedNames": [
-      "Miguel"
-    ],
-    "lastName": "Miguel"
-  },
-  {
     "id": "tm-player-7579",
     "displayName": "Miguel Ángel Angulo",
     "acceptedNames": [
@@ -11864,6 +12064,16 @@
       "Lopes"
     ],
     "lastName": "Lopes"
+  },
+  {
+    "id": "tm-player-13225",
+    "displayName": "Miguel Monteiro",
+    "acceptedNames": [
+      "Miguel",
+      "Monteiro",
+      "Miguel Monteiro"
+    ],
+    "lastName": "Monteiro"
   },
   {
     "id": "tm-player-43848",
@@ -11916,17 +12126,6 @@
       "Mike Maignan"
     ],
     "lastName": "Maignan"
-  },
-  {
-    "id": "tm-player-30739",
-    "displayName": "Mikel John Obi",
-    "acceptedNames": [
-      "Mikel",
-      "Obi",
-      "Mikel John Obi",
-      "John Obi Mikel"
-    ],
-    "lastName": "Obi"
   },
   {
     "id": "tm-player-338424",
@@ -12026,11 +12225,13 @@
   },
   {
     "id": "tm-player-33357",
-    "displayName": "Miranda",
+    "displayName": "Miranda Filho",
     "acceptedNames": [
-      "Miranda"
+      "Miranda",
+      "Filho",
+      "Miranda Filho"
     ],
-    "lastName": "Miranda"
+    "lastName": "Filho"
   },
   {
     "id": "tm-player-315852",
@@ -12177,9 +12378,9 @@
     "displayName": "Morgan De Sanctis",
     "acceptedNames": [
       "Morgan De Sanctis",
-      "De Sanctis"
+      "Sanctis"
     ],
-    "lastName": "De Sanctis"
+    "lastName": "Sanctis"
   },
   {
     "id": "tm-player-503743",
@@ -12248,7 +12449,8 @@
     "id": "tm-player-3123",
     "displayName": "Muzzy Izzet",
     "acceptedNames": [
-      "Muzzy Izzet"
+      "Muzzy Izzet",
+      "Izzet"
     ],
     "lastName": "Izzet"
   },
@@ -12376,26 +12578,11 @@
     "lastName": "Clyne"
   },
   {
-    "id": "tm-player-7493",
-    "displayName": "Naybet",
-    "acceptedNames": [
-      "Naybet"
-    ],
-    "lastName": "Naybet"
-  },
-  {
-    "id": "tm-player-3603",
-    "displayName": "Nedved",
-    "acceptedNames": [
-      "Nedved"
-    ],
-    "lastName": "Nedved"
-  },
-  {
     "id": "tm-player-4045",
     "displayName": "Neil Sullivan",
     "acceptedNames": [
-      "Neil Sullivan"
+      "Neil Sullivan",
+      "Sullivan"
     ],
     "lastName": "Sullivan"
   },
@@ -12436,28 +12623,24 @@
   },
   {
     "id": "tm-player-19726",
-    "displayName": "Nemanja Vidic‎",
+    "displayName": "Nemanja Vidic",
     "acceptedNames": [
       "Vidic‎",
+      "Vidic",
+      "Nemanja Vidic",
       "Nemanja Vidic‎"
     ],
-    "lastName": "Vidic‎"
-  },
-  {
-    "id": "tm-player-274",
-    "displayName": "Nemec",
-    "acceptedNames": [
-      "Nemec"
-    ],
-    "lastName": "Nemec"
+    "lastName": "Vidic"
   },
   {
     "id": "tm-player-111819",
-    "displayName": "Neto",
+    "displayName": "Neto Murara",
     "acceptedNames": [
-      "Neto"
+      "Neto",
+      "Murara",
+      "Neto Murara"
     ],
-    "lastName": "Neto"
+    "lastName": "Murara"
   },
   {
     "id": "tm-player-40995",
@@ -12467,14 +12650,6 @@
       "Neven Subotic"
     ],
     "lastName": "Subotic"
-  },
-  {
-    "id": "tm-player-3403",
-    "displayName": "Neville",
-    "acceptedNames": [
-      "Neville"
-    ],
-    "lastName": "Neville"
   },
   {
     "id": "tm-player-68290",
@@ -12538,12 +12713,14 @@
   },
   {
     "id": "tm-player-486031",
-    "displayName": "Nico González",
+    "displayName": "Nico Gonzalez",
     "acceptedNames": [
       "Nico González",
+      "Gonzalez",
+      "Nico Gonzalez",
       "González"
     ],
-    "lastName": "González"
+    "lastName": "Gonzalez"
   },
   {
     "id": "tm-player-743413",
@@ -12658,9 +12835,10 @@
     "displayName": "Nigel de Jong",
     "acceptedNames": [
       "de Jong",
+      "Jong",
       "Nigel de Jong"
     ],
-    "lastName": "de Jong"
+    "lastName": "Jong"
   },
   {
     "id": "tm-player-6569",
@@ -12767,6 +12945,15 @@
     "lastName": "Wooter"
   },
   {
+    "id": "tm-player-7493",
+    "displayName": "Noureddine Naybet",
+    "acceptedNames": [
+      "Naybet",
+      "Noureddine Naybet"
+    ],
+    "lastName": "Naybet"
+  },
+  {
     "id": "tm-player-340456",
     "displayName": "Noussair Mazraoui",
     "acceptedNames": [
@@ -12819,6 +13006,15 @@
     "lastName": "Sahin"
   },
   {
+    "id": "tm-player-3133",
+    "displayName": "Nwankwo Kanu",
+    "acceptedNames": [
+      "Kanu",
+      "Nwankwo Kanu"
+    ],
+    "lastName": "Kanu"
+  },
+  {
     "id": "tm-player-5794",
     "displayName": "Obafemi Martins",
     "acceptedNames": [
@@ -12855,12 +13051,14 @@
   },
   {
     "id": "tm-player-3394",
-    "displayName": "Ole Gunnar Solskjaer",
+    "displayName": "Ole Gunnar Solskjær",
     "acceptedNames": [
       "Solskjaer",
+      "Solskjær",
+      "Ole Gunnar Solskjær",
       "Ole Gunnar Solskjaer"
     ],
-    "lastName": "Solskjaer"
+    "lastName": "Solskjær"
   },
   {
     "id": "tm-player-16756",
@@ -12967,6 +13165,15 @@
     "lastName": "Torres"
   },
   {
+    "id": "tm-player-3572",
+    "displayName": "Olivier Dacourt",
+    "acceptedNames": [
+      "Dacourt",
+      "Olivier Dacourt"
+    ],
+    "lastName": "Dacourt"
+  },
+  {
     "id": "tm-player-82442",
     "displayName": "Olivier Giroud",
     "acceptedNames": [
@@ -13002,20 +13209,22 @@
     "lastName": "Romeu"
   },
   {
-    "id": "tm-player-85314",
-    "displayName": "Oscar",
-    "acceptedNames": [
-      "Oscar"
-    ],
-    "lastName": "Oscar"
-  },
-  {
     "id": "tm-player-7897",
     "displayName": "Óscar García",
     "acceptedNames": [
       "Óscar García"
     ],
     "lastName": "García"
+  },
+  {
+    "id": "tm-player-85314",
+    "displayName": "Oscar Júnior",
+    "acceptedNames": [
+      "Oscar",
+      "Júnior",
+      "Oscar Júnior"
+    ],
+    "lastName": "Júnior"
   },
   {
     "id": "tm-player-133930",
@@ -13122,14 +13331,6 @@
     "lastName": "Pallister"
   },
   {
-    "id": "tm-player-7691",
-    "displayName": "Pandiani",
-    "acceptedNames": [
-      "Pandiani"
-    ],
-    "lastName": "Pandiani"
-  },
-  {
     "id": "tm-player-9684",
     "displayName": "Pantelis Kafes",
     "acceptedNames": [
@@ -13137,14 +13338,6 @@
       "Kafes"
     ],
     "lastName": "Kafes"
-  },
-  {
-    "id": "tm-player-5940",
-    "displayName": "Panucci",
-    "acceptedNames": [
-      "Panucci"
-    ],
-    "lastName": "Panucci"
   },
   {
     "id": "tm-player-5803",
@@ -13184,9 +13377,10 @@
     "id": "tm-player-20005",
     "displayName": "Papu Gómez",
     "acceptedNames": [
-      "Papu Gómez"
+      "Papu Gómez",
+      "Gómez"
     ],
-    "lastName": "Papu Gómez"
+    "lastName": "Gómez"
   },
   {
     "id": "tm-player-18875",
@@ -13285,6 +13479,15 @@
       "Paul Bosvelt"
     ],
     "lastName": "Bosvelt"
+  },
+  {
+    "id": "tm-player-3248",
+    "displayName": "Paul Ince",
+    "acceptedNames": [
+      "Ince",
+      "Paul Ince"
+    ],
+    "lastName": "Ince"
   },
   {
     "id": "tm-player-122153",
@@ -13407,6 +13610,15 @@
     "lastName": "Mares"
   },
   {
+    "id": "tm-player-3603",
+    "displayName": "Pavel Nedved",
+    "acceptedNames": [
+      "Nedved",
+      "Pavel Nedved"
+    ],
+    "lastName": "Nedved"
+  },
+  {
     "id": "tm-player-103482",
     "displayName": "Pavel Novotny",
     "acceptedNames": [
@@ -13419,17 +13631,10 @@
     "id": "tm-player-5963",
     "displayName": "Pavel Srnicek",
     "acceptedNames": [
-      "Pavel Srnicek"
+      "Pavel Srnicek",
+      "Srnicek"
     ],
     "lastName": "Srnicek"
-  },
-  {
-    "id": "tm-player-101317",
-    "displayName": "Pearce",
-    "acceptedNames": [
-      "Pearce"
-    ],
-    "lastName": "Pearce"
   },
   {
     "id": "tm-player-683840",
@@ -13438,14 +13643,6 @@
       "Pedri"
     ],
     "lastName": "Pedri"
-  },
-  {
-    "id": "tm-player-65278",
-    "displayName": "Pedro",
-    "acceptedNames": [
-      "Pedro"
-    ],
-    "lastName": "Pedro"
   },
   {
     "id": "tm-player-9812",
@@ -13476,7 +13673,8 @@
     "id": "tm-player-7864",
     "displayName": "Pedro Munitis",
     "acceptedNames": [
-      "Pedro Munitis"
+      "Pedro Munitis",
+      "Munitis"
     ],
     "lastName": "Munitis"
   },
@@ -13490,6 +13688,16 @@
     "lastName": "Porro"
   },
   {
+    "id": "tm-player-65278",
+    "displayName": "Pedro Rodríguez",
+    "acceptedNames": [
+      "Pedro",
+      "Rodríguez",
+      "Pedro Rodríguez"
+    ],
+    "lastName": "Rodríguez"
+  },
+  {
     "id": "tm-player-1095",
     "displayName": "Peer Kluge",
     "acceptedNames": [
@@ -13497,14 +13705,6 @@
       "Kluge"
     ],
     "lastName": "Kluge"
-  },
-  {
-    "id": "tm-player-7573",
-    "displayName": "Pellegrino",
-    "acceptedNames": [
-      "Pellegrino"
-    ],
-    "lastName": "Pellegrino"
   },
   {
     "id": "tm-player-8052",
@@ -13516,11 +13716,13 @@
   },
   {
     "id": "tm-player-14132",
-    "displayName": "Pepe",
+    "displayName": "Pepe Ferreira",
     "acceptedNames": [
-      "Pepe"
+      "Pepe",
+      "Ferreira",
+      "Pepe Ferreira"
     ],
-    "lastName": "Pepe"
+    "lastName": "Ferreira"
   },
   {
     "id": "tm-player-7825",
@@ -13582,6 +13784,15 @@
       "Péter Gulácsi"
     ],
     "lastName": "Gulácsi"
+  },
+  {
+    "id": "tm-player-3465",
+    "displayName": "Peter Schmeichel",
+    "acceptedNames": [
+      "Schmeichel",
+      "Peter Schmeichel"
+    ],
+    "lastName": "Schmeichel"
   },
   {
     "id": "tm-player-101759",
@@ -13672,6 +13883,15 @@
     "lastName": "Coutinho"
   },
   {
+    "id": "tm-player-5289",
+    "displayName": "Philippe Léonard",
+    "acceptedNames": [
+      "Léonard",
+      "Philippe Léonard"
+    ],
+    "lastName": "Léonard"
+  },
+  {
     "id": "tm-player-4277",
     "displayName": "Philippe Senderos",
     "acceptedNames": [
@@ -13734,12 +13954,13 @@
   },
   {
     "id": "tm-player-181136",
-    "displayName": "Piotr Zielinski",
+    "displayName": "Piotr Zieliński",
     "acceptedNames": [
       "Piotr Zielinski",
-      "Zielinski"
+      "Zieliński",
+      "Piotr Zieliński"
     ],
-    "lastName": "Zielinski"
+    "lastName": "Zieliński"
   },
   {
     "id": "tm-player-76",
@@ -13778,7 +13999,8 @@
     "id": "tm-player-3541",
     "displayName": "Quinton Fortune",
     "acceptedNames": [
-      "Quinton Fortune"
+      "Quinton Fortune",
+      "Fortune"
     ],
     "lastName": "Fortune"
   },
@@ -13853,11 +14075,13 @@
   },
   {
     "id": "tm-player-61892",
-    "displayName": "Rafael",
+    "displayName": "Rafael da Silva",
     "acceptedNames": [
-      "Rafael"
+      "Rafael",
+      "Silva",
+      "Rafael da Silva"
     ],
-    "lastName": "Rafael"
+    "lastName": "Silva"
   },
   {
     "id": "tm-player-357164",
@@ -13896,20 +14120,24 @@
     "lastName": "Di Gennaro"
   },
   {
-    "id": "tm-player-33947",
-    "displayName": "Rafinha",
+    "id": "tm-player-129473",
+    "displayName": "Rafinha Alcântara",
     "acceptedNames": [
-      "Rafinha"
+      "Rafinha",
+      "Alcântara",
+      "Rafinha Alcântara"
     ],
-    "lastName": "Rafinha"
+    "lastName": "Alcântara"
   },
   {
-    "id": "tm-player-129473",
-    "displayName": "Rafinha",
+    "id": "tm-player-33947",
+    "displayName": "Rafinha Souza",
     "acceptedNames": [
-      "Rafinha"
+      "Rafinha",
+      "Souza",
+      "Rafinha Souza"
     ],
-    "lastName": "Rafinha"
+    "lastName": "Souza"
   },
   {
     "id": "tm-player-26669",
@@ -13959,9 +14187,10 @@
     "displayName": "Randal Kolo Muani",
     "acceptedNames": [
       "Randal Kolo Muani",
+      "Muani",
       "Kolo Muani"
     ],
-    "lastName": "Kolo Muani"
+    "lastName": "Muani"
   },
   {
     "id": "tm-player-357992",
@@ -13999,14 +14228,6 @@
     "lastName": "Raphinha"
   },
   {
-    "id": "tm-player-7349",
-    "displayName": "Raúl",
-    "acceptedNames": [
-      "Raúl"
-    ],
-    "lastName": "Raúl"
-  },
-  {
     "id": "tm-player-15452",
     "displayName": "Raúl Albiol",
     "acceptedNames": [
@@ -14023,6 +14244,16 @@
       "Raúl García"
     ],
     "lastName": "García"
+  },
+  {
+    "id": "tm-player-7349",
+    "displayName": "Raúl González",
+    "acceptedNames": [
+      "Raúl",
+      "González",
+      "Raúl González"
+    ],
+    "lastName": "González"
   },
   {
     "id": "tm-player-13168",
@@ -14065,14 +14296,6 @@
       "Reçber"
     ],
     "lastName": "Reçber"
-  },
-  {
-    "id": "tm-player-5796",
-    "displayName": "Recoba",
-    "acceptedNames": [
-      "Recoba"
-    ],
-    "lastName": "Recoba"
   },
   {
     "id": "tm-player-472423",
@@ -14141,7 +14364,8 @@
     "id": "tm-player-247",
     "displayName": "René Schneider",
     "acceptedNames": [
-      "René Schneider"
+      "René Schneider",
+      "Schneider"
     ],
     "lastName": "Schneider"
   },
@@ -14301,14 +14525,6 @@
     "lastName": "Ferdinand"
   },
   {
-    "id": "tm-player-3854",
-    "displayName": "Riquelme",
-    "acceptedNames": [
-      "Riquelme"
-    ],
-    "lastName": "Riquelme"
-  },
-  {
     "id": "tm-player-3372",
     "displayName": "Rivaldo",
     "acceptedNames": [
@@ -14357,6 +14573,15 @@
       "Huth"
     ],
     "lastName": "Huth"
+  },
+  {
+    "id": "tm-player-29556",
+    "displayName": "Robert Jarni",
+    "acceptedNames": [
+      "Jarni",
+      "Robert Jarni"
+    ],
+    "lastName": "Jarni"
   },
   {
     "id": "tm-player-38253",
@@ -14412,20 +14637,23 @@
   },
   {
     "id": "tm-player-7518",
-    "displayName": "Roberto Ca.",
+    "displayName": "Roberto Carlos",
     "acceptedNames": [
-      "Roberto Ca."
+      "Roberto Ca.",
+      "Carlos",
+      "Roberto Carlos"
     ],
-    "lastName": "Ca."
+    "lastName": "Carlos"
   },
   {
     "id": "tm-player-131789",
     "displayName": "Roberto Firmino",
     "acceptedNames": [
       "Roberto Fi.",
+      "Firmino",
       "Roberto Firmino"
     ],
-    "lastName": "Roberto Firmino"
+    "lastName": "Firmino"
   },
   {
     "id": "tm-player-197471",
@@ -14459,9 +14687,10 @@
     "displayName": "Robin Le Normand",
     "acceptedNames": [
       "Le Normand",
+      "Normand",
       "Robin Le Normand"
     ],
-    "lastName": "Le Normand"
+    "lastName": "Normand"
   },
   {
     "id": "tm-player-743515",
@@ -14477,9 +14706,10 @@
     "displayName": "Robin van Persie",
     "acceptedNames": [
       "Robin van Persie",
+      "Persie",
       "van Persie"
     ],
-    "lastName": "van Persie"
+    "lastName": "Persie"
   },
   {
     "id": "tm-player-7606",
@@ -14502,9 +14732,10 @@
     "displayName": "Rodrigo De Paul",
     "acceptedNames": [
       "De Paul",
+      "Paul",
       "Rodrigo De Paul"
     ],
-    "lastName": "De Paul"
+    "lastName": "Paul"
   },
   {
     "id": "tm-player-961297",
@@ -14706,11 +14937,13 @@
   },
   {
     "id": "tm-player-3140",
-    "displayName": "Ronaldo",
+    "displayName": "Ronaldo Nazario",
     "acceptedNames": [
-      "Ronaldo"
+      "Ronaldo",
+      "Nazario",
+      "Ronaldo Nazario"
     ],
-    "lastName": "Ronaldo"
+    "lastName": "Nazario"
   },
   {
     "id": "tm-player-3578",
@@ -14725,7 +14958,8 @@
     "id": "tm-player-5807",
     "displayName": "Roque Júnior",
     "acceptedNames": [
-      "Roque Júnior"
+      "Roque Júnior",
+      "Júnior"
     ],
     "lastName": "Júnior"
   },
@@ -14734,9 +14968,9 @@
     "displayName": "Roque Santa Cruz",
     "acceptedNames": [
       "Roque Santa Cruz",
-      "Santa Cruz"
+      "Cruz"
     ],
-    "lastName": "Santa Cruz"
+    "lastName": "Cruz"
   },
   {
     "id": "tm-player-29159",
@@ -14769,7 +15003,8 @@
     "id": "tm-player-3994",
     "displayName": "Roy Makaay",
     "acceptedNames": [
-      "Roy Makaay"
+      "Roy Makaay",
+      "Makaay"
     ],
     "lastName": "Makaay"
   },
@@ -14862,6 +15097,16 @@
     "lastName": "Hesp"
   },
   {
+    "id": "tm-player-3407",
+    "displayName": "Ruud van Nistelrooy",
+    "acceptedNames": [
+      "van Nistel.",
+      "Nistelrooy",
+      "Ruud van Nistelrooy"
+    ],
+    "lastName": "Nistelrooy"
+  },
+  {
     "id": "tm-player-16135",
     "displayName": "Ryan Babel",
     "acceptedNames": [
@@ -14923,14 +15168,6 @@
       "Saenko"
     ],
     "lastName": "Saenko"
-  },
-  {
-    "id": "tm-player-7515",
-    "displayName": "Salgado",
-    "acceptedNames": [
-      "Salgado"
-    ],
-    "lastName": "Salgado"
   },
   {
     "id": "tm-player-244940",
@@ -15014,13 +15251,12 @@
   },
   {
     "id": "tm-player-28021",
-    "displayName": "Samir Handanovic",
+    "displayName": "Samir Handanovič",
     "acceptedNames": [
       "Samir Handanovič",
-      "Handanovic",
-      "Samir Handanovic"
+      "Handanovič"
     ],
-    "lastName": "Handanovic"
+    "lastName": "Handanovič"
   },
   {
     "id": "tm-player-18935",
@@ -15140,7 +15376,8 @@
     "id": "tm-player-7639",
     "displayName": "Santiago Ezquerro",
     "acceptedNames": [
-      "Santiago Ezquerro"
+      "Santiago Ezquerro",
+      "Ezquerro"
     ],
     "lastName": "Ezquerro"
   },
@@ -15177,14 +15414,6 @@
       "Sávio"
     ],
     "lastName": "Sávio"
-  },
-  {
-    "id": "tm-player-3465",
-    "displayName": "Schmeichel",
-    "acceptedNames": [
-      "Schmeichel"
-    ],
-    "lastName": "Schmeichel"
   },
   {
     "id": "tm-player-90",
@@ -15335,14 +15564,6 @@
     "lastName": "Sentürk"
   },
   {
-    "id": "tm-player-7840",
-    "displayName": "Senna",
-    "acceptedNames": [
-      "Senna"
-    ],
-    "lastName": "Senna"
-  },
-  {
     "id": "tm-player-903693",
     "displayName": "Senny Mayulu",
     "acceptedNames": [
@@ -15353,13 +15574,12 @@
   },
   {
     "id": "tm-player-34593",
-    "displayName": "Serdar Tasci",
+    "displayName": "Serdar Taşçı",
     "acceptedNames": [
       "Serdar Taşçı",
-      "Tasci",
-      "Serdar Tasci"
+      "Taşçı"
     ],
-    "lastName": "Tasci"
+    "lastName": "Taşçı"
   },
   {
     "id": "tm-player-127032",
@@ -15467,6 +15687,15 @@
     "lastName": "Busquets"
   },
   {
+    "id": "tm-player-7912",
+    "displayName": "Sérgio Conceição",
+    "acceptedNames": [
+      "Conceição",
+      "Sérgio Conceição"
+    ],
+    "lastName": "Conceição"
+  },
+  {
     "id": "tm-player-93935",
     "displayName": "Sergio Escudero",
     "acceptedNames": [
@@ -15492,6 +15721,15 @@
       "Gómez"
     ],
     "lastName": "Gómez"
+  },
+  {
+    "id": "tm-player-7500",
+    "displayName": "Sergio González",
+    "acceptedNames": [
+      "González",
+      "Sergio González"
+    ],
+    "lastName": "González"
   },
   {
     "id": "tm-player-106220",
@@ -15604,14 +15842,6 @@
       "Govou"
     ],
     "lastName": "Govou"
-  },
-  {
-    "id": "tm-player-3194",
-    "displayName": "Silva",
-    "acceptedNames": [
-      "Silva"
-    ],
-    "lastName": "Silva"
   },
   {
     "id": "tm-player-15476",
@@ -15765,14 +15995,6 @@
     "lastName": "Campbell"
   },
   {
-    "id": "tm-player-610",
-    "displayName": "Soldo",
-    "acceptedNames": [
-      "Soldo"
-    ],
-    "lastName": "Soldo"
-  },
-  {
     "id": "tm-player-4437",
     "displayName": "Song",
     "acceptedNames": [
@@ -15798,29 +16020,14 @@
     "lastName": "Sorín"
   },
   {
-    "id": "tm-player-3744",
-    "displayName": "Southgate",
-    "acceptedNames": [
-      "Southgate"
-    ],
-    "lastName": "Southgate"
-  },
-  {
-    "id": "tm-player-3557",
-    "displayName": "Stam",
-    "acceptedNames": [
-      "Stam"
-    ],
-    "lastName": "Stam"
-  },
-  {
     "id": "tm-player-111196",
     "displayName": "Stefan de Vrij",
     "acceptedNames": [
       "de Vrij",
+      "Vrij",
       "Stefan de Vrij"
     ],
-    "lastName": "de Vrij"
+    "lastName": "Vrij"
   },
   {
     "id": "tm-player-6237",
@@ -15905,9 +16112,10 @@
     "displayName": "Stephan El Shaarawy",
     "acceptedNames": [
       "Stephan El Shaarawy",
+      "Shaarawy",
       "El Shaarawy"
     ],
-    "lastName": "El Shaarawy"
+    "lastName": "Shaarawy"
   },
   {
     "id": "tm-player-2865",
@@ -15954,7 +16162,8 @@
     "id": "tm-player-3308",
     "displayName": "Stephen Warnock",
     "acceptedNames": [
-      "Stephen Warnock"
+      "Stephen Warnock",
+      "Warnock"
     ],
     "lastName": "Warnock"
   },
@@ -15989,7 +16198,8 @@
     "id": "tm-player-3364",
     "displayName": "Steve Stone",
     "acceptedNames": [
-      "Steve Stone"
+      "Steve Stone",
+      "Stone"
     ],
     "lastName": "Stone"
   },
@@ -16030,12 +16240,13 @@
     "lastName": "Schaars"
   },
   {
-    "id": "tm-player-103812",
-    "displayName": "Stimac",
+    "id": "tm-player-101317",
+    "displayName": "Stuart Pearce",
     "acceptedNames": [
-      "Stimac"
+      "Pearce",
+      "Stuart Pearce"
     ],
-    "lastName": "Stimac"
+    "lastName": "Pearce"
   },
   {
     "id": "tm-player-103479",
@@ -16305,6 +16516,15 @@
     "lastName": "Kehrer"
   },
   {
+    "id": "tm-player-66",
+    "displayName": "Thomas Brdaric",
+    "acceptedNames": [
+      "Brdaric",
+      "Thomas Brdaric"
+    ],
+    "lastName": "Brdaric"
+  },
+  {
     "id": "tm-player-91849",
     "displayName": "Thomas Delaney",
     "acceptedNames": [
@@ -16470,7 +16690,8 @@
     "id": "tm-player-4249",
     "displayName": "Tim Flowers",
     "acceptedNames": [
-      "Tim Flowers"
+      "Tim Flowers",
+      "Flowers"
     ],
     "lastName": "Flowers"
   },
@@ -16604,7 +16825,8 @@
     "id": "tm-player-1320",
     "displayName": "Tomasz Kuszczak",
     "acceptedNames": [
-      "Tomasz Kuszczak"
+      "Tomasz Kuszczak",
+      "Kuszczak"
     ],
     "lastName": "Kuszczak"
   },
@@ -16824,22 +17046,6 @@
     "lastName": "Vampeta"
   },
   {
-    "id": "tm-player-3516",
-    "displayName": "van der Sar",
-    "acceptedNames": [
-      "van der Sar"
-    ],
-    "lastName": "Sar"
-  },
-  {
-    "id": "tm-player-3407",
-    "displayName": "van Nistel.",
-    "acceptedNames": [
-      "van Nistel."
-    ],
-    "lastName": "Nistel."
-  },
-  {
     "id": "tm-player-15114",
     "displayName": "Vashchuk",
     "acceptedNames": [
@@ -17008,14 +17214,6 @@
     "lastName": "Vierchowod"
   },
   {
-    "id": "tm-player-5797",
-    "displayName": "Vieri",
-    "acceptedNames": [
-      "Vieri"
-    ],
-    "lastName": "Vieri"
-  },
-  {
     "id": "tm-player-5351",
     "displayName": "Vikash Dhorasoo",
     "acceptedNames": [
@@ -17036,7 +17234,8 @@
     "id": "tm-player-5939",
     "displayName": "Vincent Candela",
     "acceptedNames": [
-      "Vincent Candela"
+      "Vincent Candela",
+      "Candela"
     ],
     "lastName": "Candela"
   },
@@ -17062,7 +17261,8 @@
     "id": "tm-player-5960",
     "displayName": "Vincenzo Montella",
     "acceptedNames": [
-      "Vincenzo Montella"
+      "Vincenzo Montella",
+      "Montella"
     ],
     "lastName": "Montella"
   },
@@ -17071,18 +17271,20 @@
     "displayName": "Vinicius Junior",
     "acceptedNames": [
       "Vinicius J.",
+      "Junior",
       "Vinicius Junior"
     ],
-    "lastName": "Vinicius Junior"
+    "lastName": "Junior"
   },
   {
     "id": "tm-player-139208",
     "displayName": "Virgil van Dijk",
     "acceptedNames": [
       "van Dijk",
+      "Dijk",
       "Virgil van Dijk"
     ],
-    "lastName": "van Dijk"
+    "lastName": "Dijk"
   },
   {
     "id": "tm-player-487469",
@@ -17203,6 +17405,15 @@
       "Walter Gargano"
     ],
     "lastName": "Gargano"
+  },
+  {
+    "id": "tm-player-7691",
+    "displayName": "Walter Pandiani",
+    "acceptedNames": [
+      "Pandiani",
+      "Walter Pandiani"
+    ],
+    "lastName": "Pandiani"
   },
   {
     "id": "tm-player-5938",
@@ -17459,6 +17670,15 @@
     "lastName": "Shaqiri"
   },
   {
+    "id": "tm-player-618",
+    "displayName": "Yıldıray Baştürk",
+    "acceptedNames": [
+      "Baştürk",
+      "Yıldıray Baştürk"
+    ],
+    "lastName": "Baştürk"
+  },
+  {
     "id": "tm-player-366746",
     "displayName": "Yahia Attiyat Allah",
     "acceptedNames": [
@@ -17501,15 +17721,6 @@
       "Carrasco"
     ],
     "lastName": "Carrasco"
-  },
-  {
-    "id": "tm-player-207834",
-    "displayName": "Yassine Bounou",
-    "acceptedNames": [
-      "Bounou",
-      "Yassine Bounou"
-    ],
-    "lastName": "Bounou"
   },
   {
     "id": "tm-player-13091",
@@ -17704,22 +17915,6 @@
     "lastName": "Aboukhlal"
   },
   {
-    "id": "tm-player-5757",
-    "displayName": "Zambrotta",
-    "acceptedNames": [
-      "Zambrotta"
-    ],
-    "lastName": "Zambrotta"
-  },
-  {
-    "id": "tm-player-5783",
-    "displayName": "Zanetti",
-    "acceptedNames": [
-      "Zanetti"
-    ],
-    "lastName": "Zanetti"
-  },
-  {
     "id": "tm-player-52059",
     "displayName": "Zanka",
     "acceptedNames": [
@@ -17739,7 +17934,8 @@
     "id": "tm-player-89",
     "displayName": "Zé Roberto",
     "acceptedNames": [
-      "Zé Roberto"
+      "Zé Roberto",
+      "Roberto"
     ],
     "lastName": "Roberto"
   },
@@ -17753,27 +17949,12 @@
   },
   {
     "id": "tm-player-3111",
-    "displayName": "Zidane",
+    "displayName": "Zinédine Zidane",
     "acceptedNames": [
-      "Zidane"
+      "Zidane",
+      "Zinédine Zidane"
     ],
     "lastName": "Zidane"
-  },
-  {
-    "id": "tm-player-5302",
-    "displayName": "Zikos",
-    "acceptedNames": [
-      "Zikos"
-    ],
-    "lastName": "Zikos"
-  },
-  {
-    "id": "tm-player-94",
-    "displayName": "Zivkovic",
-    "acceptedNames": [
-      "Zivkovic"
-    ],
-    "lastName": "Zivkovic"
   },
   {
     "id": "tm-player-3455",
@@ -17808,5 +17989,14 @@
       "Zoran Mamic"
     ],
     "lastName": "Mamic"
+  },
+  {
+    "id": "tm-player-610",
+    "displayName": "Zvonimir Soldo",
+    "acceptedNames": [
+      "Soldo",
+      "Zvonimir Soldo"
+    ],
+    "lastName": "Soldo"
   }
 ]

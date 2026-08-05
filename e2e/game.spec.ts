@@ -255,10 +255,10 @@ test('gates the homepage leaderboard by today’s nickname and switches game and
 test('keeps secondary formats collapsed and plays the shared lineup daily with bench autocomplete', async ({ page }) => {
   const dailyDate = new Date().toISOString().slice(0, 10)
   const boards = {
-    today: [{ rank: 1, nickname: 'ShapeReader', value: 80, gamesPlayed: 1 }],
-    cumulative: [{ rank: 1, nickname: 'ShapeReader', value: 80, gamesPlayed: 1 }],
+    today: [{ rank: 1, nickname: 'ShapeReader', value: 20, gamesPlayed: 1 }],
+    cumulative: [{ rank: 1, nickname: 'ShapeReader', value: 20, gamesPlayed: 1 }],
     average: [],
-    best: [{ rank: 1, nickname: 'ShapeReader', value: 80, gamesPlayed: 1 }],
+    best: [{ rank: 1, nickname: 'ShapeReader', value: 20, gamesPlayed: 1 }],
   }
   await page.route('**/api/functions/v1/lineup-game**', async (route) => {
     const request = route.request()
@@ -279,13 +279,15 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
         challengeDate: dailyDate,
         nickname: 'ShapeReader',
         outcome: 'correct',
+        cluesUsed: 2,
+        clueIncorrectGuessCounts: [1, 1],
         incorrectGuesses: 1,
       })
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
         date: dailyDate,
-        points: 80,
+        points: 20,
         rank: 1,
-        leaderboard: [{ rank: 1, nickname: 'ShapeReader', points: 80, submittedAt: '2026-08-05T12:00:00Z' }],
+        leaderboard: [{ rank: 1, nickname: 'ShapeReader', points: 20, submittedAt: '2026-08-05T12:00:00Z' }],
         boards,
       }) })
       return
@@ -309,6 +311,7 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
   await page.getByRole('button', { name: /let's go/i }).click()
 
   await expect(page.getByRole('heading', { name: /Juventus FC.*FC Nantes/i })).toBeVisible()
+  await expect(page.getByTestId('lineup-competition-label')).toHaveText('1995/96 / UCL Semi-Final - First leg')
   await expect(page.getByLabel(/Juventus FC and FC Nantes starting lineups/i)).toBeVisible()
   await expect(page.getByLabel(/missing Juventus FC starter/i)).toBeVisible()
   await expect(page.getByText(/CEST \(Europe\/Rome\)/)).toBeVisible()
@@ -323,6 +326,13 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId('lineup-available-score')).toHaveText('80')
   await expect(page.getByRole('status')).toContainText('Already guessed')
+
+  await page.getByRole('button', { name: /get nationality clue.*max 40 pts/i }).click()
+  await expect(page.getByTestId('lineup-primary-clue')).toHaveText(/NationalityItaly/i)
+  await expect(page.getByTestId('lineup-available-score')).toHaveText('40')
+  await page.getByRole('button', { name: /get initials clue.*max 20 pts/i }).click()
+  await expect(page.getByTestId('lineup-initials-clue')).toHaveText(/Player initialsP\./i)
+  await expect(page.getByTestId('lineup-available-score')).toHaveText('20')
 
   await input.fill('Peruzzi')
   await page.getByRole('button', { name: 'Submit' }).click()

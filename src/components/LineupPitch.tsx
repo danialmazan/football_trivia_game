@@ -1,4 +1,5 @@
 import type { LineupMatch } from '../data/lineupTypes'
+import { positionLineupStarter } from '../game/lineups'
 
 interface LineupPitchProps {
   match: LineupMatch
@@ -17,11 +18,11 @@ export function LineupPitch({ match, missingPlayerId, revealed }: LineupPitchPro
           </div>
           {team.starters.map((player) => {
             const missing = player.id === missingPlayerId
-            const top = teamIndex === 0 ? 50 + player.y / 2 : (100 - player.y) / 2
+            const { left, top } = positionLineupStarter(player.x, player.y, teamIndex)
             return (
               <div
                 className={`pitch-player ${missing ? 'pitch-player--missing' : ''} ${missing && revealed ? 'pitch-player--revealed' : ''}`}
-                style={{ left: `${player.x}%`, top: `${top}%` }}
+                style={{ left: `${left}%`, top: `${top}%` }}
                 key={player.id}
                 aria-label={missing && !revealed ? `Missing ${team.name} starter` : `${player.displayName}, ${team.name}`}
               >

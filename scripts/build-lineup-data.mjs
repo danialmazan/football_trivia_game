@@ -14,6 +14,19 @@ const searchOutput =
   process.env.LINEUP_SEARCH_OUTPUT_JSON ?? join(root, 'src', 'data', 'lineupSearch.json')
 const poolOutput =
   process.env.LINEUP_DAILY_POOL_SQL ?? join(root, 'supabase', 'migrations', '202608050002_lineup_daily_pool.sql')
+const performancesSource = process.env.FOOTBALL_PERFORMANCES_CSV ?? join(cacheRoot, 'raw', 'player_performances.csv')
+const nationalPerformancesSource = process.env.FOOTBALL_NATIONAL_PERFORMANCES_CSV ?? join(cacheRoot, 'raw', 'player_national_performances.csv')
+const nationalTeamsSource = process.env.FOOTBALL_NATIONAL_TEAMS_CSV_GZ ?? join(cacheRoot, 'raw', 'national_teams.csv.gz')
+const teamDetailsSource = process.env.FOOTBALL_TEAM_DETAILS_CSV ?? join(cacheRoot, 'raw', 'team_details.csv')
+const playerGameSource = process.env.FOOTBALL_OUTPUT_JSON ?? join(root, 'src', 'data', 'players.json')
+
+// Transfermarkt's performance feed omits the domestic records for these two
+// tournament seasons. Their profile/transfer records identify the only team
+// represented across the season, so keep the reviewed fallback explicit.
+const verifiedSeasonClubOverrides = new Map([
+  ['5855:1997', 'Atlético Mineiro'],
+  ['1772:2001', 'Korea University'],
+])
 
 const competitions = [
   {
@@ -146,9 +159,204 @@ async function loadPlayers() {
       displayName: row.name,
       firstName: row.first_name,
       lastName: row.last_name || row.name.split(/\s+/).at(-1) || row.name,
+      citizenship: row.country_of_citizenship,
     })
   }
+  if (existsSync(playerGameSource)) {
+    for (const player of JSON.parse(readFileSync(playerGameSource, 'utf8'))) {
+      const existing = players.get(String(player.sourcePlayerId))
+      players.set(String(player.sourcePlayerId), {
+        ...existing,
+        displayName: player.displayName,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        citizenship: existing?.citizenship || player.birthCountry,
+      })
+    }
+  }
   return players
+}
+
+function seasonStartYear(season) {
+  const raw = Number(String(season).split('/')[0])
+  if (!Number.isFinite(raw)) return Number.NaN
+  if (raw >= 1900) return raw
+  return raw >= 80 ? 1900 + raw : 2000 + raw
+}
+
+function cacheBatchKey(values) {
+  let hash = 2166136261
+  for (const character of values.join(',')) {
+    hash ^= character.charCodeAt(0)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0')
+}
+
+async function readCsvRows(path, callback, compressed = false) {
+  if (!existsSync(path)) throw new Error(`Missing lineup clue source: ${path}`)
+  const source = createReadStream(path)
+  const input = compressed ? source.pipe(createGunzip()) : source
+  const lines = createInterface({ input, crlfDelay: Infinity })
+  let headers
+  for await (const line of lines) {
+    if (!headers) {
+      headers = csvLine(line)
+      continue
+    }
+    if (!line.trim()) continue
+    const values = csvLine(line)
+    callback(Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ''])))
+  }
+}
+
+async function addStarterClues(matches, players) {
+  const requiredSeasons = new Map()
+  for (const match of matches) {
+    for (const starter of match.teams.flatMap((team) => team.starters)) {
+      const seasons = requiredSeasons.get(starter.sourcePlayerId) ?? new Set()
+      seasons.add(match.seasonStart)
+      requiredSeasons.set(starter.sourcePlayerId, seasons)
+    }
+  }
+
+  const nationalTeamNames = new Map()
+  const nationalityNames = new Map()
+  await readCsvRows(nationalTeamsSource, (row) => {
+    nationalTeamNames.set(row.national_team_id, row.name)
+    nationalityNames.set(Number(row.country_id), row.country_name)
+  }, true)
+  const nationalTeamsByPlayer = new Map()
+  await readCsvRows(nationalPerformancesSource, (row) => {
+    if (!requiredSeasons.has(row.player_id) || Number(row.matches || 0) <= 0) return
+    const name = nationalTeamNames.get(row.team_id)
+    if (!name) return
+    const teams = nationalTeamsByPlayer.get(row.player_id) ?? []
+    teams.push({ name, caps: Number(row.matches || 0) })
+    nationalTeamsByPlayer.set(row.player_id, teams)
+  })
+
+  const clubRows = new Map()
+  await readCsvRows(performancesSource, (row) => {
+    const seasons = requiredSeasons.get(row.player_id)
+    const startYear = seasonStartYear(row.season_name)
+    const appearances = Number(row.nb_on_pitch || 0)
+    if (!seasons?.has(startYear) || !Number.isFinite(appearances) || appearances <= 0) return
+    const key = `${row.player_id}:${startYear}:${row.team_id}`
+    const current = clubRows.get(key) ?? { playerId: row.player_id, startYear, name: row.team_name, appearances: 0 }
+    current.appearances += appearances
+    clubRows.set(key, current)
+  })
+  const primaryClub = new Map()
+  for (const club of clubRows.values()) {
+    const key = `${club.playerId}:${club.startYear}`
+    const current = primaryClub.get(key)
+    if (!current || club.appearances > current.appearances || (club.appearances === current.appearances && club.name.localeCompare(current.name) < 0)) {
+      primaryClub.set(key, club)
+    }
+  }
+
+  const uclMissingNationalityIds = [...new Set(matches
+    .filter((match) => match.competition === 'ucl')
+    .flatMap((match) => match.teams.flatMap((team) => team.starters))
+    .filter((starter) => !(nationalTeamsByPlayer.get(starter.sourcePlayerId)?.length) && !players.get(starter.sourcePlayerId)?.citizenship)
+    .map((starter) => starter.sourcePlayerId))]
+  const apiNationalities = new Map()
+  const nationalityBatches = Array.from({ length: Math.ceil(uclMissingNationalityIds.length / 75) }, (_, index) =>
+    uclMissingNationalityIds.slice(index * 75, index * 75 + 75))
+  await mapConcurrent(nationalityBatches, 4, async (ids, index) => {
+    if (!ids.length) return
+    const query = ids.map((id) => `ids%5B%5D=${encodeURIComponent(id)}`).join('&')
+    const path = join(lineupCache, 'player-metadata', `batch-${cacheBatchKey(ids)}.json`)
+    const payload = JSON.parse(await fetchCached(`https://tmapi.transfermarkt.technology/players?${query}`, path))
+    for (const player of payload.data ?? []) {
+      const details = player.nationalityDetails?.nationalities ?? {}
+      const ids = [details.nationalityId, details.secondNationalityId].filter((id) => Number(id) > 0)
+      const names = ids
+        .map((id) => nationalityNames.get(Number(id)))
+        .filter(Boolean)
+      if (names.length) apiNationalities.set(String(player.id), [...new Set(names)])
+    }
+  })
+  const unresolvedNationalityIds = uclMissingNationalityIds.filter((id) => !apiNationalities.has(id))
+  await mapConcurrent(unresolvedNationalityIds, 4, async (playerId) => {
+    const player = players.get(playerId)
+    const slug = normalize(player?.displayName ?? playerId).replace(/\s+/g, '-')
+    const path = join(lineupCache, 'player-profiles', `${playerId}.html`)
+    const html = await fetchCached(`https://www.transfermarkt.com/${slug}/profil/spieler/${playerId}`, path)
+    const citizenshipBlock = html.match(/Citizenship:[\s\S]{0,900}/)?.[0] ?? ''
+    const names = [...citizenshipBlock.matchAll(/title="([^"]+)" alt="\1" class="flaggenrahmen/g)].map((match) => decodeHtml(match[1]))
+    if (names.length) apiNationalities.set(playerId, [...new Set(names)])
+  })
+
+  const missingClubKeys = new Set(matches
+    .filter((match) => match.competition !== 'ucl')
+    .flatMap((match) => match.teams.flatMap((team) => team.starters.map((starter) => `${starter.sourcePlayerId}:${match.seasonStart}`)))
+    .filter((key) => !primaryClub.has(key)))
+  const missingClubPlayerIds = [...new Set([...missingClubKeys].map((key) => key.split(':')[0]))]
+  const clubNames = new Map()
+  await readCsvRows(teamDetailsSource, (row) => {
+    clubNames.set(String(row.club_id), row.club_name.replace(/\s*\(\d+\)\s*$/, ''))
+  })
+  const performanceClubCounts = []
+  await mapConcurrent(missingClubPlayerIds, 6, async (playerId, index) => {
+    const path = join(lineupCache, 'player-performance', `${playerId}.json`)
+    const payload = JSON.parse(await fetchCached(`https://tmapi.transfermarkt.technology/player/${playerId}/performance-game`, path))
+    const counts = new Map()
+    for (const performance of payload.data?.performance ?? []) {
+      const season = Number(performance.gameInformation?.seasonId)
+      const key = `${playerId}:${season}`
+      if (!missingClubKeys.has(key) || performance.gameInformation?.isNationalGame || performance.statistics?.generalStatistics?.participationState !== 'played') continue
+      const primaryClubId = Number(performance.statistics?.generalStatistics?.primaryClubId)
+      const clubId = String(primaryClubId > 0 ? primaryClubId : performance.clubsInformation?.club?.clubId ?? '')
+      if (!clubId) continue
+      const clubKey = `${key}:${clubId}`
+      counts.set(clubKey, (counts.get(clubKey) ?? 0) + 1)
+    }
+    for (const [clubKey, appearances] of counts) {
+      const [id, season, clubId] = clubKey.split(':')
+      performanceClubCounts.push({ id, season, clubId, appearances })
+    }
+    console.log(`Clue performance ${index + 1}/${missingClubPlayerIds.length}: ${playerId}`)
+  })
+  const unresolvedClubIds = [...new Set(performanceClubCounts.map((row) => row.clubId).filter((id) => !clubNames.has(id)))]
+  const clubBatches = Array.from({ length: Math.ceil(unresolvedClubIds.length / 75) }, (_, index) =>
+    unresolvedClubIds.slice(index * 75, index * 75 + 75))
+  await mapConcurrent(clubBatches, 4, async (ids, index) => {
+    if (!ids.length) return
+    const query = ids.map((id) => `ids%5B%5D=${encodeURIComponent(id)}`).join('&')
+    const path = join(lineupCache, 'club-metadata', `batch-${cacheBatchKey(ids)}.json`)
+    const payload = JSON.parse(await fetchCached(`https://tmapi.transfermarkt.technology/clubs?${query}`, path))
+    for (const club of payload.data ?? []) clubNames.set(String(club.id), club.name.replace(/\s*\(.*\)\s*$/, ''))
+  })
+  for (const { id, season, clubId, appearances } of performanceClubCounts) {
+    const key = `${id}:${season}`
+    const name = clubNames.get(clubId)
+    if (!name) continue
+    const current = primaryClub.get(key)
+    if (!current || appearances > current.appearances || (appearances === current.appearances && name.localeCompare(current.name) < 0)) {
+      primaryClub.set(key, { playerId: id, startYear: Number(season), name, appearances })
+    }
+  }
+  for (const [key, name] of verifiedSeasonClubOverrides) {
+    primaryClub.set(key, { playerId: key.split(':')[0], startYear: Number(key.split(':')[1]), name, appearances: 1 })
+  }
+
+  for (const match of matches) {
+    for (const team of match.teams) for (const starter of team.starters) {
+      const cappedTeams = (nationalTeamsByPlayer.get(starter.sourcePlayerId) ?? [])
+        .sort((left, right) => right.caps - left.caps || left.name.localeCompare(right.name))
+      const nationalities = [...new Set(cappedTeams.map((team) => team.name))]
+      const citizenship = String(players.get(starter.sourcePlayerId)?.citizenship ?? '')
+        .split(/[,;/]/)
+        .map((value) => value.trim())
+        .filter(Boolean)
+      starter.nationality = match.competition !== 'ucl'
+        ? team.name
+        : (nationalities.length ? nationalities : citizenship.length ? citizenship : apiNationalities.get(starter.sourcePlayerId) ?? []).join(' / ')
+      starter.seasonClub = primaryClub.get(`${starter.sourcePlayerId}:${match.seasonStart}`)?.name ?? ''
+    }
+  }
 }
 
 function seasonUrl(competition, season) {
@@ -383,6 +591,8 @@ async function main() {
     console.log(`Match ${index + 1}/${manifest.length}: ${item.sourceMatchId}`)
     return parseMatchPage(html, item, players)
   })
+
+  await addStarterClues(matches, players)
 
   matches.sort((left, right) => left.date.localeCompare(right.date) || left.id.localeCompare(right.id))
   const version = rosterVersion(matches)
