@@ -27,4 +27,10 @@ describe('lineup data snapshot', () => {
   it('has complete valid lineups, benches, metadata and autocomplete coverage', () => {
     expect(validateLineups(dataset, search)).toEqual([])
   })
+
+  it('retains the fullest sourced name for players seen under multiple labels', () => {
+    expect(search.find((player) => player.id === 'tm-player-294')).toMatchObject({
+      displayName: 'Hans Jörg Butt',
+    })
+  })
 })
