@@ -62,12 +62,35 @@ describe('saved-data migration', () => {
     )
 
     const saved = loadSavedData()
-    expect(saved.schemaVersion).toBe(3)
+    expect(saved.schemaVersion).toBe(4)
     expect(saved.highScores).toEqual({ normal: 730, hardcore: 410 })
     expect(saved.unfinishedGame?.settings.mode).toBe('challenge')
     expect(saved.lastSettings).toMatchObject({ mode: 'daily', pool: 'normal' })
     expect(saved.installationId).not.toBe('')
     expect(saved.lastNickname).toBe('')
+  })
+
+  it('preserves player records while dropping stale lineup daily state', () => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        schemaVersion: 3,
+        highScores: { normal: 640, hardcore: 210 },
+        lineupBestScore: 800,
+        lineupDailyGame: {
+          mode: 'lineup-daily',
+          dailyChallenge: { date: '2026-07-28' },
+        },
+        lineupDailyCompletion: { date: '2026-07-28', nickname: 'Old lineup' },
+        installationId: 'lineup-browser',
+      }),
+    )
+    const saved = loadSavedData()
+    expect(saved.schemaVersion).toBe(4)
+    expect(saved.highScores).toEqual({ normal: 640, hardcore: 210 })
+    expect(saved.lineupBestScore).toBe(800)
+    expect(saved.lineupDailyGame).toBeNull()
+    expect(saved.lineupDailyCompletion).toBeNull()
   })
 
   it('drops stale daily state without touching local records', () => {

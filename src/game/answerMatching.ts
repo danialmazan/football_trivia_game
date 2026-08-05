@@ -89,7 +89,7 @@ export function getPlayerSuggestions(
 
 export function matchAnswer(
   input: string,
-  selectedPlayer: Player,
+  selectedPlayer: SearchPlayer,
   searchCatalog: SearchPlayer[],
 ): MatchResult {
   if (!input.trim()) return { status: 'invalid', message: 'Enter a player name first.' }

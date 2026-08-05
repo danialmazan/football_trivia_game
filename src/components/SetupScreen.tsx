@@ -10,6 +10,7 @@ import {
 import { getActivePool } from '../game/selection'
 import type { GameSettings, PracticeLeague, SavedData } from '../game/types'
 import { GoatCrest } from './GoatCrest'
+import { useState } from 'react'
 
 interface SetupScreenProps {
   settings: GameSettings
@@ -18,6 +19,7 @@ interface SetupScreenProps {
   onSettingsChange: (settings: GameSettings) => void
   onStart: () => void
   onResume: () => void
+  onResumeLineup: () => void
   onOpenLeaderboard: () => void
 }
 
@@ -28,11 +30,14 @@ export function SetupScreen({
   onSettingsChange,
   onStart,
   onResume,
+  onResumeLineup,
   onOpenLeaderboard,
 }: SetupScreenProps) {
+  const [moreFormatsOpen, setMoreFormatsOpen] = useState(false)
+  const isLineupMode = settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge'
   const filter = settings.mode === 'practice' ? settings.practiceFilter : undefined
   const effectivePool = settings.mode === 'daily' ? 'normal' : settings.pool
-  const poolCount = getActivePool(players, effectivePool, filter).length
+  const poolCount = isLineupMode ? 201 : getActivePool(players, effectivePool, filter).length
 
   function selectMode(mode: GameSettings['mode']) {
     onSettingsChange({
@@ -83,6 +88,14 @@ export function SetupScreen({
               <span>Hardcore best</span>
               <strong>{savedData.highScores.hardcore.toString().padStart(4, '0')}</strong>
             </div>
+            <div>
+              <span>Lineup of the day best</span>
+              <strong>{(savedData.lineupDailyCompletion?.points ?? 0).toString().padStart(3, '0')}</strong>
+            </div>
+            <div>
+              <span>Lineup challenge best</span>
+              <strong>{savedData.lineupBestScore.toString().padStart(4, '0')}</strong>
+            </div>
           </div>
           <button className="hero__leaderboard-button" type="button" onClick={onOpenLeaderboard}>
             Check the leaderboard <span aria-hidden="true">↗</span>
@@ -99,7 +112,7 @@ export function SetupScreen({
           </div>
         </div>
         <div className="choice-grid choice-grid--modes">
-          {GAME_MODES.map((mode) => (
+          {GAME_MODES.filter((mode) => !['endless', 'practice'].includes(mode)).map((mode) => (
             <button
               type="button"
               className={`choice-card ${settings.mode === mode ? 'choice-card--active' : ''}`}
@@ -113,6 +126,10 @@ export function SetupScreen({
                   ? 'A player each day. Same for everyone.'
                   : mode === 'challenge'
                   ? '10 players · 1,000 max'
+                  : mode === 'lineup-daily'
+                    ? 'One missing starter. Same for everyone.'
+                    : mode === 'lineup-challenge'
+                      ? '10 historic lineups · 1,000 max'
                   : mode === 'endless'
                     ? 'Play through the pool'
                     : '10 players from your chosen filter'}
@@ -120,6 +137,31 @@ export function SetupScreen({
             </button>
           ))}
         </div>
+        <button
+          className="more-formats-toggle"
+          type="button"
+          aria-expanded={moreFormatsOpen}
+          aria-controls="more-game-formats"
+          onClick={() => setMoreFormatsOpen((open) => !open)}
+        >
+          More game formats <span aria-hidden="true">{moreFormatsOpen ? '−' : '+'}</span>
+        </button>
+        {moreFormatsOpen && (
+          <div className="choice-grid choice-grid--more" id="more-game-formats">
+            {(['endless', 'practice'] as const).map((mode) => (
+              <button
+                type="button"
+                className={`choice-card ${settings.mode === mode ? 'choice-card--active' : ''}`}
+                aria-pressed={settings.mode === mode}
+                key={mode}
+                onClick={() => selectMode(mode)}
+              >
+                <span>{MODE_LABELS[mode]}</span>
+                <small>{mode === 'endless' ? 'Play through the pool' : '10 players from your chosen filter'}</small>
+              </button>
+            ))}
+          </div>
+        )}
 
         {settings.mode === 'practice' && (
           <div className="practice-builder">
@@ -189,14 +231,14 @@ export function SetupScreen({
           </div>
         )}
 
-        <div className="setup-panel__header setup-panel__header--pool">
+        {!isLineupMode && <div className="setup-panel__header setup-panel__header--pool">
           <span className="step-marker">02</span>
           <div>
             <span className="eyebrow">Set the squad depth</span>
             <h2>Player pool</h2>
           </div>
-        </div>
-        <div className="pool-toggle">
+        </div>}
+        {!isLineupMode && <div className="pool-toggle">
           {(['normal', 'hardcore'] as const).map((pool) => (
             <button
               type="button"
@@ -214,12 +256,12 @@ export function SetupScreen({
               </small>
             </button>
           ))}
-        </div>
+        </div>}
 
         <div className="setup-actions">
           <div className="roster-count">
             <strong>{poolCount}</strong>
-            <span>players available</span>
+            <span>{isLineupMode ? 'historic matches available' : 'players available'}</span>
           </div>
           <button className="primary-button primary-button--large" type="button" onClick={onStart}>
             Kick off <span aria-hidden="true">↗</span>
@@ -228,6 +270,11 @@ export function SetupScreen({
         {savedData.unfinishedGame && (
           <button className="resume-button" type="button" onClick={onResume}>
             Continue unfinished {MODE_LABELS[savedData.unfinishedGame.settings.mode].toLowerCase()}
+          </button>
+        )}
+        {savedData.unfinishedLineupGame && (
+          <button className="resume-button" type="button" onClick={onResumeLineup}>
+            Continue unfinished lineup challenge
           </button>
         )}
       </section>

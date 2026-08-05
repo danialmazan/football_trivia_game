@@ -1,4 +1,10 @@
-export type GameMode = 'daily' | 'challenge' | 'endless' | 'practice'
+export type GameMode =
+  | 'daily'
+  | 'challenge'
+  | 'lineup-daily'
+  | 'lineup-challenge'
+  | 'endless'
+  | 'practice'
 export type Pool = 'normal' | 'hardcore'
 export type Decade = '1990s' | '2000s' | '2010s' | '2020s'
 export type PracticeLeague = 'GB1' | 'ES1' | 'IT1' | 'L1' | 'FR1'
@@ -54,15 +60,60 @@ export interface EndlessStats {
 }
 
 export interface SavedData {
-  schemaVersion: 3
+  schemaVersion: 4
   highScores: Record<Pool, number>
   endlessStats: Record<Pool, EndlessStats>
   lastSettings: GameSettings
   unfinishedGame: GameState | null
   dailyGame: GameState | null
   dailyCompletion: DailyCompletion | null
+  unfinishedLineupGame: LineupGameState | null
+  lineupDailyGame: LineupGameState | null
+  lineupDailyCompletion: DailyCompletion | null
+  lineupBestScore: number
   installationId: string
   lastNickname: string
+}
+
+export interface LineupRoundState {
+  matchId: string
+  missingPlayerId: string
+  incorrectGuesses: string[]
+  normalizedIncorrectGuesses: string[]
+  statusMessage: string
+  outcome: RoundOutcome | null
+  pointsEarned: number | null
+}
+
+export interface LineupRoundResult {
+  matchId: string
+  matchLabel: string
+  playerId: string
+  playerName: string
+  outcome: RoundOutcome
+  points: number
+  incorrectGuesses: string[]
+}
+
+export interface LineupGameState {
+  version: 1
+  mode: 'lineup-daily' | 'lineup-challenge'
+  phase: 'playing' | 'review' | 'results'
+  round: LineupRoundState
+  results: LineupRoundResult[]
+  usedMatchIds: string[]
+  totalScore: number
+  startedAt: string
+  dailyChallenge?: LineupDailyChallenge
+}
+
+export interface LineupDailyChallenge {
+  date: string
+  expiresAt: string
+  matchId: string
+  missingPlayerId: string
+  rosterVersion: string
+  attemptToken: string
 }
 
 export interface DailyChallenge {
@@ -109,6 +160,16 @@ export type LeaderboardHubResponse =
       challengeBoards: Record<Pool, LeaderboardBoards>
     }
 
+export type LineupLeaderboardHubResponse =
+  | { eligible: false; date: string }
+  | {
+      eligible: true
+      date: string
+      nickname: string
+      dailyBoards: LeaderboardBoards
+      challengeBoards: LeaderboardBoards
+    }
+
 export interface DailyResultSubmission {
   challengeDate: string
   attemptToken: string
@@ -148,6 +209,28 @@ export interface ChallengeResultSubmission {
 export interface ChallengeResultResponse {
   date: string
   pool: Pool
+  points: number
+  boards: LeaderboardBoards
+}
+
+export interface LineupDailyResultSubmission {
+  challengeDate: string
+  attemptToken: string
+  nickname: string
+  outcome: RoundOutcome
+  incorrectGuesses: number
+}
+
+export interface LineupChallengeResultSubmission {
+  nickname: string
+  rounds: Array<{
+    outcome: RoundOutcome
+    incorrectGuesses: number
+  }>
+}
+
+export interface LineupChallengeResultResponse {
+  date: string
   points: number
   boards: LeaderboardBoards
 }

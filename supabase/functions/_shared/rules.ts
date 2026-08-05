@@ -58,6 +58,14 @@ export function calculateDailyScore(
   return Math.max(0, clueScores[cluesUsed - 1] - incorrectGuesses * 10)
 }
 
+export function calculateLineupScore(
+  outcome: 'correct' | 'gave-up',
+  distinctIncorrectGuesses: number,
+): number {
+  if (outcome === 'gave-up') return 0
+  return Math.max(0, 100 - distinctIncorrectGuesses * 20)
+}
+
 export function rankDailyResults<T extends RankableDailyResult>(
   results: T[],
 ): Array<T & { rank: number }> {

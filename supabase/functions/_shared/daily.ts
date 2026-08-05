@@ -20,6 +20,15 @@ export interface StoredResult {
   submitted_at: string
 }
 
+export interface StoredLineupChallenge {
+  challenge_date: string
+  match_id: string
+  missing_player_id: string
+  roster_version: string
+}
+
+export interface StoredLineupResult extends Omit<StoredResult, 'clues_used'> {}
+
 export function createAdminClient(): SupabaseClient {
   const url = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -155,6 +164,56 @@ export async function getOrCreateChallenge(
   return stored.data as StoredChallenge
 }
 
+export async function getOrCreateLineupChallenge(
+  client: SupabaseClient,
+  date = utcDateKey(),
+): Promise<StoredLineupChallenge> {
+  const fields = 'challenge_date,match_id,missing_player_id,roster_version'
+  const existing = await client
+    .from('lineup_daily_challenges')
+    .select(fields)
+    .eq('challenge_date', date)
+    .maybeSingle()
+  if (existing.error) throw existing.error
+  if (existing.data) return existing.data as StoredLineupChallenge
+
+  const poolResult = await client
+    .from('lineup_daily_pool')
+    .select('match_id,roster_version,ranking,starter_ids')
+    .eq('active', true)
+    .order('ranking')
+  if (poolResult.error) throw poolResult.error
+  if (!poolResult.data?.length) throw new Error('The lineup daily pool is empty.')
+
+  const rosterVersion = poolResult.data[0].roster_version as string
+  const selectionSecret = Deno.env.get('DAILY_SELECTION_SECRET')
+  if (!selectionSecret || selectionSecret.length < 32) {
+    throw new Error('DAILY_SELECTION_SECRET must contain at least 32 characters.')
+  }
+  const digest = await hmacBytes(selectionSecret, `${date}:lineup:${rosterVersion}`)
+  const selected = poolResult.data[integerFrom(digest, 0) % poolResult.data.length]
+  const starters = selected.starter_ids as string[]
+  if (starters.length !== 22) throw new Error('The selected lineup pool row is invalid.')
+  const candidate: StoredLineupChallenge = {
+    challenge_date: date,
+    match_id: selected.match_id as string,
+    missing_player_id: starters[integerFrom(digest, 4) % starters.length],
+    roster_version: rosterVersion,
+  }
+
+  const inserted = await client
+    .from('lineup_daily_challenges')
+    .upsert(candidate, { onConflict: 'challenge_date', ignoreDuplicates: true })
+  if (inserted.error) throw inserted.error
+  const stored = await client
+    .from('lineup_daily_challenges')
+    .select(fields)
+    .eq('challenge_date', date)
+    .single()
+  if (stored.error) throw stored.error
+  return stored.data as StoredLineupChallenge
+}
+
 export async function createAttemptToken(
   date: string,
   installationId: string,
@@ -179,6 +238,29 @@ export async function verifyAttemptToken(
   }
   const secret = Deno.env.get('DAILY_SELECTION_SECRET') ?? ''
   const expected = await hmacHex(secret, `${date}:${participantHash}`)
+  return timingSafeEqual(signature, expected) ? participantHash : null
+}
+
+export async function createLineupAttemptToken(
+  date: string,
+  installationId: string,
+): Promise<string> {
+  const secret = Deno.env.get('DAILY_SELECTION_SECRET') ?? ''
+  const participantHash = await hmacHex(secret, `${date}:lineup:${installationId}`)
+  const signature = await hmacHex(secret, `${date}:lineup:${participantHash}`)
+  return `${participantHash}.${signature}`
+}
+
+export async function verifyLineupAttemptToken(
+  date: string,
+  token: string,
+): Promise<string | null> {
+  const [participantHash, signature, extra] = token.split('.')
+  if (extra || !/^[a-f0-9]{64}$/.test(participantHash ?? '') || !/^[a-f0-9]{64}$/.test(signature ?? '')) {
+    return null
+  }
+  const secret = Deno.env.get('DAILY_SELECTION_SECRET') ?? ''
+  const expected = await hmacHex(secret, `${date}:lineup:${participantHash}`)
   return timingSafeEqual(signature, expected) ? participantHash : null
 }
 

@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.daily-maintenance]
 verify_jwt = false
+
+[functions.lineup-game]
+verify_jwt = false
