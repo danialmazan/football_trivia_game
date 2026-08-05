@@ -390,14 +390,23 @@ async function main() {
   for (const match of matches) {
     for (const player of match.teams.flatMap((team) => [...team.starters, ...team.bench])) {
       const existing = search.get(player.id)
-      if (!existing || player.acceptedNames.length > existing.acceptedNames.length) {
-        search.set(player.id, {
-          id: player.id,
-          displayName: player.displayName,
-          acceptedNames: player.acceptedNames,
-          lastName: player.lastName,
-        })
-      }
+      const acceptedNames = [...new Set([
+        ...(existing?.acceptedNames ?? []),
+        existing?.displayName,
+        ...player.acceptedNames,
+        player.displayName,
+      ].filter(Boolean))]
+      const displayName = [existing?.displayName, player.displayName]
+        .filter(Boolean)
+        .sort((left, right) => right.length - left.length)[0]
+      search.set(player.id, {
+        id: player.id,
+        displayName,
+        acceptedNames,
+        lastName: player.lastName.length > (existing?.lastName.length ?? 0)
+          ? player.lastName
+          : existing?.lastName ?? player.lastName,
+      })
     }
   }
   const searchPlayers = [...search.values()].sort((left, right) =>
