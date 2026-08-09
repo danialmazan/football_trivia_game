@@ -18,11 +18,11 @@ export function ClueCard({ clue, index, newlyRevealed = false }: ClueCardProps) 
           <div className="team-clue">
             <div className="team-clue__copy">
               <p>
-                One Big-Five club this player represented:{' '}
+                One club from the Big-Five leagues this player represented:{' '}
                 <strong>{clue.teams[0].clubName}</strong>
               </p>
               <p className="career-decades">
-                Big-Five career decades: <strong>{clue.decades.join(' · ')}</strong>
+                Career decades in the Big-Five leagues: <strong>{clue.decades.join(' · ')}</strong>
               </p>
               <small>
                 The decades cover the full eligible career—not necessarily the years with this club.

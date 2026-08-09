@@ -24,6 +24,19 @@ interface ChallengeShareDetails {
   url: string
 }
 
+interface LineupDailyShareDetails {
+  points: number
+  rank: number
+  date: string
+  url: string
+}
+
+interface LineupChallengeShareDetails {
+  points: number
+  identified: number
+  url: string
+}
+
 export function getGameUrl(
   origin = window.location.origin,
   basePath = import.meta.env.BASE_URL,
@@ -53,6 +66,31 @@ export function buildChallengeShareData({
   return {
     title: 'Leo Guessi — 10-round challenge',
     text: `I scored ${points.toLocaleString('en-US')}/1,000 in Leo Guessi’s 10-round challenge (${POOL_LABELS[pool]}) and identified ${identified}/10 players.`,
+    url,
+  }
+}
+
+export function buildLineupDailyShareData({
+  points,
+  rank,
+  date,
+  url,
+}: LineupDailyShareDetails): ShareData {
+  return {
+    title: 'Leo Guessi — Lineup of the Day',
+    text: `I scored ${points}/100 in Leo Guessi’s Lineup of the Day — rank #${rank} on ${date} UTC.`,
+    url,
+  }
+}
+
+export function buildLineupChallengeShareData({
+  points,
+  identified,
+  url,
+}: LineupChallengeShareDetails): ShareData {
+  return {
+    title: 'Leo Guessi — 10-round lineup challenge',
+    text: `I scored ${points.toLocaleString('en-US')}/1,000 in Leo Guessi’s 10-round lineup challenge and identified ${identified}/10 missing players.`,
     url,
   }
 }

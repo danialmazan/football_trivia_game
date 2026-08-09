@@ -1,6 +1,7 @@
 import type { Player } from '../data/types'
 import {
   DECADES,
+  GAME_CONFIG,
   GAME_MODES,
   MODE_LABELS,
   POOL_LABELS,
@@ -37,7 +38,7 @@ export function SetupScreen({
   const isLineupMode = settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge'
   const filter = settings.mode === 'practice' ? settings.practiceFilter : undefined
   const effectivePool = settings.mode === 'daily' ? 'normal' : settings.pool
-  const poolCount = isLineupMode ? 201 : getActivePool(players, effectivePool, filter).length
+  const poolCount = isLineupMode ? GAME_CONFIG.lineupActiveMatchCount : getActivePool(players, effectivePool, filter).length
 
   function selectMode(mode: GameSettings['mode']) {
     onSettingsChange({
@@ -55,17 +56,16 @@ export function SetupScreen({
           <span className="hero__kicker-line" />
           <span>Big Five · Since 1995</span>
         </div>
-        <div className="hero__crest">
-          <GoatCrest />
+        <div className="hero__brand">
+          <h1 id="game-title">
+            Leo
+            <span>Guessi.</span>
+          </h1>
+          <div className="hero__crest">
+            <GoatCrest />
+          </div>
         </div>
-        <h1 id="game-title">
-          Leo
-          <span>Guessi.</span>
-        </h1>
         <p className="hero__lead">Can you become the G.O.A.T. of player guessing?</p>
-        <p className="hero__note">
-          Five clues, hardest first. Clubs, countries and careers—no transfer gossip, no luck.
-        </p>
         <div className="hero__scope">
           <strong>What does “Big Five” mean?</strong>
           <p>
@@ -75,28 +75,6 @@ export function SetupScreen({
           </p>
         </div>
         <div className="hero__records">
-          <div className="hero__scoreboard" aria-label="Saved high scores">
-            <div>
-              <span>Player of the day best</span>
-              <strong>{(savedData.dailyCompletion?.points ?? 0).toString().padStart(3, '0')}</strong>
-            </div>
-            <div>
-              <span>Normal best</span>
-              <strong>{savedData.highScores.normal.toString().padStart(4, '0')}</strong>
-            </div>
-            <div>
-              <span>Hardcore best</span>
-              <strong>{savedData.highScores.hardcore.toString().padStart(4, '0')}</strong>
-            </div>
-            <div>
-              <span>Lineup of the day best</span>
-              <strong>{(savedData.lineupDailyCompletion?.points ?? 0).toString().padStart(3, '0')}</strong>
-            </div>
-            <div>
-              <span>Lineup challenge best</span>
-              <strong>{savedData.lineupBestScore.toString().padStart(4, '0')}</strong>
-            </div>
-          </div>
           <button className="hero__leaderboard-button" type="button" onClick={onOpenLeaderboard}>
             Check the leaderboard <span aria-hidden="true">↗</span>
           </button>

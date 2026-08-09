@@ -37,9 +37,20 @@ export function selectLineupMatch(
   usedMatchIds: string[],
   random: () => number = Math.random,
 ): LineupMatch {
-  const unused = matches.filter((match) => !usedMatchIds.includes(match.id))
+  const unused = getPlayableLineupMatches(matches).filter((match) => !usedMatchIds.includes(match.id))
   if (!unused.length) throw new Error('No unused lineup matches are available.')
   return unused[randomIndex(unused.length, random)]
+}
+
+export function isPlayableLineupMatch(match: LineupMatch): boolean {
+  return (
+    match.seasonStart >= GAME_CONFIG.lineupActiveFirstSeason &&
+    match.seasonStart <= GAME_CONFIG.lineupActiveLastSeason
+  )
+}
+
+export function getPlayableLineupMatches(matches: LineupMatch[]): LineupMatch[] {
+  return matches.filter(isPlayableLineupMatch)
 }
 
 export function createLineupRound(

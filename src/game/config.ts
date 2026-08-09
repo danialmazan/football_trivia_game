@@ -14,6 +14,9 @@ export const GAME_CONFIG = {
   practiceNormalPoolSize: 100,
   practiceHardcorePoolSize: 300,
   lineupMatchCount: 201,
+  lineupActiveFirstSeason: 2005,
+  lineupActiveLastSeason: 2025,
+  lineupActiveMatchCount: 136,
   lineupWrongGuessPenalty: 20,
   lineupClueScoreCaps: [40, 20] as const,
 } as const

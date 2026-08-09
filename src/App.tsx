@@ -70,9 +70,13 @@ const EMPTY_LEADERBOARD_BOARDS: LeaderboardBoards = {
   best: [],
 }
 
+function homepageSettings(settings: GameSettings): GameSettings {
+  return { ...settings, mode: 'daily', pool: 'normal' }
+}
+
 export function App() {
   const [savedData, setSavedData] = useState<SavedData>(() => loadSavedData())
-  const [settings, setSettings] = useState<GameSettings>(savedData.lastSettings)
+  const [settings, setSettings] = useState<GameSettings>(() => homepageSettings(savedData.lastSettings))
   const [game, setGame] = useState<GameState | null>(null)
   const [lineupGame, setLineupGame] = useState<LineupGameState | null>(null)
   const [lineupDataset, setLineupDataset] = useState<LineupDataset | null>(null)
@@ -798,6 +802,7 @@ export function App() {
   function expireDailyGame() {
     setGame(null)
     setShowGuide(false)
+    setSettings((current) => homepageSettings(current))
     setDailyBoards(EMPTY_LEADERBOARD_BOARDS)
     setDailyNickname('')
     setDailyError('A new Player of the day is now available.')
@@ -811,6 +816,7 @@ export function App() {
   function expireLineupDailyGame() {
     setLineupGame(null)
     setShowGuide(false)
+    setSettings((current) => homepageSettings(current))
     setLineupDailyBoards(EMPTY_LEADERBOARD_BOARDS)
     setDailyNickname('')
     setDailyError('A new Lineup of the day is now available.')
@@ -835,6 +841,7 @@ export function App() {
     }
     setGame(null)
     setShowGuide(false)
+    setSettings((current) => homepageSettings(current))
   }
 
   function exitLineupGame() {
@@ -848,6 +855,7 @@ export function App() {
     }
     setLineupGame(null)
     setShowGuide(false)
+    setSettings((current) => homepageSettings(current))
   }
 
   function playAgain() {
@@ -880,6 +888,7 @@ export function App() {
     setLineupLeaderboardHubResponse(null)
     setLeaderboardFamily(null)
     setDailyError(null)
+    setSettings((current) => homepageSettings(current))
     setLeaderboardHubOpen(true)
   }
 
@@ -890,6 +899,7 @@ export function App() {
     setLineupLeaderboardHubResponse(null)
     setLeaderboardFamily(null)
     setDailyError(null)
+    setSettings((current) => homepageSettings(current))
   }
 
   function resetLeaderboardAccess(family: LeaderboardFamily) {
@@ -927,7 +937,7 @@ export function App() {
     resetSavedData()
     const resetData = loadSavedData()
     setSavedData(resetData)
-    setSettings(resetData.lastSettings)
+    setSettings(homepageSettings(resetData.lastSettings))
     setGame(null)
     setSettingsOpen(false)
   }
@@ -970,8 +980,8 @@ export function App() {
       )}
       {!game && !lineupGame && showGuide && (
         settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge'
-          ? <LineupGuide settings={settings} loading={dailyLoading} error={dailyError} onBack={() => setShowGuide(false)} onConfirm={confirmGameStart} />
-          : <GameGuide settings={settings} loading={dailyLoading} error={dailyError} onBack={() => setShowGuide(false)} onConfirm={confirmGameStart} />
+          ? <LineupGuide settings={settings} loading={dailyLoading} error={dailyError} onBack={() => { setShowGuide(false); setSettings((current) => homepageSettings(current)) }} onConfirm={confirmGameStart} />
+          : <GameGuide settings={settings} loading={dailyLoading} error={dailyError} onBack={() => { setShowGuide(false); setSettings((current) => homepageSettings(current)) }} onConfirm={confirmGameStart} />
       )}
       {game && game.phase !== 'results' && currentPlayer && (
         <GameScreen

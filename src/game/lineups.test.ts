@@ -5,6 +5,8 @@ import {
   createLineupRound,
   recordLineupIncorrectGuess,
   positionLineupStarter,
+  getPlayableLineupMatches,
+  isPlayableLineupMatch,
   selectLineupMatch,
 } from './lineups'
 
@@ -20,13 +22,13 @@ const starter = (id: string) => ({
   nationality: 'Testland',
   seasonClub: 'Test FC',
 })
-const match = (id: string): LineupMatch => ({
+const match = (id: string, seasonStart = 2025): LineupMatch => ({
   id,
   sourceMatchId: id,
   competition: 'ucl',
   competitionLabel: 'UEFA Champions League',
-  edition: '2025/26',
-  seasonStart: 2025,
+  edition: `${seasonStart}/${String(seasonStart + 1).slice(-2)}`,
+  seasonStart,
   stage: 'Final',
   date: '2026-05-30',
   kickoffLocal: '9:00 PM',
@@ -75,6 +77,19 @@ describe('lineup game rules', () => {
     const matches = [match('one'), match('two'), match('three')]
     expect(selectLineupMatch(matches, ['one'], () => 0).id).toBe('two')
     expect(selectLineupMatch(matches, ['one', 'two'], () => 0).id).toBe('three')
+  })
+
+  it('uses inclusive active-era bounds and excludes the compatibility archive edges', () => {
+    expect(isPlayableLineupMatch(match('first', 2005))).toBe(true)
+    expect(isPlayableLineupMatch(match('last', 2025))).toBe(true)
+    expect(isPlayableLineupMatch(match('old', 2004))).toBe(false)
+    expect(isPlayableLineupMatch(match('future', 2026))).toBe(false)
+    expect(getPlayableLineupMatches([match('old', 2004), match('active', 2005), match('future', 2026)]).map((item) => item.id)).toEqual(['active'])
+  })
+
+  it('selects only active matches and reports active-pool exhaustion', () => {
+    expect(selectLineupMatch([match('old', 2004), match('active', 2005)], [], () => 0).id).toBe('active')
+    expect(() => selectLineupMatch([match('old', 2004)], [], () => 0)).toThrow('No unused lineup matches are available.')
   })
 
   it('mirrors the top team so its tactical left remains its left', () => {

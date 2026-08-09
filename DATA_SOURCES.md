@@ -109,8 +109,8 @@ coverage, and every required badge.
 ## Historical lineup snapshot
 
 `src/data/lineupMatches.json` and `src/data/lineupSearch.json` are versioned
-runtime snapshots generated on **2026-08-05**. The match snapshot contains 201
-semifinal/final fixtures:
+runtime snapshots generated on **2026-08-05**. The match snapshot contains a
+201-match compatibility archive of semifinal/final fixtures:
 
 - 153 UEFA Champions League matches from 1995/96 through 2025/26. Every season
   contributes both semifinal legs and the final except 2019/20, whose Lisbon
@@ -118,12 +118,19 @@ semifinal/final fixtures:
 - 24 EURO matches from 1996 through 2024.
 - 24 FIFA World Cup matches from 1998 through 2026.
 
+Only 136 matches are active/playable: 103 Champions League matches from
+2005/06–2025/26, 15 EURO matches from 2008–2024, and 18 World Cup matches from
+2006–2026. Earlier archive rows are retained for compatibility and historical
+references, but are marked inactive in the server-side daily pool.
+
 The primary source for fixture metadata, formations, starters, substitutes, and
 shirt numbers is each public Transfermarkt match sheet. Every match retains its
 match-sheet and competition-season URLs plus its verification date. Player names
-are expanded from the CC0
+are generated from the fullest sourced display available across the match sheet
+and CC0
 [Transfermarkt datasets](https://github.com/dcaribou/transfermarkt-datasets)
-player table where available. The 2,048-player autocomplete snapshot is the
+player table where available. A reviewed stable-ID allowlist preserves stable
+mononyms such as Ronaldinho. The 2,048-player autocomplete snapshot is the
 union of all starters and registered substitutes in the included match sheets.
 
 Pitch coordinates are the source formation coordinates normalized to the game's
@@ -138,10 +145,13 @@ npm run lineups:build
 npm run lineups:validate
 ```
 
-The builder caches source pages under the ignored `.cache/football/lineups`
-directory and requires its cached CC0 `players.csv.gz` source or
+The builder caches source pages and generated SQL under the ignored
+`.cache/football/lineups` directory and requires its cached CC0 `players.csv.gz`
+source or
 `LINEUP_PLAYERS_CSV_GZ`. Validation enforces the exact 153/24/24 competition
-counts, the 2019/20 single-leg exception, unique match IDs, two teams, 11 unique
-starters per team, non-empty registered benches, formations, coordinates,
-complete metadata, valid IANA zones, provenance URLs, and full autocomplete
-coverage. The same build emits the versioned server-side daily pool migration.
+counts, the 136 active split, the 2019/20 single-leg exception, unique match
+IDs, two teams, 11 unique starters per team, non-empty registered benches,
+formations, coordinates, complete metadata, valid IANA zones, provenance URLs,
+full autocomplete coverage, and canonical-name consistency. The same build
+emits the versioned server-side daily pool migration without deleting archived
+rows.

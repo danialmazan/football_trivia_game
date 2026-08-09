@@ -27,6 +27,46 @@ async function startGame(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: /let's go/i }).click()
 }
 
+test('enters the homepage in Player of the Day mode with a non-overlapping crest', async ({ page }) => {
+  await expect(page.getByRole('button', { name: /^Player of the day/i })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByText(/Five clues, hardest first.*no transfer gossip, no luck/i)).toHaveCount(0)
+  await expect(page.getByLabel('Saved high scores')).toHaveCount(0)
+  await expect(page.getByText(/Player of the day best|Normal best|Hardcore best|Lineup challenge best/i)).toHaveCount(0)
+
+  for (const width of [1051, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    const boxes = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const element = document.querySelector(selector)
+        if (!element) return null
+        const box = element.getBoundingClientRect()
+        return { left: box.left, right: box.right, top: box.top, bottom: box.bottom }
+      }
+      return { kicker: rect('.hero__kicker'), crest: rect('.hero__crest'), title: rect('.hero h1') }
+    })
+    expect(boxes.kicker).not.toBeNull()
+    expect(boxes.crest).not.toBeNull()
+    expect(boxes.title).not.toBeNull()
+    for (const other of [boxes.kicker, boxes.title]) {
+      expect(boxes.crest!.right <= other!.left || boxes.crest!.left >= other!.right || boxes.crest!.bottom <= other!.top || boxes.crest!.top >= other!.bottom).toBe(true)
+    }
+  }
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+
+  await page.evaluate(() => {
+    const key = 'leo-guessi:football-trivia:v1'
+    const saved = JSON.parse(window.localStorage.getItem(key) ?? '{}')
+    saved.lastSettings = { ...saved.lastSettings, mode: 'lineup-challenge', pool: 'normal' }
+    window.localStorage.setItem(key, JSON.stringify(saved))
+  })
+  await page.reload()
+  await expect(page.getByRole('button', { name: /^Player of the day/i })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: /^Lineup of the day/i })).toHaveAttribute('aria-pressed', 'false')
+  await page.getByRole('button', { name: /^10-round challenge/i }).click()
+  await expect(page.getByRole('button', { name: /^10-round challenge/i })).toHaveAttribute('aria-pressed', 'true')
+})
+
 test('plays the shared daily player once and restores its leaderboard after reload', async ({ page }) => {
   const dailyDate = new Date().toISOString().slice(0, 10)
   const leaderboard = [
@@ -153,7 +193,9 @@ test('plays the shared daily player once and restores its leaderboard after relo
   await expect(page.getByRole('button', { name: /share your result/i })).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('AwayDays')
   await page.getByRole('button', { name: /back to home page/i }).click()
-  await expect(page.getByText('Player of the day best').locator('..')).toContainText('100')
+  await expect(page.getByText('Player of the day best')).toHaveCount(0)
+  await expect(page.getByText('Your best player-of-the-day score')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /check the leaderboard/i })).toBeVisible()
 })
 
 test('gates the homepage leaderboard by today’s nickname and switches game and pool views', async ({ page }) => {
@@ -203,9 +245,8 @@ test('gates the homepage leaderboard by today’s nickname and switches game and
     })
   })
 
-  const savedScores = page.getByLabel('Saved high scores')
-  await expect(savedScores).toContainText('Player of the day best')
-  await expect(savedScores).toContainText('000')
+  await expect(page.getByText('Player of the day best')).toHaveCount(0)
+  await expect(page.getByText('Your best player-of-the-day score')).toHaveCount(0)
   await page.getByRole('button', { name: /check the leaderboard/i }).click()
   await expect(page.getByRole('heading', { name: /check the leaderboard/i })).toBeVisible()
   await page.getByRole('button', { name: /guess the player/i }).click()
@@ -267,8 +308,8 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
         date: dailyDate,
         expiresAt: '2099-08-06T00:00:00.000Z',
-        matchId: 'tm-1067642',
-        missingPlayerId: 'tm-player-5826',
+        matchId: 'tm-53455',
+        missingPlayerId: 'tm-player-3366',
         rosterVersion: 'lineups-test',
         attemptToken: `${'c'.repeat(64)}.${'d'.repeat(64)}`,
       }) })
@@ -305,44 +346,111 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
 
   await page.getByRole('button', { name: /^Lineup of the day/i }).click()
   await expect(page.getByText('historic matches available')).toBeVisible()
+  await expect(page.locator('.roster-count strong')).toHaveText('136')
   await expect(page.getByRole('button', { name: /^Hardcore/i })).toHaveCount(0)
   await page.getByRole('button', { name: /kick off/i }).click()
   await expect(page.getByRole('heading', { name: /read the shape/i })).toBeVisible()
   await page.getByRole('button', { name: /let's go/i }).click()
 
-  await expect(page.getByRole('heading', { name: /Juventus FC.*FC Nantes/i })).toBeVisible()
-  await expect(page.getByTestId('lineup-competition-label')).toHaveText('1995/96 / UCL Semi-Final - First leg')
-  await expect(page.getByLabel(/Juventus FC and FC Nantes starting lineups/i)).toBeVisible()
-  await expect(page.getByLabel(/missing Juventus FC starter/i)).toBeVisible()
+  await expect(page.getByRole('heading', { name: /AC Milan.*FC Barcelona/i })).toBeVisible()
+  await expect(page.getByTestId('lineup-competition-label')).toHaveText('2005/06 - UCL Semi-Final - First leg')
+  await expect(page.getByLabel(/AC Milan and FC Barcelona starting lineups/i)).toBeVisible()
+  await expect(page.getByLabel(/missing AC Milan starter/i)).toBeVisible()
   await expect(page.getByText(/CEST \(Europe\/Rome\)/)).toBeVisible()
 
   const input = page.getByLabel(/who is missing/i)
-  await input.fill('Ramp')
-  await expect(page.getByRole('option', { name: /Michelangelo Rampulla/i })).toBeVisible()
-  await page.getByRole('option', { name: /Michelangelo Rampulla/i }).click()
+  await input.fill('Kal')
+  await expect(page.getByRole('option', { name: /Zeljko Kalac/i })).toBeVisible()
+  await page.getByRole('option', { name: /Zeljko Kalac/i }).click()
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId('lineup-available-score')).toHaveText('80')
-  await input.fill('Michelangelo Rampulla')
+  await input.fill('Zeljko Kalac')
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId('lineup-available-score')).toHaveText('80')
   await expect(page.getByRole('status')).toContainText('Already guessed')
 
   await page.getByRole('button', { name: /get nationality clue.*max 40 pts/i }).click()
-  await expect(page.getByTestId('lineup-primary-clue')).toHaveText(/NationalityItaly/i)
+  await expect(page.getByTestId('lineup-primary-clue')).toHaveText(/NationalityBrazil/i)
   await expect(page.getByTestId('lineup-available-score')).toHaveText('40')
   await page.getByRole('button', { name: /get initials clue.*max 20 pts/i }).click()
-  await expect(page.getByTestId('lineup-initials-clue')).toHaveText(/Player initialsP\./i)
+  await expect(page.getByTestId('lineup-initials-clue')).toHaveText(/Player initialsR\.I\.d\.S\.L\./i)
   await expect(page.getByTestId('lineup-available-score')).toHaveText('20')
 
-  await input.fill('Peruzzi')
+  await input.fill('Ric')
+  await expect(page.getByRole('option', { name: /Ricardo Izecson dos Santos Leite/i })).toBeVisible()
+  await input.fill('Kaká')
   await page.getByRole('button', { name: 'Submit' }).click()
-  await expect(page.getByTestId('lineup-answer-reveal')).toContainText('Peruzzi')
+  await expect(page.getByTestId('lineup-answer-reveal')).toContainText('Ricardo Izecson dos Santos Leite')
   await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
   await page.getByLabel(/enter your nickname to save this result/i).fill('ShapeReader')
   await page.getByRole('button', { name: /save score/i }).click()
   await expect(page.getByRole('heading', { name: /lineup score saved/i })).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('ShapeReader')
+  await expect(page.getByRole('button', { name: /share your result/i })).toBeVisible()
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: ShareData) => Reflect.set(window, '__lineupDailyShared', data),
+    })
+  })
+  await page.getByRole('button', { name: /share your result/i }).click()
+  expect(await page.evaluate(() => Reflect.get(window, '__lineupDailyShared'))).toEqual({
+    title: 'Leo Guessi — Lineup of the Day',
+    text: `I scored 20/100 in Leo Guessi’s Lineup of the Day — rank #1 on ${dailyDate} UTC.`,
+    url: 'http://127.0.0.1:4175/',
+  })
+})
+
+test('gates the lineup leaderboard share by verified daily nickname', async ({ page }) => {
+  const dailyBoards = {
+    today: [{ rank: 1, nickname: 'ShapeReader', value: 20, gamesPlayed: 1 }],
+    cumulative: [{ rank: 1, nickname: 'ShapeReader', value: 20, gamesPlayed: 1 }],
+    average: [],
+    best: [{ rank: 1, nickname: 'ShapeReader', value: 20, gamesPlayed: 1 }],
+  }
+  await page.route('**/api/functions/v1/lineup-game**', async (route) => {
+    const request = route.request()
+    if (new URL(request.url()).searchParams.get('action') !== 'leaderboard-hub') {
+      await route.fallback()
+      return
+    }
+    const { nickname } = request.postDataJSON()
+    if (nickname !== 'ShapeReader') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ eligible: false, date: '2026-08-05' }) })
+      return
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+      eligible: true,
+      date: '2026-08-05',
+      nickname,
+      dailyBoards,
+      challengeBoards: dailyBoards,
+    }) })
+  })
+
+  await page.getByRole('button', { name: /check the leaderboard/i }).click()
+  await page.getByRole('button', { name: /guess the lineup/i }).click()
+  await page.getByLabel('Public nickname').fill('Unknown')
+  await page.getByRole('button', { name: /check the leaderboard/i }).click()
+  await expect(page.getByText(/Guess today’s Lineup of the Day/i)).toBeVisible()
+  await expect(page.getByLabel('Unlocked leaderboards')).toHaveCount(0)
   await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
+
+  await page.getByLabel('Public nickname').fill('ShapeReader')
+  await page.getByRole('button', { name: /check the leaderboard/i }).click()
+  await expect(page.getByLabel('Unlocked leaderboards')).toBeVisible()
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: ShareData) => Reflect.set(window, '__lineupHubShared', data),
+    })
+  })
+  await page.getByRole('button', { name: /share your result/i }).click()
+  expect(await page.evaluate(() => Reflect.get(window, '__lineupHubShared'))).toEqual({
+    title: 'Leo Guessi — Lineup of the Day',
+    text: 'I scored 20/100 in Leo Guessi’s Lineup of the Day — rank #1 on 2026-08-05 UTC.',
+    url: 'http://127.0.0.1:4175/',
+  })
 })
 
 test('plays ten distinct lineup matches and submits the lineup challenge', async ({ page }) => {
@@ -374,11 +482,24 @@ test('plays ten distinct lineup matches and submits the lineup challenge', async
   }
   expect(matches.size).toBe(10)
   await expect(page.getByRole('heading', { name: /ten teamsheets completed/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
   await page.getByLabel('Public nickname').fill('Tactics')
   await page.getByRole('button', { name: /save score & view boards/i }).click()
   await expect(page.getByText('Lineup history updated.')).toBeVisible()
   await expect(page.getByRole('table', { name: /lineup round results/i }).getByRole('row')).toHaveCount(11)
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('Tactics')
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: ShareData) => Reflect.set(window, '__lineupChallengeShared', data),
+    })
+  })
+  await page.getByRole('button', { name: /share your result/i }).click()
+  expect(await page.evaluate(() => Reflect.get(window, '__lineupChallengeShared'))).toEqual({
+    title: 'Leo Guessi — 10-round lineup challenge',
+    text: 'I scored 0/1,000 in Leo Guessi’s 10-round lineup challenge and identified 0/10 missing players.',
+    url: 'http://127.0.0.1:4175/',
+  })
 })
 
 test('keeps the portrait lineup pitch inside a 390px viewport without autofocus', async ({ page }) => {
@@ -633,5 +754,6 @@ test('completes ten rounds, submits its nickname and persists a high score', asy
   )
 
   await page.getByRole('button', { name: /back to home page/i }).click()
-  await expect(page.getByText('Normal best').locator('..')).toContainText('1000')
+  await expect(page.getByText('Normal best')).toHaveCount(0)
+  await expect(page.getByText('Your best 10-round score')).toHaveCount(0)
 })

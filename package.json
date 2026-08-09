@@ -17,7 +17,8 @@
     "data:badges": "node scripts/fetch-club-badges.mjs",
     "daily:pool": "node scripts/build-daily-pool.mjs",
     "lineups:build": "node scripts/build-lineup-data.mjs",
-    "lineups:validate": "vitest run src/data/lineups.validation.test.ts"
+    "lineups:validate": "vitest run src/data/lineups.validation.test.ts",
+    "lineups:migration:check": "node scripts/check-lineup-migration.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

@@ -187,6 +187,11 @@ export async function getOrCreateLineupChallenge(
   if (poolResult.error) throw poolResult.error
   if (!poolResult.data?.length) throw new Error('The lineup daily pool is empty.')
 
+  const activeRosterVersions = new Set(poolResult.data.map((row) => row.roster_version as string))
+  if (activeRosterVersions.size !== 1) {
+    throw new Error('The lineup daily pool has mixed active roster versions.')
+  }
+
   const rosterVersion = poolResult.data[0].roster_version as string
   const selectionSecret = Deno.env.get('DAILY_SELECTION_SECRET')
   if (!selectionSecret || selectionSecret.length < 32) {

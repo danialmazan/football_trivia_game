@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   buildChallengeShareData,
   buildDailyShareData,
+  buildLineupDailyShareData,
+  buildLineupChallengeShareData,
   deliverShare,
   getGameUrl,
 } from './sharing'
@@ -39,6 +41,21 @@ describe('result sharing', () => {
       text: 'I scored 1,000/1,000 in Leo Guessi’s 10-round challenge (Hardcore) and identified 9/10 players.',
       url: gameUrl,
     })
+  })
+
+  it('builds exact spoiler-free lineup daily and challenge payloads', () => {
+    expect(buildLineupDailyShareData({ points: 80, rank: 12, date: '2026-08-09', url: gameUrl })).toEqual({
+      title: 'Leo Guessi — Lineup of the Day',
+      text: 'I scored 80/100 in Leo Guessi’s Lineup of the Day — rank #12 on 2026-08-09 UTC.',
+      url: gameUrl,
+    })
+    const challenge = buildLineupChallengeShareData({ points: 1000, identified: 9, url: gameUrl })
+    expect(challenge).toEqual({
+      title: 'Leo Guessi — 10-round lineup challenge',
+      text: 'I scored 1,000/1,000 in Leo Guessi’s 10-round lineup challenge and identified 9/10 missing players.',
+      url: gameUrl,
+    })
+    expect(JSON.stringify(challenge)).not.toMatch(/ShapeReader|Lionel Messi|Juventus|Barcelona|tm-/i)
   })
 
   it('constructs a root URL from the current origin and deployment base path', () => {

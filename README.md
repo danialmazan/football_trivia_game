@@ -100,10 +100,14 @@ Autocomplete always searches the expanded eligible catalog, even in Normal
 mode. A suggested player outside the active answer roster is a valid incorrect
 guess rather than an unavailable name.
 
-Lineup modes use a separate 201-match snapshot: 153 Champions League matches,
-24 EURO matches, and 24 World Cup matches. Every starter is equally eligible;
-substitutes are included in lineup autocomplete but never appear on the pitch.
-Each distinct wrong lineup guess costs 20 points and Give up scores zero.
+Lineup modes retain a 201-match compatibility archive, but only 136 matches are
+playable today: 103 Champions League matches, 15 EURO matches, and 18 World
+Cup matches. The active seasons are Champions League 2005/06–2025/26, EURO
+2008–2024, and World Cup 2006–2026. Earlier archived rows remain available for
+historical challenge/result references but are inactive in the daily pool.
+Every starter is equally eligible; substitutes are included in lineup
+autocomplete but never appear on the pitch. Each distinct wrong lineup guess
+costs 20 points and Give up scores zero.
 
 ## Architecture
 

@@ -1,13 +1,30 @@
 import type { SearchPlayer } from './types'
 import type { LineupDataset } from './lineupTypes'
+import { GAME_CONFIG } from '../game/config'
+import mononyms from './lineupMononyms.json'
 
-export const LINEUP_MATCH_COUNT = 201
+export const LINEUP_MATCH_COUNT = GAME_CONFIG.lineupMatchCount
+export const LINEUP_ACTIVE_MATCH_COUNT = GAME_CONFIG.lineupActiveMatchCount
+export const LINEUP_MONONYMS = mononyms as { sourcePlayerId: string; displayName: string; evidenceField: string }[]
+
+export function getActiveLineupMatches(dataset: LineupDataset) {
+  return dataset.matches.filter(
+    (match) =>
+      match.seasonStart >= GAME_CONFIG.lineupActiveFirstSeason &&
+      match.seasonStart <= GAME_CONFIG.lineupActiveLastSeason,
+  )
+}
 
 export function validateLineups(dataset: LineupDataset, search: SearchPlayer[]): string[] {
   const errors: string[] = []
   const matchIds = new Set<string>()
   const searchIds = new Set(search.map((player) => player.id))
+  const searchById = new Map(search.map((player) => [player.id, player]))
+  const mononymIds = new Set(LINEUP_MONONYMS.map((entry) => entry.sourcePlayerId))
+  const mononymLabels = new Set<string>()
+  const archivePlayers = new Map<string, { displayName: string; acceptedNames: string[] }>()
   const competitionCounts = { ucl: 0, euro: 0, 'world-cup': 0 }
+  const activeCompetitionCounts = { ucl: 0, euro: 0, 'world-cup': 0 }
   const uclSeasons = new Map<number, number>()
 
   if (!dataset.version.trim()) errors.push('lineup roster version is required')
@@ -20,6 +37,12 @@ export function validateLineups(dataset: LineupDataset, search: SearchPlayer[]):
     if (matchIds.has(match.id)) errors.push(`${prefix} duplicate match ID`)
     matchIds.add(match.id)
     competitionCounts[match.competition] += 1
+    if (
+      match.seasonStart >= GAME_CONFIG.lineupActiveFirstSeason &&
+      match.seasonStart <= GAME_CONFIG.lineupActiveLastSeason
+    ) {
+      activeCompetitionCounts[match.competition] += 1
+    }
     if (match.competition === 'ucl') {
       uclSeasons.set(match.seasonStart, (uclSeasons.get(match.seasonStart) ?? 0) + 1)
     }
@@ -41,6 +64,17 @@ export function validateLineups(dataset: LineupDataset, search: SearchPlayer[]):
       if (team.starters.length !== 11) errors.push(`${prefix} ${team.name} needs 11 starters`)
       if (!team.bench.length) errors.push(`${prefix} ${team.name} bench is empty`)
       for (const player of [...team.starters, ...team.bench]) {
+        const existingPlayer = archivePlayers.get(player.id)
+        if (existingPlayer && existingPlayer.displayName !== player.displayName) {
+          errors.push(`${prefix} ${player.id} has inconsistent canonical names`)
+        }
+        archivePlayers.set(player.id, {
+          displayName: player.displayName,
+          acceptedNames: [...new Set([...(existingPlayer?.acceptedNames ?? []), ...player.acceptedNames])],
+        })
+        if (searchById.get(player.id)?.displayName !== player.displayName) {
+          errors.push(`${prefix} ${player.id} canonical name differs from autocomplete`)
+        }
         if (playerIds.has(player.id)) errors.push(`${prefix} ${team.name} repeats ${player.id}`)
         playerIds.add(player.id)
         if (!player.displayName.trim() || !player.lastName.trim()) {
@@ -62,9 +96,35 @@ export function validateLineups(dataset: LineupDataset, search: SearchPlayer[]):
     }
   }
 
+  for (const [playerId, player] of archivePlayers) {
+    if (player.displayName.trim().split(/\s+/).length !== 1) continue
+    const normalized = player.displayName.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+    if (mononymLabels.has(normalized)) errors.push(`duplicate normalized mononym ${player.displayName}`)
+    mononymLabels.add(normalized)
+    if (!mononymIds.has(playerId.replace(/^tm-player-/, ''))) {
+      errors.push(`non-allowlisted one-token archive name ${player.displayName}`)
+    }
+  }
+
+  for (const entry of LINEUP_MONONYMS) {
+    if (!entry.sourcePlayerId.trim() || !entry.displayName.trim() || !['artistName', 'fullName'].includes(entry.evidenceField)) {
+      errors.push(`invalid lineup mononym allowlist entry ${entry.sourcePlayerId}`)
+    }
+    const player = archivePlayers.get(`tm-player-${entry.sourcePlayerId}`)
+    if (!player) errors.push(`lineup mononym allowlist ID ${entry.sourcePlayerId} is not in the archive`)
+    else if (player.displayName !== entry.displayName) errors.push(`lineup mononym allowlist mismatch for ${entry.sourcePlayerId}`)
+  }
+
   if (competitionCounts.ucl !== 153) errors.push('lineup dataset needs 153 UCL matches')
   if (competitionCounts.euro !== 24) errors.push('lineup dataset needs 24 EURO matches')
   if (competitionCounts['world-cup'] !== 24) errors.push('lineup dataset needs 24 World Cup matches')
+  const activeMatches = getActiveLineupMatches(dataset)
+  if (activeMatches.length !== LINEUP_ACTIVE_MATCH_COUNT) {
+    errors.push(`active lineup dataset needs exactly ${LINEUP_ACTIVE_MATCH_COUNT} matches`)
+  }
+  if (activeCompetitionCounts.ucl !== 103) errors.push('active lineup dataset needs 103 UCL matches')
+  if (activeCompetitionCounts.euro !== 15) errors.push('active lineup dataset needs 15 EURO matches')
+  if (activeCompetitionCounts['world-cup'] !== 18) errors.push('active lineup dataset needs 18 World Cup matches')
   for (let season = 1995; season <= 2025; season += 1) {
     const expected = season === 2019 ? 3 : 5
     if (uclSeasons.get(season) !== expected) {

@@ -145,7 +145,7 @@ export function LineupGameScreen({
 
       <section className="lineup-match-card">
         <div className="lineup-match-card__competition" data-testid="lineup-competition-label">
-          {editionLabel} / {tournamentLabel} {stageLabel}
+          {editionLabel} - {tournamentLabel} {stageLabel}
         </div>
         <h1>{match.homeTeam.name} <span>vs</span> {match.awayTeam.name}</h1>
         <p><time dateTime={match.date}>{new Date(`${match.date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</time><i />{match.kickoffLocal} {timezoneLabel(match.date, match.timezone)}<i />{match.venue}</p>

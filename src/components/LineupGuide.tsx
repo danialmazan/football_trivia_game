@@ -26,7 +26,7 @@ export function LineupGuide({ settings, loading, error, onBack, onConfirm }: Lin
               ? 'One match and one missing player shared worldwide until 00:00:00 UTC.'
               : `${GAME_CONFIG.challengeRounds} different semifinal or final lineups from the Champions League, EURO or World Cup.`}
           </p>
-          <div className="guide-matchup"><span>{MODE_LABELS[settings.mode]}</span><i aria-hidden="true" /><span>201 matches</span></div>
+          <div className="guide-matchup"><span>{MODE_LABELS[settings.mode]}</span><i aria-hidden="true" /><span>{GAME_CONFIG.lineupActiveMatchCount} matches</span></div>
         </div>
         <div className="guide-card__rules-column">
           <div className="guide-rules">

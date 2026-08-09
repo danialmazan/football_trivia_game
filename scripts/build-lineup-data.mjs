@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { createGunzip } from 'node:zlib'
 import { createInterface } from 'node:readline'
@@ -13,7 +13,10 @@ const output = process.env.LINEUP_OUTPUT_JSON ?? join(root, 'src', 'data', 'line
 const searchOutput =
   process.env.LINEUP_SEARCH_OUTPUT_JSON ?? join(root, 'src', 'data', 'lineupSearch.json')
 const poolOutput =
-  process.env.LINEUP_DAILY_POOL_SQL ?? join(root, 'supabase', 'migrations', '202608050002_lineup_daily_pool.sql')
+  process.env.LINEUP_DAILY_POOL_SQL ?? join(lineupCache, 'generated-lineup-daily-pool.sql')
+const mononymsSource = join(root, 'src', 'data', 'lineupMononyms.json')
+const activeFirstSeason = 2005
+const activeLastSeason = 2025
 const performancesSource = process.env.FOOTBALL_PERFORMANCES_CSV ?? join(cacheRoot, 'raw', 'player_performances.csv')
 const nationalPerformancesSource = process.env.FOOTBALL_NATIONAL_PERFORMANCES_CSV ?? join(cacheRoot, 'raw', 'player_national_performances.csv')
 const nationalTeamsSource = process.env.FOOTBALL_NATIONAL_TEAMS_CSV_GZ ?? join(cacheRoot, 'raw', 'national_teams.csv.gz')
@@ -160,6 +163,8 @@ async function loadPlayers() {
       firstName: row.first_name,
       lastName: row.last_name || row.name.split(/\s+/).at(-1) || row.name,
       citizenship: row.country_of_citizenship,
+      cc0Name: row.name,
+      cc0ComposedName: [row.first_name, row.last_name].filter(Boolean).join(' '),
     })
   }
   if (existsSync(playerGameSource)) {
@@ -171,10 +176,62 @@ async function loadPlayers() {
         firstName: player.firstName,
         lastName: player.lastName,
         citizenship: existing?.citizenship || player.birthCountry,
+        cc0Name: existing?.cc0Name,
+        cc0ComposedName: existing?.cc0ComposedName,
       })
     }
   }
   return players
+}
+
+function loadTransfermarktMetadata() {
+  const metadata = new Map()
+  if (!existsSync(join(lineupCache, 'player-metadata'))) return metadata
+  for (const file of readdirSync(join(lineupCache, 'player-metadata'))) {
+    if (!file.endsWith('.json')) continue
+    const payload = JSON.parse(readFileSync(join(lineupCache, 'player-metadata', file), 'utf8'))
+    for (const player of payload.data ?? []) metadata.set(String(player.id), player)
+  }
+  return metadata
+}
+
+async function enrichProfileNames(candidateRegistry) {
+  const requests = []
+  for (const [sourcePlayerId, candidates] of candidateRegistry) {
+    if (candidates.some((candidate) => nameTokens(candidate.value).length > 1)) continue
+    const slug = candidates.find((candidate) => candidate.profileSlug)?.profileSlug
+    if (slug) requests.push({ sourcePlayerId, slug })
+  }
+  await mapConcurrent(requests, 4, async ({ sourcePlayerId, slug }) => {
+    const candidates = candidateRegistry.get(sourcePlayerId) ?? []
+    const path = join(lineupCache, 'player-profiles', `${sourcePlayerId}.html`)
+    let html
+    try {
+      html = await fetchCached(`https://www.transfermarkt.com/${slug}/profil/spieler/${sourcePlayerId}`, path, 1)
+    } catch (error) {
+      console.warn(`Could not enrich lineup player ${sourcePlayerId} from profile: ${error instanceof Error ? error.message : String(error)}`)
+      return
+    }
+    const fullName = html.match(/Full name:\s*<\/span>\s*<span[^>]*info-table__content--bold[^>]*>([\s\S]*?)<\/span>/i)?.[1]
+    const value = fullName ? text(fullName) : ''
+    if (value && nameTokens(value).length > 1) {
+      candidates.push({ value, source: 'Transfermarkt profile full name', profileSlug: slug })
+    }
+  })
+}
+
+async function enrichTransfermarktMetadata(metadata, playerIds) {
+  const missing = playerIds.filter((playerId) => !metadata.has(playerId))
+  const batches = Array.from({ length: Math.ceil(missing.length / 75) }, (_, index) =>
+    missing.slice(index * 75, index * 75 + 75),
+  )
+  await mapConcurrent(batches, 4, async (ids) => {
+    if (!ids.length) return
+    const query = ids.map((id) => `ids%5B%5D=${encodeURIComponent(id)}`).join('&')
+    const path = join(lineupCache, 'player-metadata', `batch-${cacheBatchKey(ids)}.json`)
+    const payload = JSON.parse(await fetchCached(`https://tmapi.transfermarkt.technology/players?${query}`, path))
+    for (const player of payload.data ?? []) metadata.set(String(player.id), player)
+  })
 }
 
 function seasonStartYear(season) {
@@ -367,10 +424,11 @@ function matchUrl(matchId) {
   return `https://www.transfermarkt.com/spielbericht/index/spielbericht/${matchId}`
 }
 
-async function fetchCached(url, path) {
+async function fetchCached(url, path, maxAttempts = 5) {
   if (existsSync(path)) return readFileSync(path, 'utf8')
-  for (let attempt = 1; attempt <= 5; attempt += 1) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const response = await fetch(url, {
+      signal: AbortSignal.timeout(15_000),
       headers: {
         'user-agent': 'Mozilla/5.0 (compatible; LeoGuessiData/1.0; project data refresh)',
         'accept-language': 'en-GB,en;q=0.9',
@@ -383,7 +441,7 @@ async function fetchCached(url, path) {
       await new Promise((resolve) => setTimeout(resolve, 350))
       return body
     }
-    if (attempt === 5) throw new Error(`Could not fetch ${url}: ${response.status}`)
+    if (attempt === maxAttempts) throw new Error(`Could not fetch ${url}: ${response.status}`)
     await new Promise((resolve) => setTimeout(resolve, attempt * 1_500))
   }
   throw new Error(`Could not fetch ${url}`)
@@ -471,13 +529,23 @@ function parseSeasonPage(html, competition, season) {
   return matches
 }
 
-function playerFromAnchor(fragment, players) {
-  const anchor = fragment.match(/<a(?: title="([^"]+)")? href="[^"]*\/profil\/spieler\/(\d+)">([^<]+)<\/a>/)
+function playerFromAnchor(fragment, players, candidateRegistry) {
+  const anchor = fragment.match(/<a(?: title="([^"]+)")? href="[^"]*\/([^"/]+)\/profil\/spieler\/(\d+)">([^<]+)<\/a>/)
   if (!anchor) return null
-  const playerId = anchor[2]
+  const playerId = anchor[3]
   const source = players.get(playerId)
-  const displayName = source?.displayName || decodeHtml(anchor[1] || anchor[3])
-  const shortName = decodeHtml(anchor[3])
+  const displayName = source?.displayName || decodeHtml(anchor[1] || anchor[4])
+  const shortName = decodeHtml(anchor[4])
+  const candidates = candidateRegistry.get(playerId) ?? []
+  for (const [value, sourceName] of [
+    [anchor[1] || (nameTokens(source?.displayName).length < 2 ? anchor[2].replace(/-/g, ' ') : ''), 'match-sheet anchor title'],
+    [anchor[4], 'match-sheet short label'],
+    [source?.cc0ComposedName, 'composed CC0 first_name + last_name'],
+    [source?.cc0Name, 'CC0 name'],
+  ]) {
+    if (value?.trim()) candidates.push({ value: value.trim(), source: sourceName, profileSlug: anchor[2] })
+  }
+  candidateRegistry.set(playerId, candidates)
   return {
     id: `tm-player-${playerId}`,
     sourcePlayerId: playerId,
@@ -487,7 +555,7 @@ function playerFromAnchor(fragment, players) {
   }
 }
 
-function parseTeam(section, players) {
+function parseTeam(section, players, candidateRegistry) {
   const header = section.match(/aufstellung-unterueberschrift-mannschaft[\s\S]*?class="sb-vereinslink"[^>]*href="[^"]*\/verein\/(\d+)[^"]*"[^>]*>([^<]+)<\/a>/)
   const formation = section.match(/Starting Line-up:\s*([^<\r\n]+)/)?.[1]?.trim()
   if (!header || !formation) return null
@@ -497,7 +565,7 @@ function parseTeam(section, players) {
     const start = container.index ?? 0
     const end = containerStarts[index + 1]?.index ?? starterArea.length
     const fragment = starterArea.slice(start, end)
-    const player = playerFromAnchor(fragment, players)
+    const player = playerFromAnchor(fragment, players, candidateRegistry)
     const number = text(fragment.match(/tm-shirt-number[^>]*>([\s\S]*?)<\/div>/)?.[1] ?? '')
     if (!player) throw new Error(`Missing starter in ${text(header[2])}`)
     return {
@@ -510,7 +578,7 @@ function parseTeam(section, players) {
 
   const benchArea = section.match(/<table class="ersatzbank">([\s\S]*?)<tr class="bench-table__tr">/)?.[1] ?? ''
   const bench = [...benchArea.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((row) => {
-    const player = playerFromAnchor(row[1], players)
+    const player = playerFromAnchor(row[1], players, candidateRegistry)
     if (!player) return null
     const number = text(row[1].match(/tm-shirt-number[^>]*>([\s\S]*?)<\/div>/)?.[1] ?? '')
     const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)]
@@ -526,7 +594,7 @@ function parseTeam(section, players) {
   }
 }
 
-function parseMatchPage(html, manifest, players) {
+function parseMatchPage(html, manifest, players, candidateRegistry) {
   const lineupStart = html.indexOf('>Line-Ups')
   const lineupHtml = lineupStart >= 0 ? html.slice(lineupStart) : html
   const teamStarts = [...lineupHtml.matchAll(/<div class="unterueberschrift aufstellung-unterueberschrift-mannschaft/g)]
@@ -535,7 +603,7 @@ function parseMatchPage(html, manifest, players) {
     const end = teamStarts[index + 1]?.index ?? lineupHtml.length
     return lineupHtml.slice(start, end)
   })
-  const teams = sections.map((section) => parseTeam(section, players))
+  const teams = sections.map((section) => parseTeam(section, players, candidateRegistry))
   const stadiumBlock = html.match(/<p class="sb-zusatzinfos">([\s\S]*?)<\/p>/)?.[1] ?? ''
   const stadium = text(stadiumBlock.match(/<a href="\/stadion\/[^"]+">([^<]+)<\/a>/)?.[1] ?? '')
   if (teams.length !== 2 || teams.some((team) => !team)) {
@@ -572,8 +640,109 @@ function rosterVersion(matches) {
   return `lineups-${(hash >>> 0).toString(16).padStart(8, '0')}`
 }
 
+function normalizeWhitespace(value) {
+  return String(value ?? '').trim().replace(/\s+/g, ' ')
+}
+
+function nameTokens(value) {
+  return normalizeWhitespace(value).split(/\s+/).filter(Boolean)
+}
+
+function codePointLength(value) {
+  return [...value].length
+}
+
+function canonicalizeNames(matches, candidateRegistry, metadata, previousNames) {
+  const allowlist = JSON.parse(readFileSync(mononymsSource, 'utf8'))
+  const allowlisted = new Map(allowlist.map((entry) => [String(entry.sourcePlayerId), entry]))
+  const players = new Map()
+  for (const match of matches) {
+    for (const player of match.teams.flatMap((team) => [...team.starters, ...team.bench])) {
+      const current = players.get(player.sourcePlayerId) ?? { player, names: [] }
+      current.names.push(player.displayName, player.lastName, ...(player.acceptedNames ?? []))
+      players.set(player.sourcePlayerId, current)
+    }
+  }
+
+  const canonical = new Map()
+  for (const [sourcePlayerId, entry] of players) {
+    const metadataPlayer = metadata.get(sourcePlayerId)
+    const candidates = [
+      ...(metadataPlayer?.displayName ? [{ value: metadataPlayer.displayName, source: 'metadata displayName', priority: 0 }] : []),
+      ...(metadataPlayer?.name ? [{ value: metadataPlayer.name, source: 'metadata name', priority: 1 }] : []),
+      ...(candidateRegistry.get(sourcePlayerId) ?? []).map((candidate) => ({
+        ...candidate,
+        priority: candidate.source === 'composed CC0 first_name + last_name' ? 2
+          : candidate.source === 'CC0 name' ? 3
+            : candidate.source === 'match-sheet anchor title' ? 4 : 5,
+      })),
+      ...entry.names.map((value) => ({ value, source: 'existing snapshot alias', priority: 5 })),
+    ]
+      .map((candidate) => ({ ...candidate, value: normalizeWhitespace(candidate.value) }))
+      .filter((candidate) => candidate.value)
+
+    const override = allowlisted.get(sourcePlayerId)
+    let displayName
+    if (override) {
+      displayName = normalizeWhitespace(override.displayName)
+      const artistName = normalizeWhitespace(metadataPlayer?.artistName || override.displayName)
+      if (!artistName || normalizeWhitespace(artistName) !== displayName) {
+        throw new Error(`Stale lineup mononym allowlist entry ${sourcePlayerId}: ${displayName} does not match metadata artistName.`)
+      }
+    } else {
+      const ranked = candidates.sort((left, right) =>
+        nameTokens(right.value).length - nameTokens(left.value).length ||
+        codePointLength(right.value) - codePointLength(left.value) ||
+        left.priority - right.priority ||
+        normalize(left.value).localeCompare(normalize(right.value)),
+      )
+      displayName = ranked[0]?.value
+    }
+    if (!displayName) throw new Error(`No display name candidates for lineup player ${sourcePlayerId}.`)
+    if (nameTokens(displayName).length < 2 && !override) {
+      const details = candidates.map((candidate) => `${candidate.source}: ${candidate.value}`).join('; ')
+      throw new Error(`Unresolved one-token lineup player ${sourcePlayerId}: ${details}`)
+    }
+    canonical.set(sourcePlayerId, {
+      displayName,
+      lastName: nameTokens(displayName).at(-1) ?? displayName,
+      acceptedNames: [...new Set([
+        ...(previousNames.get(sourcePlayerId) ?? []),
+        ...entry.names,
+        ...candidates.map((candidate) => candidate.value),
+        displayName,
+      ].map(normalizeWhitespace).filter(Boolean))],
+    })
+  }
+
+  for (const match of matches) {
+    for (const team of match.teams) {
+      for (const player of [...team.starters, ...team.bench]) {
+        const resolved = canonical.get(player.sourcePlayerId)
+        player.displayName = resolved.displayName
+        player.lastName = resolved.lastName
+        player.acceptedNames = resolved.acceptedNames
+      }
+    }
+  }
+  return canonical
+}
+
 async function main() {
   const players = await loadPlayers()
+  const metadata = loadTransfermarktMetadata()
+  const previousNames = new Map()
+  if (existsSync(output)) {
+    const previous = JSON.parse(readFileSync(output, 'utf8'))
+    for (const match of previous.matches ?? []) {
+      for (const player of match.teams.flatMap((team) => [...team.starters, ...team.bench])) {
+        const names = previousNames.get(player.sourcePlayerId) ?? []
+        names.push(player.displayName, player.lastName, ...(player.acceptedNames ?? []))
+        previousNames.set(player.sourcePlayerId, names)
+      }
+    }
+  }
+  const candidateRegistry = new Map()
   const seasonItems = competitions.flatMap((competition) =>
     competition.seasons.map((season) => ({ competition, season })),
   )
@@ -589,26 +758,25 @@ async function main() {
     const path = join(lineupCache, 'matches', `${item.sourceMatchId}.html`)
     const html = await fetchCached(matchUrl(item.sourceMatchId), path)
     console.log(`Match ${index + 1}/${manifest.length}: ${item.sourceMatchId}`)
-    return parseMatchPage(html, item, players)
+    return parseMatchPage(html, item, players, candidateRegistry)
   })
 
   await addStarterClues(matches, players)
 
   matches.sort((left, right) => left.date.localeCompare(right.date) || left.id.localeCompare(right.id))
+  const archivePlayerIds = [...new Set(matches.flatMap((match) => match.teams.flatMap((team) => [...team.starters, ...team.bench]).map((player) => player.sourcePlayerId)))]
+  if (process.env.LINEUP_REFRESH_METADATA === 'true') {
+    await enrichTransfermarktMetadata(metadata, archivePlayerIds)
+  }
+  await enrichProfileNames(candidateRegistry)
+  canonicalizeNames(matches, candidateRegistry, metadata, previousNames)
   const version = rosterVersion(matches)
   const search = new Map()
   for (const match of matches) {
     for (const player of match.teams.flatMap((team) => [...team.starters, ...team.bench])) {
       const existing = search.get(player.id)
-      const acceptedNames = [...new Set([
-        ...(existing?.acceptedNames ?? []),
-        existing?.displayName,
-        ...player.acceptedNames,
-        player.displayName,
-      ].filter(Boolean))]
-      const displayName = [existing?.displayName, player.displayName]
-        .filter(Boolean)
-        .sort((left, right) => right.length - left.length)[0]
+      const acceptedNames = [...new Set([...(existing?.acceptedNames ?? []), ...player.acceptedNames, player.displayName].filter(Boolean))]
+      const displayName = player.displayName
       search.set(player.id, {
         id: player.id,
         displayName,
@@ -626,18 +794,13 @@ async function main() {
   mkdirSync(dirname(output), { recursive: true })
   writeFileSync(output, `${JSON.stringify({ version, generatedAt: VERIFIED_DATE, matches }, null, 2)}\n`)
   writeFileSync(searchOutput, `${JSON.stringify(searchPlayers, null, 2)}\n`)
-  const poolRows = matches.map((match, index) => {
-    const starterIds = match.teams
-      .flatMap((team) => team.starters.map((player) => player.id))
-      .map((playerId) => `'${playerId}'`)
-      .join(',')
+  const activeMatches = matches.filter((match) => match.seasonStart >= activeFirstSeason && match.seasonStart <= activeLastSeason)
+  const activePoolRows = activeMatches.map((match, index) => {
+    const starterIds = match.teams.flatMap((team) => team.starters.map((player) => player.id)).map((playerId) => `'${playerId}'`).join(',')
     return `  ('${match.id}', '${version}', ${index + 1}, array[${starterIds}]::text[], true)`
   })
-  writeFileSync(
-    poolOutput,
-    `insert into public.lineup_daily_pool (match_id, roster_version, ranking, starter_ids, active)\nvalues\n${poolRows.join(',\n')}\non conflict (match_id) do update set\n  roster_version = excluded.roster_version,\n  ranking = excluded.ranking,\n  starter_ids = excluded.starter_ids,\n  active = excluded.active;\n`,
-  )
-  console.log(`Wrote ${matches.length} matches, ${searchPlayers.length} searchable players, roster ${version}.`)
+  writeFileSync(poolOutput, `begin;\nupdate public.lineup_daily_pool set active = false where active;\n\ninsert into public.lineup_daily_pool (match_id, roster_version, ranking, starter_ids, active)\nvalues\n${activePoolRows.join(',\n')}\non conflict (match_id) do update set\n  roster_version = excluded.roster_version,\n  ranking = excluded.ranking,\n  starter_ids = excluded.starter_ids,\n  active = excluded.active;\ncommit;\n`)
+  console.log(`Wrote ${matches.length} archive matches, ${activeMatches.length} active matches, ${searchPlayers.length} searchable players, roster ${version}.`)
 }
 
 await main()

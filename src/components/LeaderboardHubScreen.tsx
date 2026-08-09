@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { POOL_LABELS } from '../game/config'
 import { isValidNickname } from '../game/daily'
-import { buildDailyShareData, getGameUrl } from '../game/sharing'
+import { buildDailyShareData, buildLineupDailyShareData, getGameUrl } from '../game/sharing'
 import type {
   LeaderboardHubResponse,
   LineupLeaderboardHubResponse,
@@ -69,7 +69,7 @@ export function LeaderboardHubScreen(props: LeaderboardHubScreenProps) {
       ) : (
         <section className="leaderboard-hub-content" aria-label="Unlocked leaderboards">
           <div className="leaderboard-hub-toolbar">
-            <div className="leaderboard-hub-toolbar__share"><button className="leaderboard-family-back" type="button" onClick={() => onFamilyChange(null)}>← All leaderboard games</button><p>Viewing as <strong>{response.nickname}</strong></p>{family === 'player' && ownDailyResult && <SavedResultShare data={buildDailyShareData({ points: ownDailyResult.value, rank: ownDailyResult.rank, date: response.date, url: getGameUrl() })} />}</div>
+            <div className="leaderboard-hub-toolbar__share"><button className="leaderboard-family-back" type="button" onClick={() => onFamilyChange(null)}>← All leaderboard games</button><p>Viewing as <strong>{response.nickname}</strong></p>{ownDailyResult && <SavedResultShare data={family === 'player' ? buildDailyShareData({ points: ownDailyResult.value, rank: ownDailyResult.rank, date: response.date, url: getGameUrl() }) : buildLineupDailyShareData({ points: ownDailyResult.value, rank: ownDailyResult.rank, date: response.date, url: getGameUrl() })} />}</div>
             <div className="leaderboard-hub-toolbar__tools"><button className="text-button" type="button" onClick={() => onRefresh(family)} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh leaderboards'}</button><button className="text-button" type="button" onClick={() => onResetAccess(family)}>Change nickname</button></div>
           </div>
           <div className="leaderboard-hub-pages" role="tablist" aria-label="Leaderboard game">

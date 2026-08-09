@@ -1,6 +1,6 @@
 begin;
 
-select plan(20);
+select plan(24);
 
 select has_table('public', 'lineup_daily_pool', 'lineup daily pool exists');
 select has_table('public', 'lineup_daily_challenges', 'lineup daily challenges exist');
@@ -16,8 +16,21 @@ select has_function(
 
 select is(
   (select count(*)::integer from public.lineup_daily_pool where active),
-  201,
-  'active lineup pool contains exactly 201 matches'
+  136,
+  'active lineup pool contains exactly 136 matches'
+);
+select is(
+  (select count(distinct roster_version)::integer from public.lineup_daily_pool where active),
+  1,
+  'active lineup pool has exactly one roster version'
+);
+select ok(
+  (select active = false from public.lineup_daily_pool where match_id = 'tm-1067642'),
+  'a retained pre-2005 pool row is inactive'
+);
+select ok(
+  (select active = true from public.lineup_daily_pool where match_id = 'tm-53455'),
+  'a 2005/06 pool row is active'
 );
 select is(
   (select count(*)::integer from public.lineup_daily_pool
@@ -30,6 +43,18 @@ select is(
    where (select count(distinct starter_id) from unnest(p.starter_ids) starter_id) <> 22),
   0,
   'every pool match has 22 unique starters'
+);
+
+insert into public.lineup_daily_challenges (
+  challenge_date, match_id, missing_player_id, roster_version
+)
+select date '2099-01-02', match_id, starter_ids[1], roster_version
+from public.lineup_daily_pool where match_id = 'tm-1067642';
+
+select is(
+  (select match_id from public.lineup_daily_challenges where challenge_date = date '2099-01-02'),
+  'tm-1067642',
+  'historical challenge can still reference an inactive pool row'
 );
 
 select ok((select relrowsecurity from pg_class where oid = 'public.lineup_daily_pool'::regclass), 'lineup pool has RLS');

@@ -73,7 +73,7 @@ export function getTitleHighlights(player: Player): string[] {
     milestones.push(`${player.championsLeagueAppearances} Champions League appearances`)
   }
   if (player.nationalTeam.caps > 0) milestones.push(`${player.nationalTeam.caps} senior caps`)
-  if (!milestones.length) milestones.push(`${player.bigFiveAppearances} Big-Five appearances`)
+    if (!milestones.length) milestones.push(`${player.bigFiveAppearances} appearances in the Big-Five leagues`)
   return milestones
 }
 
@@ -103,5 +103,5 @@ export function generateClues(
 export function getCareerSummary(player: Player): string {
   const team = getMainTeams(player)[0]
   const keyAchievement = getTitleHighlights(player)[0].toLowerCase()
-  return `${player.broadPosition} · ${player.bigFiveAppearances.toLocaleString('en-US')} Big-Five appearances · Most appearances for ${team.clubName} · ${keyAchievement}.`
+  return `${player.broadPosition} · ${player.bigFiveAppearances.toLocaleString('en-US')} appearances in the Big-Five leagues · Most appearances for ${team.clubName} · ${keyAchievement}.`
 }

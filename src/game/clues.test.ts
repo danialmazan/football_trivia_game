@@ -76,7 +76,7 @@ describe('football clue generation', () => {
       nationalTeam: { ...base.nationalTeam, caps: 0 },
       bigFiveAppearances: 321,
     } as Player
-    expect(getTitleHighlights(titleless)).toEqual(['321 Big-Five appearances'])
+    expect(getTitleHighlights(titleless)).toEqual(['321 appearances in the Big-Five leagues'])
   })
 
   it('derives all career decades from Big-Five seasons', () => {
