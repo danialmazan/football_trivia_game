@@ -86,9 +86,14 @@ when it would collide with a word in another player’s name—for example,
   needs 50 appearances inside the chosen decade or league. Normal uses the top
   100 filtered players and Hardcore the top 300; ranking uses only UCL
   appearances and eligible titles attributable to that filter.
+
 - **Normal:** the top 250 players with at least 50 Big-Five appearances in
   seasons starting in 1995 or later.
 - **Hardcore:** the top 800 players, including all 250 Normal players.
+
+Player of the day and Lineup of the day share a 30-day answer cooldown. A
+footballer used as either daily answer cannot be selected by either daily mode
+again until day 31; already-created daily challenges are never rewritten.
 
 Main-pool players have at least 150 combined Big-Five league appearances, a
 50-match club, a senior international cap, and at least one Big-Five appearance

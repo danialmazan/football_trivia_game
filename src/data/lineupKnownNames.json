@@ -1,0 +1,412 @@
+[
+  {
+    "sourcePlayerId": "77",
+    "displayName": "Lúcio",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "1426",
+    "displayName": "Cacau",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "1792",
+    "displayName": "Hamit Altıntop",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "3359",
+    "displayName": "Sylvinho",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "3366",
+    "displayName": "Kaká",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "3373",
+    "displayName": "Ronaldinho",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "3394",
+    "displayName": "Ole Gunnar Solskjær",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "3428",
+    "displayName": "Dejan Stanković",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "3540",
+    "displayName": "John O'Shea",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "4248",
+    "displayName": "Diego Ribas",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "4317",
+    "displayName": "Maxwell",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "5343",
+    "displayName": "Edmílson",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "5782",
+    "displayName": "Emre Belözoğlu",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "5800",
+    "displayName": "Dida",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "5819",
+    "displayName": "Serginho",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "5937",
+    "displayName": "Cafu",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "7349",
+    "displayName": "Raúl González",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "7570",
+    "displayName": "Fábio Aurélio",
+    "evidenceField": "artistName"
+  },
+  {
+    "sourcePlayerId": "7598",
+    "displayName": "Gabri",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "7607",
+    "displayName": "Xavi",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "7838",
+    "displayName": "Josico",
+    "evidenceField": "artistName"
+  },
+  {
+    "sourcePlayerId": "7916",
+    "displayName": "Oleguer",
+    "evidenceField": "artistName"
+  },
+  {
+    "sourcePlayerId": "8019",
+    "displayName": "Simão",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "8564",
+    "displayName": "Deco",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "9822",
+    "displayName": "Maniche",
+    "evidenceField": "artistName"
+  },
+  {
+    "sourcePlayerId": "9826",
+    "displayName": "Costinha",
+    "evidenceField": "artistName"
+  },
+  {
+    "sourcePlayerId": "13225",
+    "displayName": "Miguel Monteiro",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "14132",
+    "displayName": "Pepe Ferreira",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "14192",
+    "displayName": "Eliseu",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "15420",
+    "displayName": "Alex Costa",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "16136",
+    "displayName": "Dante",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "16306",
+    "displayName": "Casemiro",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "18301",
+    "displayName": "Maicon",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "19726",
+    "displayName": "Nemanja Vidic",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "26267",
+    "displayName": "Fernandinho",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "28021",
+    "displayName": "Samir Handanovič",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "28396",
+    "displayName": "Edin Džeko",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "29035",
+    "displayName": "Ederson Campos",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "30739",
+    "displayName": "John Obi Mikel",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "31005",
+    "displayName": "Fred Guedes",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "31645",
+    "displayName": "Anderson Oliveira",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "33357",
+    "displayName": "Miranda Filho",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "33706",
+    "displayName": "Nani",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "33947",
+    "displayName": "Rafinha Souza",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "34495",
+    "displayName": "Adriano Correia",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "34572",
+    "displayName": "Mario Mandžukić",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "34593",
+    "displayName": "Serdar Taşçı",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "35242",
+    "displayName": "Beto",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "38360",
+    "displayName": "Mevlüt Erdinç",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "44501",
+    "displayName": "Marcelo Vieira",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "50935",
+    "displayName": "Chicharito",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "52769",
+    "displayName": "Willian",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "52897",
+    "displayName": "Hernanes",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "54170",
+    "displayName": "Ramires",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "55769",
+    "displayName": "Danilo D'Ambrosio",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "61892",
+    "displayName": "Rafael da Silva",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "65278",
+    "displayName": "Pedro Rodríguez",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "68290",
+    "displayName": "Neymar",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "74229",
+    "displayName": "Koke",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "81999",
+    "displayName": "Joselu",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "85288",
+    "displayName": "Isco",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "85314",
+    "displayName": "Oscar Júnior",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "102017",
+    "displayName": "Jorginho",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "105470",
+    "displayName": "Alisson",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "111819",
+    "displayName": "Neto Murara",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "129473",
+    "displayName": "Rafinha Alcântara",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "134936",
+    "displayName": "Jesé",
+    "evidenceField": "artistName"
+  },
+  {
+    "sourcePlayerId": "145707",
+    "displayName": "Danilo Luiz",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "181136",
+    "displayName": "Piotr Zieliński",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "181778",
+    "displayName": "Emerson Santos",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "205938",
+    "displayName": "Mario Pasalić",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "207834",
+    "displayName": "Bono",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "225693",
+    "displayName": "Fabinho",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "238223",
+    "displayName": "Ederson Moraes",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "258254",
+    "displayName": "Jemerson",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "357565",
+    "displayName": "Rodri",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "411295",
+    "displayName": "Raphinha",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "412363",
+    "displayName": "Rodrygo",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "486031",
+    "displayName": "Nico Gonzalez",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "487469",
+    "displayName": "Vitinha",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "646740",
+    "displayName": "Gavi",
+    "evidenceField": "playerPoolDisplayName"
+  },
+  {
+    "sourcePlayerId": "683840",
+    "displayName": "Pedri",
+    "evidenceField": "playerPoolDisplayName"
+  }
+]

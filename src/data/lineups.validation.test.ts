@@ -2,10 +2,11 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import rawDataset from './lineupMatches.json'
 import rawSearch from './lineupSearch.json'
+import rawPlayers from './players.json'
 import type { SearchPlayer } from './types'
 import type { LineupDataset } from './lineupTypes'
 import { GAME_CONFIG } from '../game/config'
-import { getActiveLineupMatches, LINEUP_ACTIVE_MATCH_COUNT, LINEUP_MATCH_COUNT, LINEUP_MONONYMS, validateLineups } from './lineupValidation'
+import { getActiveLineupMatches, LINEUP_ACTIVE_MATCH_COUNT, LINEUP_KNOWN_NAMES, LINEUP_MATCH_COUNT, validateLineups } from './lineupValidation'
 
 const dataset = rawDataset as LineupDataset
 const search = rawSearch as SearchPlayer[]
@@ -45,11 +46,35 @@ describe('lineup data snapshot', () => {
       displayName: 'Tim Borowski',
       acceptedNames: expect.arrayContaining(['Borowski']),
     })
-    expect(LINEUP_MONONYMS).toEqual([{ sourcePlayerId: '3373', displayName: 'Ronaldinho', evidenceField: 'artistName' }])
+    expect(LINEUP_KNOWN_NAMES).toEqual(expect.arrayContaining([
+      { sourcePlayerId: '3366', displayName: 'Kaká', evidenceField: 'playerPoolDisplayName' },
+      { sourcePlayerId: '3373', displayName: 'Ronaldinho', evidenceField: 'playerPoolDisplayName' },
+      { sourcePlayerId: '8564', displayName: 'Deco', evidenceField: 'playerPoolDisplayName' },
+      { sourcePlayerId: '9822', displayName: 'Maniche', evidenceField: 'artistName' },
+    ]))
+    expect(search.find((player) => player.id === 'tm-player-3366')).toMatchObject({
+      displayName: 'Kaká',
+      acceptedNames: expect.arrayContaining(['Ricardo Izecson dos Santos Leite']),
+    })
+    expect(search.find((player) => player.id === 'tm-player-8564')).toMatchObject({
+      displayName: 'Deco',
+      acceptedNames: expect.arrayContaining(['Anderson Luís de Souza']),
+    })
     expect(search.find((player) => player.id === 'tm-player-3373')).toMatchObject({
       displayName: 'Ronaldinho',
       acceptedNames: expect.arrayContaining(['Ronaldo de Assis Moreira']),
     })
+  })
+
+  it('uses the curated familiar name for every active lineup player in the player pool', () => {
+    const curatedNames = new Map(rawPlayers.map((player) => [player.sourcePlayerId, player.displayName]))
+    const activePlayers = getActiveLineupMatches(dataset).flatMap((match) =>
+      match.teams.flatMap((team) => [...team.starters, ...team.bench]),
+    )
+    for (const player of activePlayers) {
+      const curatedName = curatedNames.get(player.sourcePlayerId)
+      if (curatedName) expect(player.displayName).toBe(curatedName)
+    }
   })
 
   it('matches the active JSON archive exactly to the release migration pool', () => {

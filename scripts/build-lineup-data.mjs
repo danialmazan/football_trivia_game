@@ -14,7 +14,7 @@ const searchOutput =
   process.env.LINEUP_SEARCH_OUTPUT_JSON ?? join(root, 'src', 'data', 'lineupSearch.json')
 const poolOutput =
   process.env.LINEUP_DAILY_POOL_SQL ?? join(lineupCache, 'generated-lineup-daily-pool.sql')
-const mononymsSource = join(root, 'src', 'data', 'lineupMononyms.json')
+const knownNamesSource = join(root, 'src', 'data', 'lineupKnownNames.json')
 const activeFirstSeason = 2005
 const activeLastSeason = 2025
 const performancesSource = process.env.FOOTBALL_PERFORMANCES_CSV ?? join(cacheRoot, 'raw', 'player_performances.csv')
@@ -173,6 +173,7 @@ async function loadPlayers() {
       players.set(String(player.sourcePlayerId), {
         ...existing,
         displayName: player.displayName,
+        knownDisplayName: player.displayName,
         firstName: player.firstName,
         lastName: player.lastName,
         citizenship: existing?.citizenship || player.birthCountry,
@@ -538,6 +539,7 @@ function playerFromAnchor(fragment, players, candidateRegistry) {
   const shortName = decodeHtml(anchor[4])
   const candidates = candidateRegistry.get(playerId) ?? []
   for (const [value, sourceName] of [
+    [source?.knownDisplayName, 'curated player-pool display name'],
     [anchor[1] || (nameTokens(source?.displayName).length < 2 ? anchor[2].replace(/-/g, ' ') : ''), 'match-sheet anchor title'],
     [anchor[4], 'match-sheet short label'],
     [source?.cc0ComposedName, 'composed CC0 first_name + last_name'],
@@ -653,8 +655,8 @@ function codePointLength(value) {
 }
 
 function canonicalizeNames(matches, candidateRegistry, metadata, previousNames) {
-  const allowlist = JSON.parse(readFileSync(mononymsSource, 'utf8'))
-  const allowlisted = new Map(allowlist.map((entry) => [String(entry.sourcePlayerId), entry]))
+  const knownNames = JSON.parse(readFileSync(knownNamesSource, 'utf8'))
+  const knownNamesById = new Map(knownNames.map((entry) => [String(entry.sourcePlayerId), entry]))
   const players = new Map()
   for (const match of matches) {
     for (const player of match.teams.flatMap((team) => [...team.starters, ...team.bench])) {
@@ -681,13 +683,15 @@ function canonicalizeNames(matches, candidateRegistry, metadata, previousNames) 
       .map((candidate) => ({ ...candidate, value: normalizeWhitespace(candidate.value) }))
       .filter((candidate) => candidate.value)
 
-    const override = allowlisted.get(sourcePlayerId)
+    const override = knownNamesById.get(sourcePlayerId)
     let displayName
     if (override) {
       displayName = normalizeWhitespace(override.displayName)
-      const artistName = normalizeWhitespace(metadataPlayer?.artistName || override.displayName)
-      if (!artistName || normalizeWhitespace(artistName) !== displayName) {
-        throw new Error(`Stale lineup mononym allowlist entry ${sourcePlayerId}: ${displayName} does not match metadata artistName.`)
+      const evidenceName = override.evidenceField === 'artistName'
+        ? metadataPlayer?.artistName
+        : candidates.find((candidate) => candidate.source === 'curated player-pool display name')?.value
+      if (!evidenceName || normalizeWhitespace(evidenceName) !== displayName) {
+        throw new Error(`Stale lineup known-name override ${sourcePlayerId}: ${displayName} does not match ${override.evidenceField}.`)
       }
     } else {
       const ranked = candidates.sort((left, right) =>

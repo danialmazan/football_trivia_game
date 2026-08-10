@@ -117,6 +117,11 @@ function integerFrom(bytes: Uint8Array, offset: number): number {
   )
 }
 
+function rotateFrom<T>(items: T[], startIndex: number): T[] {
+  const offset = ((startIndex % items.length) + items.length) % items.length
+  return [...items.slice(offset), ...items.slice(0, offset)]
+}
+
 export async function getOrCreateChallenge(
   client: SupabaseClient,
   date = utcDateKey(),
@@ -137,6 +142,10 @@ export async function getOrCreateChallenge(
   if (poolResult.error) throw poolResult.error
   if (!poolResult.data?.length) throw new Error('The Normal daily player pool is empty.')
 
+  const activeRosterVersions = new Set(poolResult.data.map((row) => row.roster_version as string))
+  if (activeRosterVersions.size !== 1) {
+    throw new Error('The Normal daily player pool has mixed active roster versions.')
+  }
   const rosterVersion = poolResult.data[0].roster_version as string
   const selectionSecret = Deno.env.get('DAILY_SELECTION_SECRET')
   if (!selectionSecret || selectionSecret.length < 32) {
@@ -145,25 +154,16 @@ export async function getOrCreateChallenge(
   const digest = await hmacBytes(selectionSecret, `${date}:${rosterVersion}`)
   const playerIndex = integerFrom(digest, 0) % poolResult.data.length
   const clueSeed = integerFrom(digest, 4) % 1_000_000
-  const candidate: StoredChallenge = {
-    challenge_date: date,
-    player_id: poolResult.data[playerIndex].player_id as string,
-    clue_seed: clueSeed,
-    roster_version: rosterVersion,
-  }
-
-  const inserted = await client
-    .from('daily_challenges')
-    .upsert(candidate, { onConflict: 'challenge_date', ignoreDuplicates: true })
-  if (inserted.error) throw inserted.error
-
-  const stored = await client
-    .from('daily_challenges')
-    .select('challenge_date,player_id,clue_seed,roster_version')
-    .eq('challenge_date', date)
-    .single()
-  if (stored.error) throw stored.error
-  return stored.data as StoredChallenge
+  const candidates = rotateFrom(poolResult.data, playerIndex)
+    .map((row) => row.player_id as string)
+  const reserved = await client.rpc('reserve_daily_challenge', {
+    p_challenge_date: date,
+    p_candidate_player_ids: candidates,
+    p_clue_seed: clueSeed,
+    p_roster_version: rosterVersion,
+  }).single()
+  if (reserved.error) throw reserved.error
+  return reserved.data as StoredChallenge
 }
 
 export async function getOrCreateLineupChallenge(
@@ -198,27 +198,18 @@ export async function getOrCreateLineupChallenge(
     throw new Error('DAILY_SELECTION_SECRET must contain at least 32 characters.')
   }
   const digest = await hmacBytes(selectionSecret, `${date}:lineup:${rosterVersion}`)
-  const selected = poolResult.data[integerFrom(digest, 0) % poolResult.data.length]
-  const starters = selected.starter_ids as string[]
-  if (starters.length !== 22) throw new Error('The selected lineup pool row is invalid.')
-  const candidate: StoredLineupChallenge = {
-    challenge_date: date,
-    match_id: selected.match_id as string,
-    missing_player_id: starters[integerFrom(digest, 4) % starters.length],
-    roster_version: rosterVersion,
-  }
-
-  const inserted = await client
-    .from('lineup_daily_challenges')
-    .upsert(candidate, { onConflict: 'challenge_date', ignoreDuplicates: true })
-  if (inserted.error) throw inserted.error
-  const stored = await client
-    .from('lineup_daily_challenges')
-    .select(fields)
-    .eq('challenge_date', date)
-    .single()
-  if (stored.error) throw stored.error
-  return stored.data as StoredLineupChallenge
+  const matchIndex = integerFrom(digest, 0) % poolResult.data.length
+  const orderedMatchIds = rotateFrom(poolResult.data, matchIndex)
+    .map((row) => row.match_id as string)
+  const starterOffset = integerFrom(digest, 4) % 22
+  const reserved = await client.rpc('reserve_lineup_daily_challenge', {
+    p_challenge_date: date,
+    p_candidate_match_ids: orderedMatchIds,
+    p_starter_offset: starterOffset,
+    p_roster_version: rosterVersion,
+  }).single()
+  if (reserved.error) throw reserved.error
+  return reserved.data as StoredLineupChallenge
 }
 
 export async function createAttemptToken(

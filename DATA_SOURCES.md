@@ -126,11 +126,14 @@ references, but are marked inactive in the server-side daily pool.
 The primary source for fixture metadata, formations, starters, substitutes, and
 shirt numbers is each public Transfermarkt match sheet. Every match retains its
 match-sheet and competition-season URLs plus its verification date. Player names
-are generated from the fullest sourced display available across the match sheet
-and CC0
+use the familiar football display name when it is explicitly backed by the
+curated player pool or Transfermarkt's artist-name field; the fullest sourced
+name remains an accepted answer. Other names are generated from the fullest
+sourced display available across the match sheet and CC0
 [Transfermarkt datasets](https://github.com/dcaribou/transfermarkt-datasets)
-player table where available. A reviewed stable-ID allowlist preserves stable
-mononyms such as Ronaldinho. The 2,048-player autocomplete snapshot is the
+player table where available. A reviewed stable-ID override file prevents known
+names such as Deco, Kaká, and Ronaldinho from reverting to legal names during a
+refresh. The 2,048-player autocomplete snapshot is the
 union of all starters and registered substitutes in the included match sheets.
 
 Pitch coordinates are the source formation coordinates normalized to the game's

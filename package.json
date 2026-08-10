@@ -18,7 +18,8 @@
     "daily:pool": "node scripts/build-daily-pool.mjs",
     "lineups:build": "node scripts/build-lineup-data.mjs",
     "lineups:validate": "vitest run src/data/lineups.validation.test.ts",
-    "lineups:migration:check": "node scripts/check-lineup-migration.mjs"
+    "lineups:migration:check": "node scripts/check-lineup-migration.mjs",
+    "daily:cooldown:check": "node scripts/check-daily-cooldown-migration.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

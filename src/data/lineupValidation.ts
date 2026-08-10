@@ -1,11 +1,11 @@
 import type { SearchPlayer } from './types'
 import type { LineupDataset } from './lineupTypes'
 import { GAME_CONFIG } from '../game/config'
-import mononyms from './lineupMononyms.json'
+import knownNames from './lineupKnownNames.json'
 
 export const LINEUP_MATCH_COUNT = GAME_CONFIG.lineupMatchCount
 export const LINEUP_ACTIVE_MATCH_COUNT = GAME_CONFIG.lineupActiveMatchCount
-export const LINEUP_MONONYMS = mononyms as { sourcePlayerId: string; displayName: string; evidenceField: string }[]
+export const LINEUP_KNOWN_NAMES = knownNames as { sourcePlayerId: string; displayName: string; evidenceField: string }[]
 
 export function getActiveLineupMatches(dataset: LineupDataset) {
   return dataset.matches.filter(
@@ -20,7 +20,7 @@ export function validateLineups(dataset: LineupDataset, search: SearchPlayer[]):
   const matchIds = new Set<string>()
   const searchIds = new Set(search.map((player) => player.id))
   const searchById = new Map(search.map((player) => [player.id, player]))
-  const mononymIds = new Set(LINEUP_MONONYMS.map((entry) => entry.sourcePlayerId))
+  const knownNamesById = new Map(LINEUP_KNOWN_NAMES.map((entry) => [entry.sourcePlayerId, entry]))
   const mononymLabels = new Set<string>()
   const archivePlayers = new Map<string, { displayName: string; acceptedNames: string[] }>()
   const competitionCounts = { ucl: 0, euro: 0, 'world-cup': 0 }
@@ -101,18 +101,18 @@ export function validateLineups(dataset: LineupDataset, search: SearchPlayer[]):
     const normalized = player.displayName.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
     if (mononymLabels.has(normalized)) errors.push(`duplicate normalized mononym ${player.displayName}`)
     mononymLabels.add(normalized)
-    if (!mononymIds.has(playerId.replace(/^tm-player-/, ''))) {
+    if (!knownNamesById.has(playerId.replace(/^tm-player-/, ''))) {
       errors.push(`non-allowlisted one-token archive name ${player.displayName}`)
     }
   }
 
-  for (const entry of LINEUP_MONONYMS) {
-    if (!entry.sourcePlayerId.trim() || !entry.displayName.trim() || !['artistName', 'fullName'].includes(entry.evidenceField)) {
-      errors.push(`invalid lineup mononym allowlist entry ${entry.sourcePlayerId}`)
+  for (const entry of LINEUP_KNOWN_NAMES) {
+    if (!entry.sourcePlayerId.trim() || !entry.displayName.trim() || !['artistName', 'playerPoolDisplayName'].includes(entry.evidenceField)) {
+      errors.push(`invalid lineup known-name override ${entry.sourcePlayerId}`)
     }
     const player = archivePlayers.get(`tm-player-${entry.sourcePlayerId}`)
-    if (!player) errors.push(`lineup mononym allowlist ID ${entry.sourcePlayerId} is not in the archive`)
-    else if (player.displayName !== entry.displayName) errors.push(`lineup mononym allowlist mismatch for ${entry.sourcePlayerId}`)
+    if (!player) errors.push(`lineup known-name override ID ${entry.sourcePlayerId} is not in the archive`)
+    else if (player.displayName !== entry.displayName) errors.push(`lineup known-name override mismatch for ${entry.sourcePlayerId}`)
   }
 
   if (competitionCounts.ucl !== 153) errors.push('lineup dataset needs 153 UCL matches')
