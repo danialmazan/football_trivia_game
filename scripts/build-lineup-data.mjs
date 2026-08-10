@@ -803,7 +803,7 @@ async function main() {
     const starterIds = match.teams.flatMap((team) => team.starters.map((player) => player.id)).map((playerId) => `'${playerId}'`).join(',')
     return `  ('${match.id}', '${version}', ${index + 1}, array[${starterIds}]::text[], true)`
   })
-  writeFileSync(poolOutput, `begin;\nupdate public.lineup_daily_pool set active = false where active;\n\ninsert into public.lineup_daily_pool (match_id, roster_version, ranking, starter_ids, active)\nvalues\n${activePoolRows.join(',\n')}\non conflict (match_id) do update set\n  roster_version = excluded.roster_version,\n  ranking = excluded.ranking,\n  starter_ids = excluded.starter_ids,\n  active = excluded.active;\ncommit;\n`)
+  writeFileSync(poolOutput, `begin;\nupdate public.lineup_daily_pool\nset active = false, ranking = ranking + 1000\nwhere active;\n\ninsert into public.lineup_daily_pool (match_id, roster_version, ranking, starter_ids, active)\nvalues\n${activePoolRows.join(',\n')}\non conflict (match_id) do update set\n  roster_version = excluded.roster_version,\n  ranking = excluded.ranking,\n  starter_ids = excluded.starter_ids,\n  active = excluded.active;\ncommit;\n`)
   console.log(`Wrote ${matches.length} archive matches, ${activeMatches.length} active matches, ${searchPlayers.length} searchable players, roster ${version}.`)
 }
 

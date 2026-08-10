@@ -1,5 +1,7 @@
 begin;
-update public.lineup_daily_pool set active = false where active;
+update public.lineup_daily_pool
+set active = false, ranking = ranking + 1000
+where active;
 
 insert into public.lineup_daily_pool (match_id, roster_version, ranking, starter_ids, active)
 values
