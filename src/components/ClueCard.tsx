@@ -1,4 +1,5 @@
 import type { Clue } from '../game/clues'
+import { useI18n } from '../i18n'
 
 interface ClueCardProps {
   clue: Clue
@@ -7,8 +8,9 @@ interface ClueCardProps {
 }
 
 export function ClueCard({ clue, index, newlyRevealed = false }: ClueCardProps) {
+  const { locale } = useI18n()
   return (
-    <article className={`clue-card ${newlyRevealed ? 'clue-card--new' : ''}`} aria-label={`Clue ${index}`}>
+    <article className={`clue-card ${newlyRevealed ? 'clue-card--new' : ''}`} aria-label={`${locale === 'es' ? 'Pista' : 'Clue'} ${index}`}>
       <div className="clue-card__number" aria-hidden="true">
         {String(index).padStart(2, '0')}
       </div>
@@ -28,7 +30,7 @@ export function ClueCard({ clue, index, newlyRevealed = false }: ClueCardProps) 
                 The decades cover the full eligible career—not necessarily the years with this club.
               </small>
             </div>
-            <div className="team-logos" aria-label="Team logos">
+            <div className="team-logos" aria-label={locale === 'es' ? 'Escudos de los equipos' : 'Team logos'}>
               {clue.teams.map((team) => (
                 <div className="team-logo" key={team.clubId} title={team.clubName}>
                   <img

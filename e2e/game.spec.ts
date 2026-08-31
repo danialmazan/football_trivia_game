@@ -27,6 +27,40 @@ async function startGame(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: /let's go/i }).click()
 }
 
+test('switches the full interface to Spanish and preserves an active game', async ({ page }) => {
+  await page.goto('/?lang=es')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es')
+  await expect(page).toHaveURL(/\?lang=es$/)
+  await expect(page).toHaveTitle('Leo Guessi — Trivia de fútbol')
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /identifica futbolistas/i)
+  await expect(page.getByRole('heading', { name: 'Formato de juego' })).toBeVisible()
+  await expect(page.getByText('¿Puedes convertirte en el G.O.A.T. de adivinar futbolistas?')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Abrir ajustes' }).click()
+  await expect(page.getByRole('heading', { name: 'Ajustes' })).toBeVisible()
+  await page.getByRole('button', { name: 'Cerrar ajustes' }).click()
+
+  await page.getByRole('button', { name: /ver la clasificación/i }).click()
+  await expect(page.getByRole('heading', { name: /consulta la clasificación/i })).toBeVisible()
+  await page.getByRole('button', { name: /volver a la página de inicio/i }).click()
+
+  await page.getByRole('button', { name: /^Reto de 10 rondas/i }).click()
+  await page.getByRole('button', { name: /empezar/i }).click()
+  await expect(page.getByRole('heading', { name: /conoce tus tres opciones/i })).toBeVisible()
+  await page.getByRole('button', { name: /vamos/i }).click()
+  const input = page.getByLabel(/responde ahora/i)
+  await input.fill('Lionel')
+
+  await page.getByRole('button', { name: 'Inglés' }).click()
+  await expect(page).toHaveURL(/\?lang=en$/)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+  await expect(page.getByLabel(/guess now/i)).toHaveValue('Lionel')
+
+  await page.getByRole('button', { name: 'Spanish' }).click()
+  await expect(page).toHaveURL(/\?lang=es$/)
+  await expect(page.getByLabel(/responde ahora/i)).toHaveValue('Lionel')
+})
+
 test('enters the homepage in Player of the Day mode with a non-overlapping crest', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^Player of the day/i })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByText(/Five clues, hardest first.*no transfer gossip, no luck/i)).toHaveCount(0)
@@ -170,7 +204,7 @@ test('plays the shared daily player once and restores its leaderboard after relo
   expect(sharedResult).toEqual({
     title: 'Leo Guessi — Player of the Day',
     text: `I scored 100/100 in Leo Guessi’s Player of the Day — rank #1 on ${dailyDate} UTC.`,
-    url: 'http://127.0.0.1:4175/',
+    url: 'http://127.0.0.1:4175/?lang=en',
   })
   expect(JSON.stringify(sharedResult)).not.toContain('Lionel Messi')
   expect(JSON.stringify(sharedResult)).not.toContain('LeoFan')
@@ -276,7 +310,7 @@ test('gates the homepage leaderboard by today’s nickname and switches game and
   expect(hubSharedResult).toEqual({
     title: 'Leo Guessi — Player of the Day',
     text: 'I scored 100/100 in Leo Guessi’s Player of the Day — rank #1 on 2026-07-31 UTC.',
-    url: 'http://127.0.0.1:4175/',
+    url: 'http://127.0.0.1:4175/?lang=en',
   })
   expect(JSON.stringify(hubSharedResult)).not.toContain('LeoFan')
 
@@ -397,7 +431,7 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
   expect(await page.evaluate(() => Reflect.get(window, '__lineupDailyShared'))).toEqual({
     title: 'Leo Guessi — Lineup of the Day',
     text: `I scored 20/100 in Leo Guessi’s Lineup of the Day — rank #1 on ${dailyDate} UTC.`,
-    url: 'http://127.0.0.1:4175/',
+    url: 'http://127.0.0.1:4175/?lang=en',
   })
 })
 
@@ -449,7 +483,7 @@ test('gates the lineup leaderboard share by verified daily nickname', async ({ p
   expect(await page.evaluate(() => Reflect.get(window, '__lineupHubShared'))).toEqual({
     title: 'Leo Guessi — Lineup of the Day',
     text: 'I scored 20/100 in Leo Guessi’s Lineup of the Day — rank #1 on 2026-08-05 UTC.',
-    url: 'http://127.0.0.1:4175/',
+    url: 'http://127.0.0.1:4175/?lang=en',
   })
 })
 
@@ -498,7 +532,7 @@ test('plays ten distinct lineup matches and submits the lineup challenge', async
   expect(await page.evaluate(() => Reflect.get(window, '__lineupChallengeShared'))).toEqual({
     title: 'Leo Guessi — 10-round lineup challenge',
     text: 'I scored 0/1,000 in Leo Guessi’s 10-round lineup challenge and identified 0/10 missing players.',
-    url: 'http://127.0.0.1:4175/',
+    url: 'http://127.0.0.1:4175/?lang=en',
   })
 })
 
@@ -735,7 +769,7 @@ test('completes ten rounds, submits its nickname and persists a high score', asy
   await page.getByRole('button', { name: /share your result/i }).click()
   await expect(page.getByRole('status')).toHaveText('Link copied.')
   await expect.poll(() => page.evaluate(() => Reflect.get(window, '__copiedLink'))).toBe(
-    'http://127.0.0.1:4175/',
+    'http://127.0.0.1:4175/?lang=en',
   )
 
   await page.evaluate(() => {

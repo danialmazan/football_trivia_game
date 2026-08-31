@@ -1,9 +1,10 @@
-import { GAME_CONFIG, MODE_LABELS, POOL_LABELS, PRACTICE_LEAGUES } from '../game/config'
+import { GAME_CONFIG } from '../game/config'
 import { isValidNickname } from '../game/daily'
-import { buildChallengeShareData, getGameUrl } from '../game/sharing'
+import { buildChallengeShareData, getLocalizedGameUrl } from '../game/sharing'
 import type { GameState, LeaderboardBoards } from '../game/types'
 import { LeaderboardTabs } from './LeaderboardTabs'
 import { SavedResultShare } from './SavedResultShare'
+import { useI18n } from '../i18n'
 
 interface ResultsScreenProps {
   game: GameState
@@ -34,6 +35,7 @@ export function ResultsScreen({
   onSubmit,
   onRefresh,
 }: ResultsScreenProps) {
+  const { locale, t, modeLabel, poolLabel, leagueLabel, known } = useI18n()
   const correct = game.results.filter((result) => result.outcome === 'correct')
   const averageClues = game.results.length
     ? game.results.reduce((sum, result) => sum + result.cluesUsed, 0) / game.results.length
@@ -44,7 +46,7 @@ export function ResultsScreen({
   const practiceLabel = isPractice
     ? game.settings.practiceFilter.kind === 'decade'
       ? game.settings.practiceFilter.value
-      : PRACTICE_LEAGUES[game.settings.practiceFilter.value]
+      : leagueLabel(game.settings.practiceFilter.value)
     : null
 
   return (
@@ -54,20 +56,20 @@ export function ResultsScreen({
           LEO <span>GUESSI</span>
         </button>
         <span className="eyebrow">
-          Full time · {MODE_LABELS[game.settings.mode]} · {POOL_LABELS[game.settings.pool]}
+          {t('Full time')} · {modeLabel(game.settings.mode)} · {poolLabel(game.settings.pool)}
           {practiceLabel ? ` · ${practiceLabel}` : ''}
         </span>
-        <h1>That’s the final whistle.</h1>
+        <h1>{t('That’s the final whistle.')}</h1>
         <div className="final-score">
           <strong>{game.totalScore}</strong>
           <span>/ {GAME_CONFIG.challengeRounds * GAME_CONFIG.clueBaseScores[0]}</span>
         </div>
         <p>
           {isPractice
-            ? 'Ten filtered players completed.'
+            ? t('Ten filtered players completed.')
             : game.totalScore >= highScore
-              ? 'New personal best.'
-              : `Personal best: ${highScore}`}
+              ? t('New personal best.')
+              : t('Personal best: {score}', { score: highScore })}
         </p>
       </header>
 
@@ -75,12 +77,12 @@ export function ResultsScreen({
         <section className={`claim-place ${submitted ? 'claim-place--submitted' : ''}`}>
           <div className="claim-place__marker" aria-hidden="true">LG</div>
           <div className="claim-place__copy">
-            <span className="eyebrow">{submitted ? 'Score saved.' : 'Save your game'}</span>
-            <h2>{submitted ? 'Now share your result.' : 'Save it. Share it.'}</h2>
+            <span className="eyebrow">{submitted ? t('Score saved.') : t('Save your game')}</span>
+            <h2>{submitted ? t('Now share your result.') : t('Save it. Share it.')}</h2>
             <p>
               {submitted
-                ? 'This game now counts toward your challenge history.'
-                : 'Enter your nickname to save this game, build your stats history and unlock sharing.'}
+                ? t('This game now counts toward your challenge history.')
+                : t('Enter your nickname to save this result, build your stats history and unlock sharing.')}
             </p>
           </div>
           {!submitted ? (
@@ -91,14 +93,14 @@ export function ResultsScreen({
                 onSubmit()
               }}
             >
-              <label htmlFor="challenge-nickname">Public nickname</label>
+              <label htmlFor="challenge-nickname">{t('Public nickname')}</label>
               <div>
                 <input
                   id="challenge-nickname"
                   value={nickname}
                   onChange={(event) => onNicknameChange(event.target.value)}
                   maxLength={24}
-                  placeholder="Name or nickname"
+                  placeholder={t('Name or nickname')}
                   autoComplete="nickname"
                 />
                 <button
@@ -106,11 +108,11 @@ export function ResultsScreen({
                   type="submit"
                   disabled={submitting || !isValidNickname(nickname)}
                 >
-                  {submitting ? 'Saving…' : 'Save score & view boards'}
+                  {submitting ? t('Saving…') : t('Save score & view boards')}
                 </button>
               </div>
-              <small>Use the same nickname every time for your stats history to stay together.</small>
-              {error && <p className="daily-service-error" role="alert">{error}</p>}
+              <small>{t('Use the same nickname every time for your stats history to stay together.')}</small>
+              {error && <p className="daily-service-error" role="alert">{known(error)}</p>}
             </form>
           ) : (
             <div className="claim-place__saved-actions">
@@ -119,11 +121,12 @@ export function ResultsScreen({
                   points: game.totalScore,
                   pool: game.settings.pool,
                   identified: correct.length,
-                  url: getGameUrl(),
+                  url: getLocalizedGameUrl(locale),
+                  locale,
                 })}
               />
               <button className="text-button" type="button" onClick={onRefresh} disabled={submitting}>
-                {submitting ? 'Refreshing…' : 'Refresh leaderboards'}
+                {submitting ? t('Refreshing…') : t('Refresh leaderboards')}
               </button>
             </div>
           )}
@@ -134,20 +137,20 @@ export function ResultsScreen({
         <LeaderboardTabs mode="challenge" boards={boards} currentNickname={nickname} />
       )}
 
-      <section className="result-stats" aria-label="Game statistics">
-        <div><strong>{correct.length}</strong><span>Identified</span></div>
-        <div><strong>{averageClues.toFixed(1)}</strong><span>Avg clues used</span></div>
-        <div><strong>{incorrect}</strong><span>Wrong guesses</span></div>
-        <div><strong>{bestRound}</strong><span>Best round</span></div>
+      <section className="result-stats" aria-label={t('Game statistics')}>
+        <div><strong>{correct.length}</strong><span>{t('Identified')}</span></div>
+        <div><strong>{averageClues.toFixed(1)}</strong><span>{t('Avg clues used')}</span></div>
+        <div><strong>{incorrect}</strong><span>{t('Wrong guesses')}</span></div>
+        <div><strong>{bestRound}</strong><span>{t('Best round')}</span></div>
       </section>
 
       <section className="round-recap">
         <div className="section-heading">
-          <div><span className="eyebrow">Box score</span><h2>Round by round</h2></div>
+          <div><span className="eyebrow">{t('Box score')}</span><h2>{t('Round by round')}</h2></div>
         </div>
-        <div className="recap-table" role="table" aria-label="Round results">
+        <div className="recap-table" role="table" aria-label={t('Round results')}>
           <div className="recap-row recap-row--head" role="row">
-            <span>Rnd</span><span>Player</span><span>Clues</span><span>Misses</span><span>Pts</span>
+            <span>{t('Rnd')}</span><span>{t('Player')}</span><span>{t('Clues')}</span><span>{t('Misses')}</span><span>Pts</span>
           </div>
           {game.results.map((result, index) => (
             <div className="recap-row" role="row" key={`${result.playerId}-${index}`}>
@@ -162,8 +165,8 @@ export function ResultsScreen({
       </section>
 
       <div className="results-actions">
-        <button className="primary-button primary-button--large" type="button" onClick={onPlayAgain}>Play again</button>
-        <button className="secondary-button" type="button" onClick={onHome}>Back to home page</button>
+        <button className="primary-button primary-button--large" type="button" onClick={onPlayAgain}>{t('Play again')}</button>
+        <button className="secondary-button" type="button" onClick={onHome}>{t('Back to home page')}</button>
       </div>
     </main>
   )

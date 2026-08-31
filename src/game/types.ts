@@ -12,6 +12,20 @@ export type PracticeFilter =
   | { kind: 'decade'; value: Decade }
   | { kind: 'league'; value: PracticeLeague }
 export type RoundOutcome = 'correct' | 'gave-up'
+export type FeedbackMessageKey =
+  | 'already-guessed'
+  | 'incorrect-player'
+  | 'incorrect-lineup-player'
+  | 'clue-revealed'
+  | 'pool-reset'
+  | 'enter-player-name'
+  | 'one-player-per-guess'
+  | 'be-specific'
+
+export interface FeedbackMessage {
+  key: FeedbackMessageKey
+  number?: number
+}
 
 export interface GameSettings {
   mode: GameMode
@@ -34,7 +48,7 @@ export interface RoundState {
   clueSeed: number
   incorrectGuesses: string[]
   normalizedIncorrectGuesses: string[]
-  statusMessage: string
+  statusMessage: FeedbackMessage | null
   outcome: RoundOutcome | null
   pointsEarned: number | null
 }
@@ -48,7 +62,7 @@ export interface GameState {
   usedPlayerIds: string[]
   totalScore: number
   poolCycle: number
-  poolResetMessage: string | null
+  poolResetMessage: FeedbackMessage | null
   startedAt: string
   dailyChallenge?: DailyChallenge
 }
@@ -60,7 +74,7 @@ export interface EndlessStats {
 }
 
 export interface SavedData {
-  schemaVersion: 5
+  schemaVersion: 6
   highScores: Record<Pool, number>
   endlessStats: Record<Pool, EndlessStats>
   lastSettings: GameSettings
@@ -82,7 +96,7 @@ export interface LineupRoundState {
   clueIncorrectGuessCounts: number[]
   incorrectGuesses: string[]
   normalizedIncorrectGuesses: string[]
-  statusMessage: string
+  statusMessage: FeedbackMessage | null
   outcome: RoundOutcome | null
   pointsEarned: number | null
 }

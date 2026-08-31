@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { LeaderboardBoards, LeaderboardMetricEntry } from '../game/types'
+import { useI18n, type MessageKey } from '../i18n'
 
 type BoardKey = 'today' | 'cumulative' | 'gamesPlayed' | 'average' | 'best'
 
@@ -9,7 +10,7 @@ interface LeaderboardTabsProps {
   currentNickname: string
 }
 
-const DAILY_LABELS: Record<BoardKey, string> = {
+const DAILY_LABELS: Record<BoardKey, MessageKey> = {
   today: 'Today',
   cumulative: 'Cumulative points',
   gamesPlayed: 'Games played',
@@ -17,7 +18,7 @@ const DAILY_LABELS: Record<BoardKey, string> = {
   best: 'Best day',
 }
 
-const CHALLENGE_LABELS: Record<BoardKey, string> = {
+const CHALLENGE_LABELS: Record<BoardKey, MessageKey> = {
   today: 'Today',
   cumulative: 'Cumulative points',
   gamesPlayed: 'Games played',
@@ -30,6 +31,7 @@ function normalized(value: string): string {
 }
 
 export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTabsProps) {
+  const { t, modeLabel, formatNumber } = useI18n()
   const tabs: BoardKey[] =
     mode === 'daily' || mode === 'lineup-daily'
       ? ['today', 'cumulative', 'average', 'best']
@@ -40,25 +42,19 @@ export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTa
     () => ((boards[active] ?? []) as LeaderboardMetricEntry[]),
     [active, boards],
   )
-  const unit = active === 'gamesPlayed' ? 'games' : 'pts'
+  const unit = active === 'gamesPlayed' ? t('games') : 'pts'
 
   return (
     <section className="leaderboard-tabs" aria-labelledby="leaderboard-tabs-title">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Nickname history</span>
+          <span className="eyebrow">{t('Nickname history')}</span>
           <h2 id="leaderboard-tabs-title">
-            {mode === 'daily'
-              ? 'Player of the day'
-              : mode === 'lineup-daily'
-                ? 'Lineup of the day'
-                : mode === 'lineup-challenge'
-                  ? '10-round lineup challenge'
-                  : '10-round challenge'} leaderboard
+            {t('{mode} leaderboard', { mode: modeLabel(mode) })}
           </h2>
         </div>
       </div>
-      <div className="leaderboard-tablist" role="tablist" aria-label="Leaderboard view">
+      <div className="leaderboard-tablist" role="tablist" aria-label={t('Leaderboard view')}>
         {tabs.map((tab) => (
           <button
             type="button"
@@ -68,21 +64,21 @@ export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTa
             onClick={() => setActive(tab)}
             key={tab}
           >
-            {labels[tab]}
+            {t(labels[tab])}
           </button>
         ))}
       </div>
       {(mode === 'challenge' || mode === 'lineup-challenge') && (
         <p className="leaderboard-era-note">
-          Shared 10-round records began on 31 July 2026. Earlier games stayed only in each browser.
+          {t('Shared 10-round records began on 31 July 2026. Earlier games stayed only in each browser.')}
         </p>
       )}
       {active === 'average' && (
-        <p className="leaderboard-note">Ranked after at least three completed games.</p>
+        <p className="leaderboard-note">{t('Ranked after at least three completed games.')}</p>
       )}
-      <div className="leaderboard-metric-table" role="table" aria-label={`${labels[active]} leaderboard`}>
+      <div className="leaderboard-metric-table" role="table" aria-label={t('{label} leaderboard', { label: t(labels[active]) })}>
         <div className="leaderboard-metric-row leaderboard-metric-row--head" role="row">
-          <span>Rank</span><span>Nickname</span><span>{active === 'gamesPlayed' ? 'Games' : 'Points'}</span><span>Played</span>
+          <span>{t('Rank')}</span><span>{t('Nickname')}</span><span>{active === 'gamesPlayed' ? t('Games') : t('Points')}</span><span>{t('Played')}</span>
         </div>
         {entries.map((entry) => (
           <div
@@ -96,18 +92,18 @@ export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTa
           >
             <strong>#{entry.rank}</strong>
             <span>{entry.nickname}</span>
-            <b>{entry.value.toLocaleString('en-US', { maximumFractionDigits: 1 })} {unit}</b>
+            <b>{formatNumber(entry.value, { maximumFractionDigits: 1 })} {unit}</b>
             <small>{entry.gamesPlayed}</small>
           </div>
         ))}
       </div>
       {!entries.length && (
         <p className="daily-empty">
-          {active === 'average' ? 'No nickname has reached three games yet.' : 'No scores yet.'}
+          {active === 'average' ? t('No nickname has reached three games yet.') : t('No scores yet.')}
         </p>
       )}
       <p className="nickname-history-disclaimer">
-        Use the same nickname every time for your stats history to stay together.
+        {t('Use the same nickname every time for your stats history to stay together.')}
       </p>
     </section>
   )

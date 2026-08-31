@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
 }
 
 export const DEFAULT_SAVED_DATA: SavedData = {
-  schemaVersion: 5,
+  schemaVersion: 6,
   highScores: { normal: 0, hardcore: 0 },
   endlessStats: {
     normal: { totalScore: 0, solved: 0, rounds: 0 },
@@ -49,6 +49,22 @@ function isCurrentLineupDailyGame(game: SavedData['lineupDailyGame']): boolean {
   )
 }
 
+function migratePlayerGame(game: SavedData['dailyGame']): SavedData['dailyGame']
+function migratePlayerGame(game: SavedData['unfinishedGame']): SavedData['unfinishedGame']
+function migratePlayerGame(game: SavedData['dailyGame'] | SavedData['unfinishedGame']) {
+  if (!game) return null
+  return {
+    ...game,
+    round: {
+      ...game.round,
+      statusMessage:
+        typeof game.round.statusMessage === 'object' ? game.round.statusMessage : null,
+    },
+    poolResetMessage:
+      typeof game.poolResetMessage === 'object' ? game.poolResetMessage : null,
+  }
+}
+
 function migrateLineupGame(game: SavedData['lineupDailyGame']): SavedData['lineupDailyGame']
 function migrateLineupGame(game: SavedData['unfinishedLineupGame']): SavedData['unfinishedLineupGame']
 function migrateLineupGame(game: SavedData['lineupDailyGame'] | SavedData['unfinishedLineupGame']) {
@@ -60,6 +76,8 @@ function migrateLineupGame(game: SavedData['lineupDailyGame'] | SavedData['unfin
       ...game.round,
       cluesUsed: game.round.cluesUsed ?? 0,
       clueIncorrectGuessCounts: game.round.clueIncorrectGuessCounts ?? [],
+      statusMessage:
+        typeof game.round.statusMessage === 'object' ? game.round.statusMessage : null,
     },
     results: game.results.map((result) => ({
       ...result,
@@ -95,7 +113,7 @@ export function loadSavedData(): SavedData {
     return {
       ...DEFAULT_SAVED_DATA,
       ...parsed,
-      schemaVersion: 5,
+      schemaVersion: 6,
       highScores: { ...DEFAULT_SAVED_DATA.highScores, ...parsed.highScores },
       endlessStats: { ...DEFAULT_SAVED_DATA.endlessStats, ...parsed.endlessStats },
       lastSettings: migrated
@@ -105,7 +123,8 @@ export function loadSavedData(): SavedData {
             ...parsed.lastSettings,
             pool: parsed.lastSettings?.mode === 'daily' ? 'normal' : parsed.lastSettings?.pool ?? 'normal',
           },
-      dailyGame: parsedDailyGame,
+      unfinishedGame: migratePlayerGame(parsed.unfinishedGame ?? null),
+      dailyGame: migratePlayerGame(parsedDailyGame),
       dailyCompletion: parsedDailyCompletion,
       lineupDailyGame: parsedLineupDailyGame,
       lineupDailyCompletion: parsedLineupDailyCompletion,

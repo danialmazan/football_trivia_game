@@ -62,6 +62,7 @@ import type {
   RoundResult,
   SavedData,
 } from './game/types'
+import { LANGUAGE_STORAGE_KEY, LanguageToggle, useI18n } from './i18n'
 
 const EMPTY_LEADERBOARD_BOARDS: LeaderboardBoards = {
   today: [],
@@ -75,6 +76,7 @@ function homepageSettings(settings: GameSettings): GameSettings {
 }
 
 export function App() {
+  const { t, known } = useI18n()
   const [savedData, setSavedData] = useState<SavedData>(() => loadSavedData())
   const [settings, setSettings] = useState<GameSettings>(() => homepageSettings(savedData.lastSettings))
   const [game, setGame] = useState<GameState | null>(null)
@@ -304,7 +306,7 @@ export function App() {
       if (
         settings.mode === 'lineup-challenge' &&
         savedData.unfinishedLineupGame &&
-        !window.confirm('Start a new lineup challenge and abandon the saved one?')
+        !window.confirm(known('Start a new lineup challenge and abandon the saved one?'))
       ) return
       setShowGuide(true)
       return
@@ -322,7 +324,7 @@ export function App() {
     }
     if (
       ['challenge', 'practice'].includes(savedData.unfinishedGame?.settings.mode ?? '') &&
-      !window.confirm('Start a new game and abandon the saved 10-round game?')
+      !window.confirm(known('Start a new game and abandon the saved 10-round game?'))
     ) {
       return
     }
@@ -415,7 +417,7 @@ export function App() {
     const nextGame: GameState = {
       ...game,
       phase: 'review',
-      round: { ...game.round, outcome, pointsEarned: points, statusMessage: '' },
+      round: { ...game.round, outcome, pointsEarned: points, statusMessage: null },
       results: [...game.results, result],
       totalScore: game.totalScore + points,
     }
@@ -442,11 +444,13 @@ export function App() {
     if (!game || !currentPlayer || game.phase !== 'playing') return
     const result = matchAnswer(guess, currentPlayer, playerSearch)
     if (result.status === 'invalid') {
-      setGame({ ...game, round: { ...game.round, statusMessage: result.message } })
+      setGame({ ...game, round: { ...game.round, statusMessage: {
+        key: result.message === 'Enter one player per guess.' ? 'one-player-per-guess' : 'enter-player-name',
+      } } })
       return
     }
     if (result.status === 'ambiguous') {
-      setGame({ ...game, round: { ...game.round, statusMessage: 'Please be more specific.' } })
+      setGame({ ...game, round: { ...game.round, statusMessage: { key: 'be-specific' } } })
       return
     }
     if (result.status === 'correct') {
@@ -503,9 +507,7 @@ export function App() {
         ? [selection.player.id]
         : [...game.usedPlayerIds, selection.player.id],
       poolCycle: game.poolCycle + (selection.exhausted ? 1 : 0),
-      poolResetMessage: selection.exhausted
-        ? 'Every player in this pool has appeared. The rotation has reset.'
-        : null,
+      poolResetMessage: selection.exhausted ? { key: 'pool-reset' } : null,
     })
   }
 
@@ -521,7 +523,7 @@ export function App() {
     setLineupGame({
       ...lineupGame,
       phase: 'review',
-      round: { ...lineupGame.round, outcome, pointsEarned: points, statusMessage: '' },
+      round: { ...lineupGame.round, outcome, pointsEarned: points, statusMessage: null },
       results: [
         ...lineupGame.results,
         {
@@ -544,11 +546,13 @@ export function App() {
     if (!lineupGame || !currentMissingPlayer || lineupGame.phase !== 'playing') return
     const result = matchAnswer(guess, currentMissingPlayer, lineupSearch)
     if (result.status === 'invalid') {
-      setLineupGame({ ...lineupGame, round: { ...lineupGame.round, statusMessage: result.message } })
+      setLineupGame({ ...lineupGame, round: { ...lineupGame.round, statusMessage: {
+        key: result.message === 'Enter one player per guess.' ? 'one-player-per-guess' : 'enter-player-name',
+      } } })
       return
     }
     if (result.status === 'ambiguous') {
-      setLineupGame({ ...lineupGame, round: { ...lineupGame.round, statusMessage: 'Please be more specific.' } })
+      setLineupGame({ ...lineupGame, round: { ...lineupGame.round, statusMessage: { key: 'be-specific' } } })
       return
     }
     if (result.status === 'correct') {
@@ -831,11 +835,11 @@ export function App() {
           : game.phase !== 'results'
             ? 'Leave this active 10-round game? Your progress will remain saved.'
             : null
-      if (confirmation && !window.confirm(confirmation)) return
+      if (confirmation && !window.confirm(known(confirmation))) return
     } else if (
       game?.settings.mode === 'practice' &&
       game.phase !== 'results' &&
-      !window.confirm('Leave this active 10-round game? Your progress will remain saved.')
+      !window.confirm(known('Leave this active 10-round game? Your progress will remain saved.'))
     ) {
       return
     }
@@ -851,7 +855,7 @@ export function App() {
         : lineupGame.phase !== 'results'
           ? 'Leave this active lineup challenge? Your progress will remain saved.'
           : null
-      if (confirmation && !window.confirm(confirmation)) return
+      if (confirmation && !window.confirm(known(confirmation))) return
     }
     setLineupGame(null)
     setShowGuide(false)
@@ -863,7 +867,7 @@ export function App() {
       game?.settings.mode === 'challenge' &&
       game.phase === 'results' &&
       !challengeSubmitted &&
-      !window.confirm('Play again without submitting this score to the leaderboard?')
+      !window.confirm(known('Play again without submitting this score to the leaderboard?'))
     ) {
       return
     }
@@ -875,7 +879,7 @@ export function App() {
 
   function playLineupsAgain() {
     if (!lineupDataset) return
-    if (lineupGame?.phase === 'results' && !lineupChallengeSubmitted && !window.confirm('Play again without submitting this lineup score?')) return
+    if (lineupGame?.phase === 'results' && !lineupChallengeSubmitted && !window.confirm(known('Play again without submitting this lineup score?'))) return
     setLineupChallengeBoards(null)
     setLineupChallengeSubmitted(false)
     setDailyError(null)
@@ -933,8 +937,9 @@ export function App() {
   }
 
   function handleResetSavedData() {
-    if (!window.confirm('Reset high scores, endless stats, preferences and saved games?')) return
+    if (!window.confirm(known('Reset high scores, endless stats, preferences and saved games?'))) return
     resetSavedData()
+    window.localStorage.removeItem(LANGUAGE_STORAGE_KEY)
     const resetData = loadSavedData()
     setSavedData(resetData)
     setSettings(homepageSettings(resetData.lastSettings))
@@ -1076,7 +1081,7 @@ export function App() {
       <button
         className="settings-trigger"
         type="button"
-        aria-label="Open settings"
+        aria-label={t('Open settings')}
         onClick={() => setSettingsOpen(true)}
       >
         <span aria-hidden="true">⚙</span>
@@ -1098,27 +1103,25 @@ export function App() {
               className="modal-close"
               type="button"
               onClick={() => setSettingsOpen(false)}
-              aria-label="Close settings"
+              aria-label={t('Close settings')}
             >
               ×
             </button>
-            <span className="eyebrow">Preferences and records</span>
-            <h2 id="settings-title">Settings</h2>
-            <p>
-              Player and lineup progress and personal records live in this browser. Submitted
-              nicknames and scores join their matching shared leaderboard.
-            </p>
+            <span className="eyebrow">{t('Preferences and records')}</span>
+            <h2 id="settings-title">{t('Settings')}</h2>
+            <p>{t('Player and lineup progress and personal records live in this browser. Submitted nicknames and scores join their matching shared leaderboard.')}</p>
             <div className="settings-records">
-              <span>Normal high score <strong>{savedData.highScores.normal}</strong></span>
-              <span>Hardcore high score <strong>{savedData.highScores.hardcore}</strong></span>
-              <span>Lineup challenge best <strong>{savedData.lineupBestScore}</strong></span>
+              <span>{t('Normal high score')} <strong>{savedData.highScores.normal}</strong></span>
+              <span>{t('Hardcore high score')} <strong>{savedData.highScores.hardcore}</strong></span>
+              <span>{t('Lineup challenge best')} <strong>{savedData.lineupBestScore}</strong></span>
             </div>
             <button className="danger-button" type="button" onClick={handleResetSavedData}>
-              Reset saved data
+              {t('Reset saved data')}
             </button>
           </section>
         </div>
       )}
+      <LanguageToggle />
     </div>
   )
 }

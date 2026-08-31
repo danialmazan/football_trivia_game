@@ -2178,6 +2178,57 @@ button:disabled {
   color: var(--paper);
 }
 
+.language-toggle {
+  position: fixed;
+  z-index: 20;
+  left: 1rem;
+  bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 2.55rem);
+  overflow: hidden;
+  border: 1px solid rgba(241, 237, 223, 0.26);
+  border-radius: 999px;
+  background: rgba(6, 26, 20, 0.92);
+  box-shadow: 0 0.6rem 1.8rem rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+.language-toggle button {
+  min-height: 2.35rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+}
+
+.language-toggle button[aria-pressed='true'] {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.language-toggle button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--paper);
+  outline-offset: -3px;
+}
+
+@media (max-width: 560px) {
+  .language-toggle {
+    left: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .settings-trigger {
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+}
+
 .modal-backdrop {
   position: fixed;
   z-index: 100;

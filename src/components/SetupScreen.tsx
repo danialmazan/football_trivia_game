@@ -3,15 +3,12 @@ import {
   DECADES,
   GAME_CONFIG,
   GAME_MODES,
-  MODE_LABELS,
-  POOL_LABELS,
-  POOL_RULES,
-  PRACTICE_LEAGUES,
 } from '../game/config'
 import { getActivePool } from '../game/selection'
 import type { GameSettings, PracticeLeague, SavedData } from '../game/types'
 import { GoatCrest } from './GoatCrest'
 import { useState } from 'react'
+import { useI18n } from '../i18n'
 
 interface SetupScreenProps {
   settings: GameSettings
@@ -34,6 +31,7 @@ export function SetupScreen({
   onResumeLineup,
   onOpenLeaderboard,
 }: SetupScreenProps) {
+  const { t, modeLabel, poolLabel, leagueLabel } = useI18n()
   const [moreFormatsOpen, setMoreFormatsOpen] = useState(false)
   const isLineupMode = settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge'
   const filter = settings.mode === 'practice' ? settings.practiceFilter : undefined
@@ -52,9 +50,9 @@ export function SetupScreen({
     <main className="setup-shell">
       <section className="hero" aria-labelledby="game-title">
         <div className="hero__kicker">
-          <span>European football knowledge test</span>
+          <span>{t('European football knowledge test')}</span>
           <span className="hero__kicker-line" />
-          <span>Big Five · Since 1995</span>
+          <span>{t('Big Five · Since 1995')}</span>
         </div>
         <div className="hero__brand">
           <h1 id="game-title">
@@ -65,28 +63,24 @@ export function SetupScreen({
             <GoatCrest />
           </div>
         </div>
-        <p className="hero__lead">Can you become the G.O.A.T. of player guessing?</p>
+        <p className="hero__lead">{t('Can you become the G.O.A.T. of player guessing?')}</p>
         <div className="hero__scope">
-          <strong>What does “Big Five” mean?</strong>
-          <p>
-            England, Spain, Italy, Germany and France. The player pool only includes
-            footballers who appeared in at least one of those countries’ top leagues from
-            1995 onwards.
-          </p>
+          <strong>{t('What does “Big Five” mean?')}</strong>
+          <p>{t('England, Spain, Italy, Germany and France. The player pool only includes footballers who appeared in at least one of those countries’ top leagues from 1995 onwards.')}</p>
         </div>
         <div className="hero__records">
           <button className="hero__leaderboard-button" type="button" onClick={onOpenLeaderboard}>
-            Check the leaderboard <span aria-hidden="true">↗</span>
+            {t('Check the leaderboard')} <span aria-hidden="true">↗</span>
           </button>
         </div>
       </section>
 
-      <section className="setup-panel" aria-label="Game setup">
+      <section className="setup-panel" aria-label={t('Game setup')}>
         <div className="setup-panel__header">
           <span className="step-marker">01</span>
           <div>
-            <span className="eyebrow">Choose the fixture</span>
-            <h2>Game format</h2>
+            <span className="eyebrow">{t('Choose the fixture')}</span>
+            <h2>{t('Game format')}</h2>
           </div>
         </div>
         <div className="choice-grid choice-grid--modes">
@@ -98,19 +92,19 @@ export function SetupScreen({
               key={mode}
               onClick={() => selectMode(mode)}
             >
-              <span>{MODE_LABELS[mode]}</span>
+              <span>{modeLabel(mode)}</span>
               <small>
                 {mode === 'daily'
-                  ? 'A player each day. Same for everyone.'
+                  ? t('A player each day. Same for everyone.')
                   : mode === 'challenge'
-                  ? '10 players · 1,000 max'
+                  ? t('10 players · 1,000 max')
                   : mode === 'lineup-daily'
-                    ? 'One missing starter. Same for everyone.'
+                    ? t('One missing starter. Same for everyone.')
                     : mode === 'lineup-challenge'
-                      ? '10 historic lineups · 1,000 max'
+                      ? t('10 historic lineups · 1,000 max')
                   : mode === 'endless'
-                    ? 'Play through the pool'
-                    : '10 players from your chosen filter'}
+                    ? t('Play through the pool')
+                    : t('10 players from your chosen filter')}
               </small>
             </button>
           ))}
@@ -122,7 +116,7 @@ export function SetupScreen({
           aria-controls="more-game-formats"
           onClick={() => setMoreFormatsOpen((open) => !open)}
         >
-          More game formats <span aria-hidden="true">{moreFormatsOpen ? '−' : '+'}</span>
+          {t('More game formats')} <span aria-hidden="true">{moreFormatsOpen ? '−' : '+'}</span>
         </button>
         {moreFormatsOpen && (
           <div className="choice-grid choice-grid--more" id="more-game-formats">
@@ -134,8 +128,8 @@ export function SetupScreen({
                 key={mode}
                 onClick={() => selectMode(mode)}
               >
-                <span>{MODE_LABELS[mode]}</span>
-                <small>{mode === 'endless' ? 'Play through the pool' : '10 players from your chosen filter'}</small>
+                <span>{modeLabel(mode)}</span>
+                <small>{mode === 'endless' ? t('Play through the pool') : t('10 players from your chosen filter')}</small>
               </button>
             ))}
           </div>
@@ -143,7 +137,7 @@ export function SetupScreen({
 
         {settings.mode === 'practice' && (
           <div className="practice-builder">
-            <div className="practice-kind" aria-label="Practice filter type">
+            <div className="practice-kind" aria-label={t('Practice filter type')}>
               <button
                 type="button"
                 className={settings.practiceFilter.kind === 'decade' ? 'active' : ''}
@@ -154,7 +148,7 @@ export function SetupScreen({
                   })
                 }
               >
-                By decade
+                {t('By decade')}
               </button>
               <button
                 type="button"
@@ -166,10 +160,10 @@ export function SetupScreen({
                   })
                 }
               >
-                By league
+                {t('By league')}
               </button>
             </div>
-            <div className="decade-row" aria-label="Practice selection">
+            <div className="decade-row" aria-label={t('Practice selection')}>
               {settings.practiceFilter.kind === 'decade'
                 ? DECADES.map((decade) => (
                     <button
@@ -187,8 +181,8 @@ export function SetupScreen({
                       {decade}
                     </button>
                   ))
-                : (Object.entries(PRACTICE_LEAGUES) as [PracticeLeague, string][]).map(
-                    ([league, label]) => (
+                : (['GB1', 'ES1', 'IT1', 'L1', 'FR1'] as PracticeLeague[]).map(
+                    (league) => (
                       <button
                         type="button"
                         key={league}
@@ -201,7 +195,7 @@ export function SetupScreen({
                           })
                         }
                       >
-                        {label}
+                        {leagueLabel(league)}
                       </button>
                     ),
                   )}
@@ -212,8 +206,8 @@ export function SetupScreen({
         {!isLineupMode && <div className="setup-panel__header setup-panel__header--pool">
           <span className="step-marker">02</span>
           <div>
-            <span className="eyebrow">Set the squad depth</span>
-            <h2>Player pool</h2>
+            <span className="eyebrow">{t('Set the squad depth')}</span>
+            <h2>{t('Player pool')}</h2>
           </div>
         </div>}
         {!isLineupMode && <div className="pool-toggle">
@@ -226,11 +220,11 @@ export function SetupScreen({
               disabled={settings.mode === 'daily' && pool === 'hardcore'}
               onClick={() => onSettingsChange({ ...settings, pool })}
             >
-              <span>{POOL_LABELS[pool]}</span>
+              <span>{poolLabel(pool)}</span>
               <small>
                 {settings.mode === 'daily' && pool === 'hardcore'
-                  ? 'Player of the day uses the Normal pool.'
-                  : POOL_RULES[pool]}
+                  ? t('Player of the day uses the Normal pool.')
+                  : t(pool === 'normal' ? '250 recognised players with 50+ Big-Five appearances since 1995.' : '800 ranked players with 150+ career Big-Five appearances.')}
               </small>
             </button>
           ))}
@@ -239,20 +233,20 @@ export function SetupScreen({
         <div className="setup-actions">
           <div className="roster-count">
             <strong>{poolCount}</strong>
-            <span>{isLineupMode ? 'historic matches available' : 'players available'}</span>
+            <span>{isLineupMode ? t('historic matches available') : t('players available')}</span>
           </div>
           <button className="primary-button primary-button--large" type="button" onClick={onStart}>
-            Kick off <span aria-hidden="true">↗</span>
+            {t('Kick off')} <span aria-hidden="true">↗</span>
           </button>
         </div>
         {savedData.unfinishedGame && (
           <button className="resume-button" type="button" onClick={onResume}>
-            Continue unfinished {MODE_LABELS[savedData.unfinishedGame.settings.mode].toLowerCase()}
+            {t('Continue unfinished {mode}', { mode: modeLabel(savedData.unfinishedGame.settings.mode).toLowerCase() })}
           </button>
         )}
         {savedData.unfinishedLineupGame && (
           <button className="resume-button" type="button" onClick={onResumeLineup}>
-            Continue unfinished lineup challenge
+            {t('Continue unfinished lineup challenge')}
           </button>
         )}
       </section>

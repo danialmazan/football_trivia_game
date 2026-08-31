@@ -1,5 +1,6 @@
 import type { ClubStint, Player, TeamTitle } from '../data/types'
 import type { PracticeFilter } from './types'
+import { translate, translateCountryName, translateFootballTerm, type Locale } from '../i18n'
 
 export interface TeamClueData {
   kind: 'teams'
@@ -54,7 +55,7 @@ function formatTitle(title: TeamTitle): string {
   return `${title.count}× ${title.label}`
 }
 
-export function getTitleHighlights(player: Player): string[] {
+export function getTitleHighlights(player: Player, locale: Locale = 'en'): string[] {
   if (player.titles.length) {
     const club = player.titles.filter(
       (title) => title.kind !== 'world-cup' && title.kind !== 'continental-national',
@@ -70,10 +71,10 @@ export function getTitleHighlights(player: Player): string[] {
 
   const milestones: string[] = []
   if (player.championsLeagueAppearances > 0) {
-    milestones.push(`${player.championsLeagueAppearances} Champions League appearances`)
+    milestones.push(translate(locale, '{count} Champions League appearances', { count: player.championsLeagueAppearances }))
   }
-  if (player.nationalTeam.caps > 0) milestones.push(`${player.nationalTeam.caps} senior caps`)
-    if (!milestones.length) milestones.push(`${player.bigFiveAppearances} appearances in the Big-Five leagues`)
+  if (player.nationalTeam.caps > 0) milestones.push(translate(locale, '{count} senior caps', { count: player.nationalTeam.caps }))
+    if (!milestones.length) milestones.push(translate(locale, '{count} appearances in the Big-Five leagues', { count: player.bigFiveAppearances }))
   return milestones
 }
 
@@ -81,27 +82,33 @@ export function generateClues(
   player: Player,
   clueSeed = 0,
   practiceFilter?: PracticeFilter,
+  locale: Locale = 'en',
 ): Clue[] {
   return [
     {
       kind: 'teams',
-      label: 'Club & career era',
+      label: translate(locale, 'Club & career era'),
       teams: [getTeamClue(player, clueSeed, practiceFilter)],
       decades: getCareerDecades(player),
     },
     {
       kind: 'text',
-      label: 'National team',
-      text: `${player.nationalTeam.teamName} · ${player.nationalTeam.caps} caps`,
+      label: translate(locale, 'National team'),
+      text: `${translateCountryName(locale, player.nationalTeam.teamName)} · ${translate(locale, '{caps} caps', { caps: player.nationalTeam.caps })}`,
     },
-    { kind: 'text', label: player.titles.length ? 'Major team titles' : 'Career milestones', text: getTitleHighlights(player).join(' · ') },
-    { kind: 'text', label: 'Position', text: `${player.broadPosition} · ${player.primaryRole}` },
-    { kind: 'text', label: 'Initials', text: `Initials: ${player.initials}` },
+    { kind: 'text', label: translate(locale, player.titles.length ? 'Major team titles' : 'Career milestones'), text: getTitleHighlights(player, locale).join(' · ') },
+    { kind: 'text', label: translate(locale, 'Position'), text: `${translateFootballTerm(locale, player.broadPosition)} · ${translateFootballTerm(locale, player.primaryRole)}` },
+    { kind: 'text', label: translate(locale, 'Initials'), text: translate(locale, 'Initials: {initials}', { initials: player.initials }) },
   ]
 }
 
-export function getCareerSummary(player: Player): string {
+export function getCareerSummary(player: Player, locale: Locale = 'en'): string {
   const team = getMainTeams(player)[0]
-  const keyAchievement = getTitleHighlights(player)[0].toLowerCase()
-  return `${player.broadPosition} · ${player.bigFiveAppearances.toLocaleString('en-US')} appearances in the Big-Five leagues · Most appearances for ${team.clubName} · ${keyAchievement}.`
+  const keyAchievement = getTitleHighlights(player, locale)[0].toLocaleLowerCase(locale)
+  return translate(locale, '{position} · {appearances} appearances in the Big-Five leagues · Most appearances for {club} · {achievement}.', {
+    position: translateFootballTerm(locale, player.broadPosition),
+    appearances: player.bigFiveAppearances.toLocaleString(locale === 'es' ? 'es-ES' : 'en-US'),
+    club: team.clubName,
+    achievement: keyAchievement,
+  })
 }

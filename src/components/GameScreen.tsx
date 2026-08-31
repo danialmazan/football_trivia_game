@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Player, SearchPlayer } from '../data/types'
 import { getPlayerSuggestions } from '../game/answerMatching'
-import { GAME_CONFIG, MODE_LABELS, POOL_LABELS, PRACTICE_LEAGUES } from '../game/config'
+import { GAME_CONFIG } from '../game/config'
 import { generateClues, getCareerSummary } from '../game/clues'
 import { calculateAvailableScore } from '../game/scoring'
 import { isValidNickname } from '../game/daily'
 import type { GameState } from '../game/types'
 import { ClueCard } from './ClueCard'
+import { useI18n } from '../i18n'
 
 interface GameScreenProps {
   game: GameState
@@ -43,13 +44,14 @@ export function GameScreen({
   onDailyNicknameChange,
   onDailySubmit,
 }: GameScreenProps) {
+  const { locale, t, modeLabel, poolLabel, leagueLabel, feedback, known } = useI18n()
   const [guess, setGuess] = useState('')
   const [suggestionsOpen, setSuggestionsOpen] = useState(false)
   const [activeSuggestion, setActiveSuggestion] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const isReview = game.phase === 'review'
   const practiceFilter = game.settings.mode === 'practice' ? game.settings.practiceFilter : undefined
-  const clues = generateClues(player, game.round.clueSeed, practiceFilter)
+  const clues = generateClues(player, game.round.clueSeed, practiceFilter, locale)
   const visibleClues = clues.slice(0, isReview ? GAME_CONFIG.cluesPerRound : game.round.clueLevel)
   const availableScore = calculateAvailableScore(game.round.clueLevel, game.round.incorrectGuesses.length)
   const roundNumber = game.results.length + (isReview ? 0 : 1)
@@ -115,36 +117,36 @@ export function GameScreen({
   return (
     <main className="game-shell">
       <header className="game-header">
-        <button className="wordmark" type="button" onClick={onExit} aria-label="Leave game">
+        <button className="wordmark" type="button" onClick={onExit} aria-label={t('Leave game')}>
           LEO <span>GUESSI</span>
         </button>
         <div className="game-header__meta">
-          <span>{MODE_LABELS[game.settings.mode]}</span>
+          <span>{modeLabel(game.settings.mode)}</span>
           <i aria-hidden="true" />
-          <span>{POOL_LABELS[game.settings.pool]} pool</span>
+          <span>{t('{pool} pool', { pool: poolLabel(game.settings.pool) })}</span>
           {game.settings.mode === 'practice' && (
             <span>
               · {game.settings.practiceFilter.kind === 'decade'
                 ? game.settings.practiceFilter.value
-                : PRACTICE_LEAGUES[game.settings.practiceFilter.value]}
+                : leagueLabel(game.settings.practiceFilter.value)}
             </span>
           )}
         </div>
         <button className="exit-button" type="button" onClick={onExit}>
-          Exit
+          {t('Exit')}
         </button>
       </header>
 
-      <section className="game-scorebar" aria-label="Game status">
+      <section className="game-scorebar" aria-label={t('Game status')}>
         <div>
           <span>
             {isDaily
-              ? 'Today’s player'
+              ? t('Today’s player')
               : game.settings.mode === 'challenge' || game.settings.mode === 'practice'
-                ? 'Progress'
+                ? t('Progress')
                 : game.settings.mode === 'endless'
-                  ? 'Players seen'
-                  : 'Progress'}
+                  ? t('Players seen')
+                  : t('Progress')}
           </span>
           <strong>
             {isDaily
@@ -155,28 +157,28 @@ export function GameScreen({
           </strong>
         </div>
         <div className="game-scorebar__available">
-          <span>{isReview ? 'Round score' : 'Available now'}</span>
+          <span>{isReview ? t('Round score') : t('Available now')}</span>
           <div className="scorebar-points">
-            {!isReview && <em>for</em>}
+            {!isReview && <em>{t('for')}</em>}
             <strong data-testid="available-score">{isReview ? game.round.pointsEarned : availableScore}</strong>
             <em>PTS</em>
           </div>
         </div>
         <div>
           <span>
-            {isDaily ? 'Daily score' : 'Game score'}
+            {isDaily ? t('Daily score') : t('Game score')}
           </span>
           <strong data-testid="total-score">{game.totalScore}</strong>
         </div>
         {game.settings.mode === 'endless' && (
           <div className="scorebar-optional">
-            <span>Avg / player</span>
+            <span>{t('Avg / player')}</span>
             <strong>{averageEndless}</strong>
           </div>
         )}
       </section>
 
-      {game.poolResetMessage && <div className="pool-reset" role="status">{game.poolResetMessage}</div>}
+      {game.poolResetMessage && <div className="pool-reset" role="status">{feedback(game.poolResetMessage)}</div>}
 
       <div className={`game-layout ${isReview ? 'game-layout--review' : ''}`}>
         <section className="clue-zone" aria-labelledby="clue-heading">
@@ -184,8 +186,8 @@ export function GameScreen({
             <details className="review-clues">
               <summary id="clue-heading">
                 <span>
-                  <strong>Review all five clues</strong>
-                  <small>Optional · answer shown above</small>
+                  <strong>{t('Review all five clues')}</strong>
+                  <small>{t('Optional · answer shown above')}</small>
                 </span>
                 <b aria-hidden="true">＋</b>
               </summary>
@@ -198,8 +200,8 @@ export function GameScreen({
           ) : (
             <>
               <div className="section-heading">
-                <span className="eyebrow current-clues-title" id="clue-heading">Current clues</span>
-                <span className="difficulty-pip">Clue {game.round.clueLevel} / 5</span>
+                <span className="eyebrow current-clues-title" id="clue-heading">{t('Current clues')}</span>
+                <span className="difficulty-pip">{t('Clue {current} / 5', { current: game.round.clueLevel })}</span>
               </div>
 
               <div className="clue-stack">
@@ -219,16 +221,16 @@ export function GameScreen({
         <aside className={`answer-zone ${isReview ? 'answer-zone--review' : ''}`}>
           {isReview ? (
             <div className="answer-reveal" data-testid="answer-reveal">
-              <span className="eyebrow">{game.round.outcome === 'correct' ? 'Top bins.' : 'Answer revealed'}</span>
+              <span className="eyebrow">{game.round.outcome === 'correct' ? t('Top bins.') : t('Answer revealed')}</span>
               <h2>{player.displayName}</h2>
               <div className="earned-stamp">
                 <strong>{game.round.pointsEarned}</strong>
-                <span>points earned</span>
+                <span>{t('points earned')}</span>
               </div>
-              <p>{getCareerSummary(player)}</p>
+              <p>{getCareerSummary(player, locale)}</p>
               {game.round.incorrectGuesses.length > 0 && (
                 <div className="review-guesses">
-                  <span>Missed guesses</span>
+                  <span>{t('Missed guesses')}</span>
                   <p>{game.round.incorrectGuesses.join(' · ')}</p>
                 </div>
               )}
@@ -241,8 +243,8 @@ export function GameScreen({
                   }}
                 >
                   <label htmlFor="daily-nickname">
-                    Enter your nickname to save this result, build your stats history and unlock sharing.
-                    <span>Your nickname is public and can submit once today.</span>
+                    {t('Enter your nickname to save this result, build your stats history and unlock sharing.')}
+                    <span>{t('Your nickname is public and can submit once today.')}</span>
                   </label>
                   <div className="daily-submit__row">
                     <input
@@ -250,7 +252,7 @@ export function GameScreen({
                       value={dailyNickname}
                       onChange={(event) => onDailyNicknameChange?.(event.target.value)}
                       maxLength={48}
-                      placeholder="Name or nickname"
+                      placeholder={t('Name or nickname')}
                       autoComplete="nickname"
                     />
                     <button
@@ -258,20 +260,20 @@ export function GameScreen({
                       type="submit"
                       disabled={dailySubmitting || !isValidNickname(dailyNickname)}
                     >
-                      {dailySubmitting ? 'Saving…' : 'Save score'}
+                      {dailySubmitting ? t('Saving…') : t('Save score')}
                     </button>
                   </div>
                   <small>
-                    Use the same nickname every time for your stats history to stay together.
+                    {t('Use the same nickname every time for your stats history to stay together.')}
                   </small>
-                  {dailyError && <p className="daily-service-error" role="alert">{dailyError}</p>}
+                  {dailyError && <p className="daily-service-error" role="alert">{known(dailyError)}</p>}
                 </form>
               ) : (
                 <button className="primary-button primary-button--large" type="button" onClick={onNext}>
                   {(game.settings.mode === 'challenge' || game.settings.mode === 'practice') &&
                   game.results.length >= GAME_CONFIG.challengeRounds
-                    ? 'See final results'
-                    : 'Next player'}{' '}
+                    ? t('See final results')
+                    : t('Next player')}{' '}
                   <span aria-hidden="true">→</span>
                 </button>
               )}
@@ -279,12 +281,12 @@ export function GameScreen({
           ) : (
             <>
               <div className="answer-zone__header">
-                <span className="eyebrow">Your call</span>
-                <span>Guess · clue · give up</span>
+                <span className="eyebrow">{t('Your call')}</span>
+                <span>{t('Guess · clue · give up')}</span>
               </div>
               <form onSubmit={handleSubmit}>
                 <label htmlFor="player-guess">
-                  Guess now <span>· −{GAME_CONFIG.incorrectGuessPenalty} pts per miss</span>
+                  {t('Guess now')} <span>· −{GAME_CONFIG.incorrectGuessPenalty} pts</span>
                 </label>
                 <div className="guess-row">
                   <div className="player-autocomplete">
@@ -300,7 +302,7 @@ export function GameScreen({
                       onFocus={() => setSuggestionsOpen(true)}
                       onBlur={() => setSuggestionsOpen(false)}
                       onKeyDown={handleGuessKeyDown}
-                      placeholder="Player name"
+                      placeholder={t('Player name')}
                       autoComplete="off"
                       spellCheck="false"
                       role="combobox"
@@ -318,7 +320,7 @@ export function GameScreen({
                         className="player-suggestions"
                         id={suggestionListId}
                         role="listbox"
-                        aria-label="Player suggestions"
+                        aria-label={t('Player suggestions')}
                       >
                         {suggestions.map((suggestion, index) => (
                           <li
@@ -337,11 +339,11 @@ export function GameScreen({
                       </ul>
                     )}
                   </div>
-                  <button className="primary-button" type="submit">Submit</button>
+                  <button className="primary-button" type="submit">{t('Submit')}</button>
                 </div>
               </form>
               <p className="status-message" role="status" aria-live="polite">
-                {game.round.statusMessage || 'Full names, unique surnames and common short names work.'}
+                {game.round.statusMessage ? feedback(game.round.statusMessage) : t('Full names, unique surnames and common short names work.')}
               </p>
               <div className="round-actions">
                 <button
@@ -350,15 +352,15 @@ export function GameScreen({
                   onClick={onReveal}
                   disabled={game.round.clueLevel >= GAME_CONFIG.cluesPerRound}
                 >
-                  Next clue
-                  <span>{game.round.clueLevel >= 5 ? 'All shown' : `${GAME_CONFIG.clueBaseScores[game.round.clueLevel]} pts base`}</span>
+                  {t('Next clue')}
+                  <span>{game.round.clueLevel >= 5 ? t('All shown') : t('{points} pts base', { points: GAME_CONFIG.clueBaseScores[game.round.clueLevel] })}</span>
                 </button>
                 <button className="give-up-button" type="button" onClick={onGiveUp}>
-                  Give up
+                  {t('Give up')}
                 </button>
               </div>
               {game.round.incorrectGuesses.length > 0 && (
-                <p className="previous-guesses-inline" aria-label="Incorrect guesses">
+                <p className="previous-guesses-inline" aria-label={t('Incorrect guesses')}>
                   {game.round.incorrectGuesses.map((previousGuess, index) => (
                     <span key={previousGuess}>
                       <s>{previousGuess}</s>{index < game.round.incorrectGuesses.length - 1 ? ', ' : '.'}

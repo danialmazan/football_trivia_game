@@ -70,7 +70,7 @@ export function createLineupRound(
     clueIncorrectGuessCounts: [],
     incorrectGuesses: [],
     normalizedIncorrectGuesses: [],
-    statusMessage: '',
+    statusMessage: null,
     outcome: null,
     pointsEarned: null,
   }
@@ -102,7 +102,7 @@ export function revealNextLineupClue(round: LineupRoundState): LineupRoundState 
       ...round.clueIncorrectGuessCounts,
       round.incorrectGuesses.length,
     ],
-    statusMessage: '',
+    statusMessage: null,
   }
 }
 
@@ -114,7 +114,7 @@ export function recordLineupIncorrectGuess(
   if (round.normalizedIncorrectGuesses.includes(normalizedGuess)) {
     return {
       duplicate: true,
-      round: { ...round, statusMessage: 'Already guessed — no points deducted.' },
+      round: { ...round, statusMessage: { key: 'already-guessed' } },
     }
   }
   return {
@@ -123,7 +123,7 @@ export function recordLineupIncorrectGuess(
       ...round,
       incorrectGuesses: [...round.incorrectGuesses, displayGuess.trim()],
       normalizedIncorrectGuesses: [...round.normalizedIncorrectGuesses, normalizedGuess],
-      statusMessage: 'Not the missing starter. Keep going.',
+      statusMessage: { key: 'incorrect-lineup-player' },
     },
   }
 }

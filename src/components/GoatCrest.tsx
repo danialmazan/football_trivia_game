@@ -1,10 +1,13 @@
+import { useI18n } from '../i18n'
+
 export function GoatCrest() {
+  const { t } = useI18n()
   return (
     <svg
       className="goat-crest"
       viewBox="0 0 160 190"
       role="img"
-      aria-label="Leo Guessi goat crest"
+      aria-label={t('Leo Guessi goat crest')}
     >
       <g className="goat-crest__outline">
         <path d="M57 43C44 39 31 28 27 12c17 1 31 11 38 27" />

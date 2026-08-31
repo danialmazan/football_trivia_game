@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import type { LineupMatch } from '../data/lineupTypes'
 import type { SearchPlayer } from '../data/types'
 import { getPlayerSuggestions } from '../game/answerMatching'
-import { GAME_CONFIG, MODE_LABELS } from '../game/config'
+import { GAME_CONFIG } from '../game/config'
 import { isValidNickname } from '../game/daily'
 import { calculateLineupScore } from '../game/lineups'
 import type { LineupGameState } from '../game/types'
 import { LineupPitch } from './LineupPitch'
+import { useI18n } from '../i18n'
 
 interface LineupGameScreenProps {
   game: LineupGameState
@@ -29,8 +30,8 @@ function shouldAutoFocusGuess(): boolean {
   return window.matchMedia('(min-width: 781px) and (pointer: fine)').matches
 }
 
-function timezoneLabel(date: string, timezone: string): string {
-  const part = new Intl.DateTimeFormat('en-GB', {
+function timezoneLabel(date: string, timezone: string, locale: string): string {
+  const part = new Intl.DateTimeFormat(locale, {
     timeZone: timezone,
     timeZoneName: 'short',
   }).formatToParts(new Date(`${date}T12:00:00Z`)).find((item) => item.type === 'timeZoneName')?.value
@@ -53,6 +54,7 @@ export function LineupGameScreen({
   onNicknameChange,
   onDailySubmit,
 }: LineupGameScreenProps) {
+  const { locale, t, modeLabel, term, country, feedback, known } = useI18n()
   const [guess, setGuess] = useState('')
   const [suggestionsOpen, setSuggestionsOpen] = useState(false)
   const [activeSuggestion, setActiveSuggestion] = useState(-1)
@@ -70,17 +72,21 @@ export function LineupGameScreen({
   const missingStarter = match.teams
     .flatMap((team) => team.starters)
     .find((player) => player.id === game.round.missingPlayerId)
-  const primaryClueLabel = match.competition === 'ucl' ? 'Nationality' : 'Most-played club that season'
-  const primaryClue = match.competition === 'ucl' ? missingStarter?.nationality : missingStarter?.seasonClub
+  const primaryClueLabel = match.competition === 'ucl' ? t('Nationality') : t('Most-played club that season')
+  const primaryClue = match.competition === 'ucl' && missingStarter?.nationality
+    ? country(missingStarter.nationality)
+    : missingStarter?.seasonClub
   const initials = missingPlayer.displayName
     .split(/[\s-]+/)
     .filter(Boolean)
     .map((part) => `${part[0]?.toLocaleUpperCase()}.`)
     .join('')
-  const stageLabel = match.stage.replace('Semi-final', 'Semi-Final').replace(' · ', ' - ')
+  const stageLabel = term(match.stage)
+    .replace(locale === 'en' ? 'Semi-final' : 'Semifinal', locale === 'en' ? 'Semi-Final' : 'Semifinal')
+    .replace(' · ', ' - ')
   const tournamentLabel = match.competition === 'ucl'
     ? 'UCL'
-    : match.competition === 'euro' ? 'UEFA EURO' : 'FIFA World Cup'
+    : match.competition === 'euro' ? 'UEFA EURO' : term('FIFA World Cup')
   const editionLabel = match.competition === 'ucl'
     ? match.edition
     : match.edition.replace(/^EURO\s+/, '').replace(/^World Cup\s+/, '')
@@ -133,14 +139,14 @@ export function LineupGameScreen({
     <main className="lineup-game-shell">
       <header className="game-header">
         <button className="wordmark" type="button" onClick={onExit}>LEO <span>GUESSI</span></button>
-        <div className="game-header__meta"><span>{MODE_LABELS[game.mode]}</span><i aria-hidden="true" /><span>{match.competitionLabel}</span></div>
-        <button className="exit-button" type="button" onClick={onExit}>Exit</button>
+        <div className="game-header__meta"><span>{modeLabel(game.mode)}</span><i aria-hidden="true" /><span>{term(match.competitionLabel)}</span></div>
+        <button className="exit-button" type="button" onClick={onExit}>{t('Exit')}</button>
       </header>
 
-      <section className="game-scorebar lineup-scorebar" aria-label="Lineup game status">
-        <div><span>{daily ? 'Today’s lineup' : 'Progress'}</span><strong>{daily ? '1 / 1' : `${Math.max(1, roundNumber)} / ${GAME_CONFIG.challengeRounds}`}</strong></div>
-        <div className="game-scorebar__available"><span>{review ? 'Round score' : 'Available now'}</span><div className="scorebar-points"><strong data-testid="lineup-available-score">{review ? game.round.pointsEarned : available}</strong><em>PTS</em></div></div>
-        <div><span>Game score</span><strong data-testid="lineup-total-score">{game.totalScore}</strong></div>
+      <section className="game-scorebar lineup-scorebar" aria-label={t('Lineup game status')}>
+        <div><span>{daily ? t('Today’s lineup') : t('Progress')}</span><strong>{daily ? '1 / 1' : `${Math.max(1, roundNumber)} / ${GAME_CONFIG.challengeRounds}`}</strong></div>
+        <div className="game-scorebar__available"><span>{review ? t('Round score') : t('Available now')}</span><div className="scorebar-points"><strong data-testid="lineup-available-score">{review ? game.round.pointsEarned : available}</strong><em>PTS</em></div></div>
+        <div><span>{t('Game score')}</span><strong data-testid="lineup-total-score">{game.totalScore}</strong></div>
       </section>
 
       <section className="lineup-match-card">
@@ -148,7 +154,7 @@ export function LineupGameScreen({
           {editionLabel} - {tournamentLabel} {stageLabel}
         </div>
         <h1>{match.homeTeam.name} <span>vs</span> {match.awayTeam.name}</h1>
-        <p><time dateTime={match.date}>{new Date(`${match.date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</time><i />{match.kickoffLocal} {timezoneLabel(match.date, match.timezone)}<i />{match.venue}</p>
+        <p><time dateTime={match.date}>{new Date(`${match.date}T12:00:00Z`).toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</time><i />{match.kickoffLocal} {timezoneLabel(match.date, match.timezone, locale === 'es' ? 'es-ES' : 'en-GB')}<i />{match.venue}</p>
       </section>
 
       <div className={`lineup-game-layout ${review ? 'lineup-game-layout--review' : ''}`}>
@@ -156,56 +162,56 @@ export function LineupGameScreen({
         <aside className="lineup-answer-zone">
           {review ? (
             <div className="answer-reveal lineup-answer-reveal" data-testid="lineup-answer-reveal">
-              <span className="eyebrow">{game.round.outcome === 'correct' ? 'Starter identified.' : 'Missing player revealed'}</span>
+              <span className="eyebrow">{game.round.outcome === 'correct' ? t('Starter identified.') : t('Missing player revealed')}</span>
               <h2>{missingPlayer.displayName}</h2>
               <p>{match.homeTeam.name} vs {match.awayTeam.name} · {match.edition}</p>
-              <div className="earned-stamp"><strong>{game.round.pointsEarned}</strong><span>points earned</span></div>
-              {game.round.incorrectGuesses.length > 0 && <div className="review-guesses"><span>Missed guesses</span><p>{game.round.incorrectGuesses.join(' · ')}</p></div>}
+              <div className="earned-stamp"><strong>{game.round.pointsEarned}</strong><span>{t('points earned')}</span></div>
+              {game.round.incorrectGuesses.length > 0 && <div className="review-guesses"><span>{t('Missed guesses')}</span><p>{game.round.incorrectGuesses.join(' · ')}</p></div>}
               {daily ? (
                 <form className="daily-submit" onSubmit={(event) => { event.preventDefault(); onDailySubmit() }}>
-                  <label htmlFor="lineup-daily-nickname">Enter your nickname to save this result and unlock Guess the lineup leaderboards.<span>Your nickname is public and can submit once today.</span></label>
+                  <label htmlFor="lineup-daily-nickname">{t('Enter your nickname to save this result and unlock Guess the lineup leaderboards.')}<span>{t('Your nickname is public and can submit once today.')}</span></label>
                   <div className="daily-submit__row">
-                    <input id="lineup-daily-nickname" value={nickname} onChange={(event) => onNicknameChange(event.target.value)} maxLength={24} placeholder="Name or nickname" autoComplete="nickname" />
-                    <button className="primary-button" type="submit" disabled={submitting || !isValidNickname(nickname)}>{submitting ? 'Saving…' : 'Save score'}</button>
+                    <input id="lineup-daily-nickname" value={nickname} onChange={(event) => onNicknameChange(event.target.value)} maxLength={24} placeholder={t('Name or nickname')} autoComplete="nickname" />
+                    <button className="primary-button" type="submit" disabled={submitting || !isValidNickname(nickname)}>{submitting ? t('Saving…') : t('Save score')}</button>
                   </div>
-                  <small>Use the same nickname every time for your stats history to stay together.</small>
-                  {error && <p className="daily-service-error" role="alert">{error}</p>}
+                  <small>{t('Use the same nickname every time for your stats history to stay together.')}</small>
+                  {error && <p className="daily-service-error" role="alert">{known(error)}</p>}
                 </form>
               ) : (
-                <button className="primary-button primary-button--large" type="button" onClick={onNext}>{game.results.length >= GAME_CONFIG.challengeRounds ? 'See final results' : 'Next lineup'} <span aria-hidden="true">→</span></button>
+                <button className="primary-button primary-button--large" type="button" onClick={onNext}>{game.results.length >= GAME_CONFIG.challengeRounds ? t('See final results') : t('Next lineup')} <span aria-hidden="true">→</span></button>
               )}
             </div>
           ) : (
             <>
-              <div className="answer-zone__header"><span className="eyebrow">The blank shirt</span><span>Guess · give up</span></div>
+              <div className="answer-zone__header"><span className="eyebrow">{t('The blank shirt')}</span><span>{t('Guess · give up')}</span></div>
               <form onSubmit={submit}>
-                <label htmlFor="lineup-player-guess">Who is missing? <span>· −{GAME_CONFIG.lineupWrongGuessPenalty} pts per miss</span></label>
+                <label htmlFor="lineup-player-guess">{t('Who is missing?')} <span>· −{GAME_CONFIG.lineupWrongGuessPenalty} pts</span></label>
                 <div className="guess-row">
                   <div className="player-autocomplete">
-                    <input id="lineup-player-guess" ref={inputRef} value={guess} onChange={(event) => { setGuess(event.target.value); setSuggestionsOpen(true); setActiveSuggestion(-1) }} onFocus={() => setSuggestionsOpen(true)} onBlur={() => setSuggestionsOpen(false)} onKeyDown={onKeyDown} placeholder="Player name" autoComplete="off" spellCheck="false" role="combobox" aria-autocomplete="list" aria-expanded={showSuggestions} aria-controls="lineup-player-suggestions" aria-activedescendant={showSuggestions && activeSuggestion >= 0 ? `lineup-player-suggestion-${suggestions[activeSuggestion].id}` : undefined} />
-                    {showSuggestions && <ul className="player-suggestions" id="lineup-player-suggestions" role="listbox" aria-label="Lineup player suggestions">{suggestions.map((player, index) => <li className={index === activeSuggestion ? 'player-suggestion is-active' : 'player-suggestion'} id={`lineup-player-suggestion-${player.id}`} key={player.id} role="option" aria-selected={index === activeSuggestion} onMouseDown={(event) => event.preventDefault()} onClick={() => selectSuggestion(player)}><small aria-hidden="true">{String(index + 1).padStart(2, '0')}</small><span>{player.displayName}</span></li>)}</ul>}
+                    <input id="lineup-player-guess" ref={inputRef} value={guess} onChange={(event) => { setGuess(event.target.value); setSuggestionsOpen(true); setActiveSuggestion(-1) }} onFocus={() => setSuggestionsOpen(true)} onBlur={() => setSuggestionsOpen(false)} onKeyDown={onKeyDown} placeholder={t('Player name')} autoComplete="off" spellCheck="false" role="combobox" aria-autocomplete="list" aria-expanded={showSuggestions} aria-controls="lineup-player-suggestions" aria-activedescendant={showSuggestions && activeSuggestion >= 0 ? `lineup-player-suggestion-${suggestions[activeSuggestion].id}` : undefined} />
+                    {showSuggestions && <ul className="player-suggestions" id="lineup-player-suggestions" role="listbox" aria-label={t('Lineup player suggestions')}>{suggestions.map((player, index) => <li className={index === activeSuggestion ? 'player-suggestion is-active' : 'player-suggestion'} id={`lineup-player-suggestion-${player.id}`} key={player.id} role="option" aria-selected={index === activeSuggestion} onMouseDown={(event) => event.preventDefault()} onClick={() => selectSuggestion(player)}><small aria-hidden="true">{String(index + 1).padStart(2, '0')}</small><span>{player.displayName}</span></li>)}</ul>}
                   </div>
-                  <button className="primary-button" type="submit">Submit</button>
+                  <button className="primary-button" type="submit">{t('Submit')}</button>
                 </div>
               </form>
-              {game.round.statusMessage && <p className="guess-feedback" role="status">{game.round.statusMessage}</p>}
-              {game.round.incorrectGuesses.length > 0 && <div className="previous-guesses-inline"><span>Previous guesses</span><p>{game.round.incorrectGuesses.join(' · ')}.</p></div>}
-              <div className="lineup-clues" aria-label="Lineup clues">
+              {game.round.statusMessage && <p className="guess-feedback" role="status">{feedback(game.round.statusMessage)}</p>}
+              {game.round.incorrectGuesses.length > 0 && <div className="previous-guesses-inline"><span>{t('Previous guesses')}</span><p>{game.round.incorrectGuesses.join(' · ')}.</p></div>}
+              <div className="lineup-clues" aria-label={t('Lineup clues')}>
                 {game.round.cluesUsed >= 1 && (
                   <div className="lineup-clue" data-testid="lineup-primary-clue"><span>{primaryClueLabel}</span><strong>{primaryClue}</strong></div>
                 )}
                 {game.round.cluesUsed >= 2 && (
-                  <div className="lineup-clue" data-testid="lineup-initials-clue"><span>Player initials</span><strong>{initials}</strong></div>
+                  <div className="lineup-clue" data-testid="lineup-initials-clue"><span>{t('Player initials')}</span><strong>{initials}</strong></div>
                 )}
                 {game.round.cluesUsed < 2 && (
                   <button className="lineup-clue-button" type="button" onClick={onClue}>
                     {game.round.cluesUsed === 0
-                      ? `Get ${match.competition === 'ucl' ? 'nationality' : 'club'} clue — max 40 pts`
-                      : 'Get initials clue — max 20 pts'}
+                      ? t(match.competition === 'ucl' ? 'Get nationality clue — max 40 pts' : 'Get club clue — max 40 pts')
+                      : t('Get initials clue — max 20 pts')}
                   </button>
                 )}
               </div>
-              <button className="give-up-button" type="button" onClick={onGiveUp}>Give up and reveal</button>
+              <button className="give-up-button" type="button" onClick={onGiveUp}>{t('Give up and reveal')}</button>
             </>
           )}
         </aside>

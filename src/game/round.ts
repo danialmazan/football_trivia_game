@@ -8,7 +8,7 @@ export function createRound(playerId: string, random: () => number = Math.random
     clueSeed: Math.floor(random() * 1_000_000),
     incorrectGuesses: [],
     normalizedIncorrectGuesses: [],
-    statusMessage: '',
+    statusMessage: null,
     outcome: null,
     pointsEarned: null,
   }
@@ -19,7 +19,7 @@ export function revealNextClue(round: RoundState): RoundState {
   return {
     ...round,
     clueLevel: round.clueLevel + 1,
-    statusMessage: `Clue ${round.clueLevel + 1} revealed.`,
+    statusMessage: { key: 'clue-revealed', number: round.clueLevel + 1 },
   }
 }
 
@@ -31,7 +31,7 @@ export function recordIncorrectGuess(
   if (round.normalizedIncorrectGuesses.includes(normalizedGuess)) {
     return {
       duplicate: true,
-      round: { ...round, statusMessage: 'Already guessed — no points deducted.' },
+      round: { ...round, statusMessage: { key: 'already-guessed' } },
     }
   }
   return {
@@ -40,7 +40,7 @@ export function recordIncorrectGuess(
       ...round,
       incorrectGuesses: [...round.incorrectGuesses, displayGuess.trim()],
       normalizedIncorrectGuesses: [...round.normalizedIncorrectGuesses, normalizedGuess],
-      statusMessage: 'Not this player. Keep going.',
+      statusMessage: { key: 'incorrect-player' },
     },
   }
 }
