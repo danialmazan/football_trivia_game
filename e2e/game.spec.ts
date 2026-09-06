@@ -48,6 +48,8 @@ test('switches the full interface to Spanish and preserves an active game', asyn
   await page.getByRole('button', { name: /empezar/i }).click()
   await expect(page.getByRole('heading', { name: /conoce tus tres opciones/i })).toBeVisible()
   await page.getByRole('button', { name: /vamos/i }).click()
+  await expect(page.getByText('Un club de las ligas del Big Five que representó este jugador:')).toBeVisible()
+  await expect(page.getByText('Career decades in the Big-Five leagues:')).toHaveCount(0)
   const input = page.getByLabel(/responde ahora/i)
   await input.fill('Lionel')
 

@@ -8,7 +8,7 @@ interface ClueCardProps {
 }
 
 export function ClueCard({ clue, index, newlyRevealed = false }: ClueCardProps) {
-  const { locale } = useI18n()
+  const { locale, t } = useI18n()
   return (
     <article className={`clue-card ${newlyRevealed ? 'clue-card--new' : ''}`} aria-label={`${locale === 'es' ? 'Pista' : 'Clue'} ${index}`}>
       <div className="clue-card__number" aria-hidden="true">
@@ -20,14 +20,14 @@ export function ClueCard({ clue, index, newlyRevealed = false }: ClueCardProps) 
           <div className="team-clue">
             <div className="team-clue__copy">
               <p>
-                One club from the Big-Five leagues this player represented:{' '}
+                {t('One club from the Big-Five leagues this player represented:')}{' '}
                 <strong>{clue.teams[0].clubName}</strong>
               </p>
               <p className="career-decades">
-                Career decades in the Big-Five leagues: <strong>{clue.decades.join(' · ')}</strong>
+                {t('Career decades in the Big-Five leagues:')} <strong>{clue.decades.join(' · ')}</strong>
               </p>
               <small>
-                The decades cover the full eligible career—not necessarily the years with this club.
+                {t('The decades cover the full eligible career—not necessarily the years with this club.')}
               </small>
             </div>
             <div className="team-logos" aria-label={locale === 'es' ? 'Escudos de los equipos' : 'Team logos'}>
@@ -35,7 +35,7 @@ export function ClueCard({ clue, index, newlyRevealed = false }: ClueCardProps) 
                 <div className="team-logo" key={team.clubId} title={team.clubName}>
                   <img
                     src={`${import.meta.env.BASE_URL}${team.logoPath.replace(/^\/+/, '')}`}
-                    alt={`${team.clubName} badge`}
+                    alt={t('{club} badge', { club: team.clubName })}
                   />
                   <span>{team.leagueName}</span>
                 </div>

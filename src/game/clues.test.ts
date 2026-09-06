@@ -53,6 +53,14 @@ describe('football clue generation', () => {
     expect(clues[3]).toMatchObject({ kind: 'text', text: expect.stringContaining(player.primaryRole) })
   })
 
+  it('localizes clue values while preserving football proper names', () => {
+    const clues = generateClues(byName('Lionel Messi'), 0, undefined, 'es')
+    expect(clues[0].label).toBe('Club y época de carrera')
+    expect(clues[1]).toMatchObject({ kind: 'text', text: expect.stringContaining('Argentina ·') })
+    expect(clues[1]).toMatchObject({ kind: 'text', text: expect.stringContaining('partidos internacionales') })
+    expect(clues[2]).toMatchObject({ kind: 'text', text: expect.stringContaining('UEFA Champions League') })
+  })
+
   it('shows milestones when a player has no qualifying title', () => {
     const base = players[0]
     const titleless = {
