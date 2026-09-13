@@ -24,9 +24,10 @@ describe('football answer matching', () => {
     expect(matchAnswer('CR7', byName('Cristiano Ronaldo'), playerSearch).status).toBe('correct')
   })
 
-  it('uses Ronaldo Nazario as the disambiguated Brazilian player name', () => {
-    expect(matchAnswer('Ronaldo Nazario', byName('Ronaldo Nazario'), playerSearch).status).toBe('correct')
-    expect(matchAnswer('Ronaldo', byName('Ronaldo Nazario'), playerSearch).status).toBe('incorrect')
+  it('uses the full-name label to disambiguate the Brazilian Ronaldo', () => {
+    const brazilianRonaldo = byName('Ronaldo (Ronaldo Luís Nazário de Lima)')
+    expect(matchAnswer('Ronaldo Nazario', brazilianRonaldo, playerSearch).status).toBe('correct')
+    expect(matchAnswer('Ronaldo', brazilianRonaldo, playerSearch).status).toBe('incorrect')
     expect(matchAnswer('Ronaldo', byName('Cristiano Ronaldo'), playerSearch).status).toBe('correct')
   })
 

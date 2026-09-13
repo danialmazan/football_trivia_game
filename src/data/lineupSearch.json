@@ -219,16 +219,17 @@
   },
   {
     "id": "tm-player-34495",
-    "displayName": "Adriano Correia",
+    "displayName": "Adriano (Adriano Correia Claro)",
     "acceptedNames": [
-      "Adriano Correia Claro",
-      "Claro",
       "Adriano Correia",
       "Correia",
+      "Adriano Correia Claro",
+      "Claro",
       "Adriano",
-      "adriano"
+      "adriano",
+      "Adriano (Adriano Correia Claro)"
     ],
-    "lastName": "Correia"
+    "lastName": "Claro"
   },
   {
     "id": "tm-player-182913",
@@ -645,6 +646,19 @@
     "lastName": "Tacchinardi"
   },
   {
+    "id": "tm-player-15420",
+    "displayName": "Alex (Alex Rodrigo Dias da Costa)",
+    "acceptedNames": [
+      "Alex Costa",
+      "Costa",
+      "Alex Rodrigo Dias da Costa",
+      "Alex",
+      "alex",
+      "Alex (Alex Rodrigo Dias da Costa)"
+    ],
+    "lastName": "Costa"
+  },
+  {
     "id": "tm-player-548111",
     "displayName": "Álex Baena",
     "acceptedNames": [
@@ -692,18 +706,6 @@
       "Remiro"
     ],
     "lastName": "Remiro"
-  },
-  {
-    "id": "tm-player-15420",
-    "displayName": "Alex Costa",
-    "acceptedNames": [
-      "Alex Rodrigo Dias da Costa",
-      "Costa",
-      "Alex Costa",
-      "Alex",
-      "alex"
-    ],
-    "lastName": "Costa"
   },
   {
     "id": "tm-player-79960",
@@ -836,9 +838,9 @@
     "id": "tm-player-105470",
     "displayName": "Alisson",
     "acceptedNames": [
+      "Alisson",
       "Alisson Ramses Becker",
       "Becker",
-      "Alisson",
       "alisson"
     ],
     "lastName": "Alisson"
@@ -1047,37 +1049,16 @@
     "lastName": "Beraldo"
   },
   {
-    "id": "tm-player-52897",
-    "displayName": "Hernanes",
-    "acceptedNames": [
-      "Anderson Hernanes de Carvalho Viana Lima",
-      "Lima",
-      "Hernanes"
-    ],
-    "lastName": "Hernanes"
-  },
-  {
     "id": "tm-player-31645",
     "displayName": "Anderson Oliveira",
     "acceptedNames": [
-      "Anderson Luís de Abreu Oliveira",
-      "Oliveira",
       "Anderson Oliveira",
+      "Oliveira",
+      "Anderson Luís de Abreu Oliveira",
       "Anderson",
       "anderson"
     ],
     "lastName": "Oliveira"
-  },
-  {
-    "id": "tm-player-8564",
-    "displayName": "Deco",
-    "acceptedNames": [
-      "Anderson Luís de Souza",
-      "Souza",
-      "Deco",
-      "deco"
-    ],
-    "lastName": "Deco"
   },
   {
     "id": "tm-player-13882",
@@ -1579,16 +1560,6 @@
       "Adán"
     ],
     "lastName": "Adán"
-  },
-  {
-    "id": "tm-player-35242",
-    "displayName": "Beto",
-    "acceptedNames": [
-      "António Alberto Bastos Pimparel",
-      "Pimparel",
-      "Beto"
-    ],
-    "lastName": "Beto"
   },
   {
     "id": "tm-player-495621",
@@ -2256,6 +2227,16 @@
     "lastName": "Traoré"
   },
   {
+    "id": "tm-player-35242",
+    "displayName": "Beto",
+    "acceptedNames": [
+      "Beto",
+      "António Alberto Bastos Pimparel",
+      "Pimparel"
+    ],
+    "lastName": "Beto"
+  },
+  {
     "id": "tm-player-654982",
     "displayName": "Bilal El Khannouss",
     "acceptedNames": [
@@ -2331,6 +2312,17 @@
       "Krkic"
     ],
     "lastName": "Krkic"
+  },
+  {
+    "id": "tm-player-207834",
+    "displayName": "Bono",
+    "acceptedNames": [
+      "Bono",
+      "Yassine Bounou",
+      "Bounou",
+      "yassine bounou"
+    ],
+    "lastName": "Bono"
   },
   {
     "id": "tm-player-94",
@@ -2582,6 +2574,27 @@
     "lastName": "Kim"
   },
   {
+    "id": "tm-player-1426",
+    "displayName": "Cacau",
+    "acceptedNames": [
+      "Cacau",
+      "Claudemir Jerônimo Barreto",
+      "Barreto"
+    ],
+    "lastName": "Cacau"
+  },
+  {
+    "id": "tm-player-5937",
+    "displayName": "Cafu",
+    "acceptedNames": [
+      "Cafu",
+      "Marcos Evangelista de Moraes",
+      "Moraes",
+      "cafu"
+    ],
+    "lastName": "Cafu"
+  },
+  {
     "id": "tm-player-392768",
     "displayName": "Callum Hudson-Odoi",
     "acceptedNames": [
@@ -2687,17 +2700,6 @@
     "lastName": "Germano"
   },
   {
-    "id": "tm-player-16306",
-    "displayName": "Casemiro",
-    "acceptedNames": [
-      "Carlos Henrique Casimiro",
-      "Casimiro",
-      "Casemiro",
-      "casemiro"
-    ],
-    "lastName": "Casemiro"
-  },
-  {
     "id": "tm-player-7572",
     "displayName": "Carlos Marchena",
     "acceptedNames": [
@@ -2757,6 +2759,17 @@
       "carsten ramelow"
     ],
     "lastName": "Ramelow"
+  },
+  {
+    "id": "tm-player-16306",
+    "displayName": "Casemiro",
+    "acceptedNames": [
+      "Casemiro",
+      "Carlos Henrique Casimiro",
+      "Casimiro",
+      "casemiro"
+    ],
+    "lastName": "Casemiro"
   },
   {
     "id": "tm-player-112988",
@@ -2874,6 +2887,17 @@
       "Itandje"
     ],
     "lastName": "Itandje"
+  },
+  {
+    "id": "tm-player-50935",
+    "displayName": "Chicharito",
+    "acceptedNames": [
+      "Chicharito",
+      "Javier Hernández Balcázar",
+      "Balcázar",
+      "chicharito"
+    ],
+    "lastName": "Chicharito"
   },
   {
     "id": "tm-player-4437",
@@ -3165,16 +3189,6 @@
     "lastName": "Makélélé"
   },
   {
-    "id": "tm-player-1426",
-    "displayName": "Cacau",
-    "acceptedNames": [
-      "Claudemir Jerônimo Barreto",
-      "Barreto",
-      "Cacau"
-    ],
-    "lastName": "Cacau"
-  },
-  {
     "id": "tm-player-40423",
     "displayName": "Claudio Bravo",
     "acceptedNames": [
@@ -3318,6 +3332,17 @@
       "corentin tolisso"
     ],
     "lastName": "Tolisso"
+  },
+  {
+    "id": "tm-player-9826",
+    "displayName": "Costinha",
+    "acceptedNames": [
+      "Costinha",
+      "Francisco José Rodrigues da Costa",
+      "Costa",
+      "costinha"
+    ],
+    "lastName": "Costinha"
   },
   {
     "id": "tm-player-3297",
@@ -3725,8 +3750,6 @@
     "id": "tm-player-55769",
     "displayName": "Danilo D'Ambrosio",
     "acceptedNames": [
-      "Danilo D&#039;Ambrosio",
-      "D&#039;Ambrosio",
       "Danilo D'Ambrosio",
       "D'Ambrosio"
     ],
@@ -3734,16 +3757,17 @@
   },
   {
     "id": "tm-player-145707",
-    "displayName": "Danilo Luiz",
+    "displayName": "Danilo (Danilo Luiz da Silva)",
     "acceptedNames": [
-      "Danilo Luiz da Silva",
-      "Silva",
       "Danilo Luiz",
       "Luiz",
+      "Danilo Luiz da Silva",
+      "Silva",
       "Danilo",
-      "danilo"
+      "danilo",
+      "Danilo (Danilo Luiz da Silva)"
     ],
-    "lastName": "Luiz"
+    "lastName": "Silva"
   },
   {
     "id": "tm-player-141050",
@@ -3816,9 +3840,9 @@
     "id": "tm-player-16136",
     "displayName": "Dante",
     "acceptedNames": [
+      "Dante",
       "Dante Bonfim Costa Santos",
       "Santos",
-      "Dante",
       "dante"
     ],
     "lastName": "Dante"
@@ -4164,6 +4188,17 @@
     "lastName": "Rice"
   },
   {
+    "id": "tm-player-8564",
+    "displayName": "Deco",
+    "acceptedNames": [
+      "Deco",
+      "Anderson Luís de Souza",
+      "Souza",
+      "deco"
+    ],
+    "lastName": "Deco"
+  },
+  {
     "id": "tm-player-88262",
     "displayName": "Dedryck Boyata",
     "acceptedNames": [
@@ -4186,10 +4221,10 @@
     "id": "tm-player-3428",
     "displayName": "Dejan Stanković",
     "acceptedNames": [
-      "Dejan Stankovic",
-      "Stankovic",
       "Dejan Stanković",
-      "Stanković"
+      "Stanković",
+      "Dejan Stankovic",
+      "Stankovic"
     ],
     "lastName": "Stanković"
   },
@@ -4332,6 +4367,17 @@
     "lastName": "Doué"
   },
   {
+    "id": "tm-player-5800",
+    "displayName": "Dida",
+    "acceptedNames": [
+      "Dida",
+      "Nélson de Jesús da Silva",
+      "Silva",
+      "dida"
+    ],
+    "lastName": "Dida"
+  },
+  {
     "id": "tm-player-75553",
     "displayName": "Didier Deschamps",
     "acceptedNames": [
@@ -4388,6 +4434,20 @@
       "diego costa"
     ],
     "lastName": "Costa"
+  },
+  {
+    "id": "tm-player-4248",
+    "displayName": "Diego (Diego Ribas da Cunha)",
+    "acceptedNames": [
+      "Diego Ribas",
+      "Ribas",
+      "Diego Ribas da Cunha",
+      "Cunha",
+      "Diego",
+      "diego",
+      "Diego (Diego Ribas da Cunha)"
+    ],
+    "lastName": "Cunha"
   },
   {
     "id": "tm-player-3408",
@@ -4468,19 +4528,6 @@
       "Placente"
     ],
     "lastName": "placente"
-  },
-  {
-    "id": "tm-player-4248",
-    "displayName": "Diego Ribas",
-    "acceptedNames": [
-      "Diego Ribas da Cunha",
-      "Cunha",
-      "Diego Ribas",
-      "Ribas",
-      "Diego",
-      "diego"
-    ],
-    "lastName": "Ribas"
   },
   {
     "id": "tm-player-7504",
@@ -4898,9 +4945,9 @@
     "id": "tm-player-29035",
     "displayName": "Ederson Campos",
     "acceptedNames": [
-      "Ederson Honorato Campos",
-      "Campos",
       "Ederson Campos",
+      "Campos",
+      "Ederson Honorato Campos",
       "Ederson",
       "ederson"
     ],
@@ -4910,9 +4957,9 @@
     "id": "tm-player-238223",
     "displayName": "Ederson Moraes",
     "acceptedNames": [
-      "Ederson Santana de Moraes",
-      "Moraes",
       "Ederson Moraes",
+      "Moraes",
+      "Ederson Santana de Moraes",
       "Ederson",
       "ederson"
     ],
@@ -4963,10 +5010,10 @@
     "id": "tm-player-28396",
     "displayName": "Edin Džeko",
     "acceptedNames": [
-      "Edin Dzeko",
-      "Dzeko",
       "Edin Džeko",
       "Džeko",
+      "Edin Dzeko",
+      "Dzeko",
       "edin dzeko"
     ],
     "lastName": "Džeko"
@@ -4985,9 +5032,9 @@
     "id": "tm-player-5343",
     "displayName": "Edmílson",
     "acceptedNames": [
+      "Edmílson",
       "Edmílson José Gomes de Moraes",
       "Moraes",
-      "Edmílson",
       "edmilson"
     ],
     "lastName": "Edmílson"
@@ -5137,9 +5184,9 @@
     "id": "tm-player-14192",
     "displayName": "Eliseu",
     "acceptedNames": [
+      "Eliseu",
       "Eliseu Pereira dos Santos",
-      "Santos",
-      "Eliseu"
+      "Santos"
     ],
     "lastName": "Eliseu"
   },
@@ -5194,9 +5241,9 @@
     "id": "tm-player-181778",
     "displayName": "Emerson Santos",
     "acceptedNames": [
-      "Emerson Palmieri dos Santos",
-      "Santos",
       "Emerson Santos",
+      "Santos",
+      "Emerson Palmieri dos Santos",
       "Emerson",
       "emerson"
     ],
@@ -5265,10 +5312,10 @@
     "id": "tm-player-5782",
     "displayName": "Emre Belözoğlu",
     "acceptedNames": [
-      "Emre Belözoglu",
-      "Belözoglu",
       "Emre Belözoğlu",
       "Belözoğlu",
+      "Emre Belözoglu",
+      "Belözoglu",
       "emre belozoglu"
     ],
     "lastName": "Belözoğlu"
@@ -5562,13 +5609,24 @@
     "lastName": "Lefèvre"
   },
   {
+    "id": "tm-player-225693",
+    "displayName": "Fabinho",
+    "acceptedNames": [
+      "Fabinho",
+      "Fabio Henrique Tavares",
+      "Tavares",
+      "fabinho"
+    ],
+    "lastName": "Fabinho"
+  },
+  {
     "id": "tm-player-7570",
     "displayName": "Fábio Aurélio",
     "acceptedNames": [
-      "Fábio Aurélio Rodrigues",
-      "Rodrigues",
       "Fábio Aurélio",
       "Aurélio",
+      "Fábio Aurélio Rodrigues",
+      "Rodrigues",
       "Fábio Auré.",
       "Auré.",
       "fabio aurelio"
@@ -5615,17 +5673,6 @@
       "grosso"
     ],
     "lastName": "Grosso"
-  },
-  {
-    "id": "tm-player-225693",
-    "displayName": "Fabinho",
-    "acceptedNames": [
-      "Fabio Henrique Tavares",
-      "Tavares",
-      "Fabinho",
-      "fabinho"
-    ],
-    "lastName": "Fabinho"
   },
   {
     "id": "tm-player-16871",
@@ -5810,6 +5857,17 @@
     "lastName": "López"
   },
   {
+    "id": "tm-player-26267",
+    "displayName": "Fernandinho",
+    "acceptedNames": [
+      "Fernandinho",
+      "Fernando Luiz Roza",
+      "Roza",
+      "fernandinho"
+    ],
+    "lastName": "Fernandinho"
+  },
+  {
     "id": "tm-player-5831",
     "displayName": "fernando couto",
     "acceptedNames": [
@@ -5859,17 +5917,6 @@
       "fernando llorente"
     ],
     "lastName": "Llorente"
-  },
-  {
-    "id": "tm-player-26267",
-    "displayName": "Fernandinho",
-    "acceptedNames": [
-      "Fernando Luiz Roza",
-      "Roza",
-      "Fernandinho",
-      "fernandinho"
-    ],
-    "lastName": "Fernandinho"
   },
   {
     "id": "tm-player-137745",
@@ -6169,17 +6216,6 @@
     "lastName": "Pérez"
   },
   {
-    "id": "tm-player-9826",
-    "displayName": "Costinha",
-    "acceptedNames": [
-      "Francisco José Rodrigues da Costa",
-      "Costa",
-      "Costinha",
-      "costinha"
-    ],
-    "lastName": "Costinha"
-  },
-  {
     "id": "tm-player-7517",
     "displayName": "Francisco Pavón",
     "acceptedNames": [
@@ -6188,17 +6224,6 @@
       "francisco pavon"
     ],
     "lastName": "Pavón"
-  },
-  {
-    "id": "tm-player-85288",
-    "displayName": "Isco",
-    "acceptedNames": [
-      "Francisco Román Alarcón Suárez",
-      "Suárez",
-      "Isco",
-      "isco"
-    ],
-    "lastName": "Isco"
   },
   {
     "id": "tm-player-173567",
@@ -6297,6 +6322,18 @@
     "lastName": "Grim"
   },
   {
+    "id": "tm-player-31005",
+    "displayName": "Fred Guedes",
+    "acceptedNames": [
+      "Fred Guedes",
+      "Guedes",
+      "Frederico Chaves Guedes",
+      "Fred",
+      "fred"
+    ],
+    "lastName": "Guedes"
+  },
+  {
     "id": "tm-player-3134",
     "displayName": "Freddie Ljungberg",
     "acceptedNames": [
@@ -6315,18 +6352,6 @@
       "Déhu"
     ],
     "lastName": "Déhu"
-  },
-  {
-    "id": "tm-player-31005",
-    "displayName": "Fred Guedes",
-    "acceptedNames": [
-      "Frederico Chaves Guedes",
-      "Guedes",
-      "Fred Guedes",
-      "Fred",
-      "fred"
-    ],
-    "lastName": "Guedes"
   },
   {
     "id": "tm-player-107775",
@@ -6349,6 +6374,17 @@
     "lastName": "Jong"
   },
   {
+    "id": "tm-player-7598",
+    "displayName": "Gabri",
+    "acceptedNames": [
+      "Gabri",
+      "Gabriel Francisco García de la Torre",
+      "Torre",
+      "gabri"
+    ],
+    "lastName": "Gabri"
+  },
+  {
     "id": "tm-player-22969",
     "displayName": "Gabriel Fernández Arenas",
     "acceptedNames": [
@@ -6358,17 +6394,6 @@
       "gabi"
     ],
     "lastName": "Arenas"
-  },
-  {
-    "id": "tm-player-7598",
-    "displayName": "Gabri",
-    "acceptedNames": [
-      "Gabriel Francisco García de la Torre",
-      "Torre",
-      "Gabri",
-      "gabri"
-    ],
-    "lastName": "Gabri"
   },
   {
     "id": "tm-player-5555",
@@ -6541,6 +6566,16 @@
       "gary pallister"
     ],
     "lastName": "Pallister"
+  },
+  {
+    "id": "tm-player-646740",
+    "displayName": "Gavi",
+    "acceptedNames": [
+      "Gavi",
+      "Pablo Martín Páez Gavira",
+      "Gavira"
+    ],
+    "lastName": "Gavi"
   },
   {
     "id": "tm-player-5813",
@@ -7171,10 +7206,10 @@
     "id": "tm-player-1792",
     "displayName": "Hamit Altıntop",
     "acceptedNames": [
-      "Hamit Altintop",
-      "Altintop",
       "Hamit Altıntop",
       "Altıntop",
+      "Hamit Altintop",
+      "Altintop",
       "hamit altintop"
     ],
     "lastName": "Altıntop"
@@ -7395,6 +7430,16 @@
       "crespo"
     ],
     "lastName": "Crespo"
+  },
+  {
+    "id": "tm-player-52897",
+    "displayName": "Hernanes",
+    "acceptedNames": [
+      "Hernanes",
+      "Anderson Hernanes de Carvalho Viana Lima",
+      "Lima"
+    ],
+    "lastName": "Hernanes"
   },
   {
     "id": "tm-player-91845",
@@ -7735,6 +7780,17 @@
       "isaac cuenca"
     ],
     "lastName": "Cuenca"
+  },
+  {
+    "id": "tm-player-85288",
+    "displayName": "Isco",
+    "acceptedNames": [
+      "Isco",
+      "Francisco Román Alarcón Suárez",
+      "Suárez",
+      "isco"
+    ],
+    "lastName": "Isco"
   },
   {
     "id": "tm-player-351816",
@@ -8258,17 +8314,6 @@
     "lastName": "Farinós"
   },
   {
-    "id": "tm-player-50935",
-    "displayName": "Chicharito",
-    "acceptedNames": [
-      "Javier Hernández Balcázar",
-      "Balcázar",
-      "Chicharito",
-      "chicharito"
-    ],
-    "lastName": "Chicharito"
-  },
-  {
     "id": "tm-player-7824",
     "displayName": "Javier López Vallejo",
     "acceptedNames": [
@@ -8440,9 +8485,9 @@
     "id": "tm-player-258254",
     "displayName": "Jemerson",
     "acceptedNames": [
+      "Jemerson",
       "Jemerson de Jesus Nascimento",
       "Nascimento",
-      "Jemerson",
       "jemerson"
     ],
     "lastName": "Jemerson"
@@ -8600,9 +8645,9 @@
     "id": "tm-player-134936",
     "displayName": "Jesé",
     "acceptedNames": [
+      "Jesé",
       "Jesé Rodríguez Ruiz",
       "Ruiz",
-      "Jesé",
       "jese"
     ],
     "lastName": "Jesé"
@@ -8783,18 +8828,6 @@
       "joao mario"
     ],
     "lastName": "Mário"
-  },
-  {
-    "id": "tm-player-33357",
-    "displayName": "Miranda Filho",
-    "acceptedNames": [
-      "João Miranda de Souza Filho",
-      "Filho",
-      "Miranda Filho",
-      "Miranda",
-      "miranda"
-    ],
-    "lastName": "Filho"
   },
   {
     "id": "tm-player-29364",
@@ -9019,13 +9052,23 @@
     "id": "tm-player-3540",
     "displayName": "John O'Shea",
     "acceptedNames": [
-      "John O&#039;Shea",
-      "O&#039;Shea",
       "John O'Shea",
       "O'Shea",
       "john oshea"
     ],
     "lastName": "O'Shea"
+  },
+  {
+    "id": "tm-player-30739",
+    "displayName": "John Obi Mikel",
+    "acceptedNames": [
+      "John Obi Mikel",
+      "Mikel",
+      "Mikel John Obi",
+      "Obi",
+      "john obi mikel"
+    ],
+    "lastName": "Mikel"
   },
   {
     "id": "tm-player-186590",
@@ -9305,17 +9348,6 @@
     "lastName": "Costa"
   },
   {
-    "id": "tm-player-102017",
-    "displayName": "Jorginho",
-    "acceptedNames": [
-      "Jorge Luiz Frello Filho",
-      "Filho",
-      "Jorginho",
-      "jorginho"
-    ],
-    "lastName": "Jorginho"
-  },
-  {
     "id": "tm-player-345084",
     "displayName": "Jorge Marco de Oliveira Moraes",
     "acceptedNames": [
@@ -9326,15 +9358,15 @@
     "lastName": "Moraes"
   },
   {
-    "id": "tm-player-74229",
-    "displayName": "Koke",
+    "id": "tm-player-102017",
+    "displayName": "Jorginho",
     "acceptedNames": [
-      "Jorge Resurrección Merodio",
-      "Merodio",
-      "Koke",
-      "koke"
+      "Jorginho",
+      "Jorge Luiz Frello Filho",
+      "Filho",
+      "jorginho"
     ],
-    "lastName": "Koke"
+    "lastName": "Jorginho"
   },
   {
     "id": "tm-player-4563",
@@ -9436,17 +9468,6 @@
     "lastName": "Gayà"
   },
   {
-    "id": "tm-player-7838",
-    "displayName": "Josico",
-    "acceptedNames": [
-      "José Joaquín Moreno Verdú",
-      "Verdú",
-      "Josico",
-      "josico"
-    ],
-    "lastName": "Josico"
-  },
-  {
     "id": "tm-player-3365",
     "displayName": "José Kléberson Pereira",
     "acceptedNames": [
@@ -9456,16 +9477,6 @@
       "kleberson"
     ],
     "lastName": "Pereira"
-  },
-  {
-    "id": "tm-player-81999",
-    "displayName": "Joselu",
-    "acceptedNames": [
-      "José Luis Mato Sanmartín",
-      "Sanmartín",
-      "Joselu"
-    ],
-    "lastName": "Joselu"
   },
   {
     "id": "tm-player-17407",
@@ -9605,6 +9616,16 @@
     "lastName": "Sosa"
   },
   {
+    "id": "tm-player-81999",
+    "displayName": "Joselu",
+    "acceptedNames": [
+      "Joselu",
+      "José Luis Mato Sanmartín",
+      "Sanmartín"
+    ],
+    "lastName": "Joselu"
+  },
+  {
     "id": "tm-player-388516",
     "displayName": "Josep Martínez",
     "acceptedNames": [
@@ -9640,6 +9661,17 @@
       "Zirkzee"
     ],
     "lastName": "Zirkzee"
+  },
+  {
+    "id": "tm-player-7838",
+    "displayName": "Josico",
+    "acceptedNames": [
+      "Josico",
+      "José Joaquín Moreno Verdú",
+      "Verdú",
+      "josico"
+    ],
+    "lastName": "Josico"
   },
   {
     "id": "tm-player-362977",
@@ -10115,6 +10147,17 @@
     "lastName": "Havertz"
   },
   {
+    "id": "tm-player-3366",
+    "displayName": "Kaká",
+    "acceptedNames": [
+      "Kaká",
+      "Ricardo Izecson dos Santos Leite",
+      "Leite",
+      "kaka"
+    ],
+    "lastName": "Kaká"
+  },
+  {
     "id": "tm-player-3430",
     "displayName": "Kakhaber Kaladze",
     "acceptedNames": [
@@ -10272,18 +10315,6 @@
       "Arrizabalaga"
     ],
     "lastName": "Arrizabalaga"
-  },
-  {
-    "id": "tm-player-14132",
-    "displayName": "Pepe Ferreira",
-    "acceptedNames": [
-      "Képler Laveran Lima Ferreira",
-      "Ferreira",
-      "Pepe Ferreira",
-      "Pepe",
-      "pepe"
-    ],
-    "lastName": "Ferreira"
   },
   {
     "id": "tm-player-88755",
@@ -10518,6 +10549,17 @@
       "Casteels"
     ],
     "lastName": "Casteels"
+  },
+  {
+    "id": "tm-player-74229",
+    "displayName": "Koke",
+    "acceptedNames": [
+      "Koke",
+      "Jorge Resurrección Merodio",
+      "Merodio",
+      "koke"
+    ],
+    "lastName": "Koke"
   },
   {
     "id": "tm-player-3202",
@@ -10913,14 +10955,15 @@
   },
   {
     "id": "tm-player-102586",
-    "displayName": "Leonardo Nascimento de Araujo",
+    "displayName": "Leonardo (Leonardo Nascimento de Araujo)",
     "acceptedNames": [
-      "Leonardo Nascimento de Araujo",
-      "Araujo",
       "Leonardo Araújo",
       "Araújo",
+      "Leonardo Nascimento de Araujo",
+      "Araujo",
       "Leonardo",
-      "leonardo"
+      "leonardo",
+      "Leonardo (Leonardo Nascimento de Araujo)"
     ],
     "lastName": "Araujo"
   },
@@ -11245,9 +11288,9 @@
     "id": "tm-player-77",
     "displayName": "Lúcio",
     "acceptedNames": [
+      "Lúcio",
       "Lucimar da Silva Ferreira",
       "Ferreira",
-      "Lúcio",
       "lucio"
     ],
     "lastName": "Lúcio"
@@ -11294,17 +11337,6 @@
       "Morte"
     ],
     "lastName": "Morte"
-  },
-  {
-    "id": "tm-player-33706",
-    "displayName": "Nani",
-    "acceptedNames": [
-      "Luís Carlos Almeida da Cunha",
-      "Cunha",
-      "Nani",
-      "nani"
-    ],
-    "lastName": "Nani"
   },
   {
     "id": "tm-player-480692",
@@ -11358,18 +11390,6 @@
       "López"
     ],
     "lastName": "López"
-  },
-  {
-    "id": "tm-player-13225",
-    "displayName": "Miguel Monteiro",
-    "acceptedNames": [
-      "Luís Miguel Brito Garcia Monteiro",
-      "Monteiro",
-      "Miguel Monteiro",
-      "Miguel",
-      "miguel"
-    ],
-    "lastName": "Monteiro"
   },
   {
     "id": "tm-player-147796",
@@ -11555,9 +11575,9 @@
     "id": "tm-player-18301",
     "displayName": "Maicon",
     "acceptedNames": [
+      "Maicon",
       "Maicon Douglas Sisenando",
       "Sisenando",
-      "Maicon",
       "maicon"
     ],
     "lastName": "Maicon"
@@ -11600,6 +11620,17 @@
       "manfred binz"
     ],
     "lastName": "Binz"
+  },
+  {
+    "id": "tm-player-9822",
+    "displayName": "Maniche",
+    "acceptedNames": [
+      "Maniche",
+      "Nuno Ricardo de Oliveira Ribeiro",
+      "Ribeiro",
+      "maniche"
+    ],
+    "lastName": "Maniche"
   },
   {
     "id": "tm-player-120627",
@@ -11861,16 +11892,17 @@
   },
   {
     "id": "tm-player-44501",
-    "displayName": "Marcelo Vieira",
+    "displayName": "Marcelo (Marcelo Vieira da Silva Júnior)",
     "acceptedNames": [
-      "Marcelo Vieira da Silva Júnior",
-      "Júnior",
       "Marcelo Vieira",
       "Vieira",
+      "Marcelo Vieira da Silva Júnior",
+      "Júnior",
       "Marcelo",
-      "marcelo"
+      "marcelo",
+      "Marcelo (Marcelo Vieira da Silva Júnior)"
     ],
-    "lastName": "Vieira"
+    "lastName": "Júnior"
   },
   {
     "id": "tm-player-5767",
@@ -11898,18 +11930,6 @@
       "Amoroso"
     ],
     "lastName": "Amoroso"
-  },
-  {
-    "id": "tm-player-33947",
-    "displayName": "Rafinha Souza",
-    "acceptedNames": [
-      "Marcio Rafael Ferreira de Souza",
-      "Souza",
-      "Rafinha Souza",
-      "Rafinha",
-      "rafinha"
-    ],
-    "lastName": "Souza"
   },
   {
     "id": "tm-player-4294",
@@ -12075,17 +12095,6 @@
       "marquinhos"
     ],
     "lastName": "Corrêa"
-  },
-  {
-    "id": "tm-player-5937",
-    "displayName": "Cafu",
-    "acceptedNames": [
-      "Marcos Evangelista de Moraes",
-      "Moraes",
-      "Cafu",
-      "cafu"
-    ],
-    "lastName": "Cafu"
   },
   {
     "id": "tm-player-38998",
@@ -12297,10 +12306,10 @@
     "id": "tm-player-34572",
     "displayName": "Mario Mandžukić",
     "acceptedNames": [
-      "Mario Mandzukic",
-      "Mandzukic",
       "Mario Mandžukić",
       "Mandžukić",
+      "Mario Mandzukic",
+      "Mandzukic",
       "mario mandzukic"
     ],
     "lastName": "Mandžukić"
@@ -12319,10 +12328,10 @@
     "id": "tm-player-205938",
     "displayName": "Mario Pasalić",
     "acceptedNames": [
-      "Mario Pašalić",
-      "Pašalić",
       "Mario Pasalić",
       "Pasalić",
+      "Mario Pašalić",
+      "Pašalić",
       "mario pasalic"
     ],
     "lastName": "Pasalić"
@@ -13022,9 +13031,9 @@
     "id": "tm-player-4317",
     "displayName": "Maxwell",
     "acceptedNames": [
+      "Maxwell",
       "Maxwell Scherrer Cabelino Andrade",
       "Andrade",
-      "Maxwell",
       "maxwell"
     ],
     "lastName": "Maxwell"
@@ -13122,10 +13131,10 @@
     "id": "tm-player-38360",
     "displayName": "Mevlüt Erdinç",
     "acceptedNames": [
-      "Mevlüt Erdinc",
-      "Erdinc",
       "Mevlüt Erdinç",
-      "Erdinç"
+      "Erdinç",
+      "Mevlüt Erdinc",
+      "Erdinc"
     ],
     "lastName": "Erdinç"
   },
@@ -13399,6 +13408,18 @@
     "lastName": "Lopes"
   },
   {
+    "id": "tm-player-13225",
+    "displayName": "Miguel Monteiro",
+    "acceptedNames": [
+      "Miguel Monteiro",
+      "Monteiro",
+      "Luís Miguel Brito Garcia Monteiro",
+      "Miguel",
+      "miguel"
+    ],
+    "lastName": "Monteiro"
+  },
+  {
     "id": "tm-player-117606",
     "displayName": "Miguel Porlán Noguera",
     "acceptedNames": [
@@ -13456,18 +13477,6 @@
       "mike maignan"
     ],
     "lastName": "Maignan"
-  },
-  {
-    "id": "tm-player-30739",
-    "displayName": "John Obi Mikel",
-    "acceptedNames": [
-      "Mikel John Obi",
-      "Obi",
-      "John Obi Mikel",
-      "Mikel",
-      "john obi mikel"
-    ],
-    "lastName": "Mikel"
   },
   {
     "id": "tm-player-338424",
@@ -13565,6 +13574,18 @@
       "miralem pjanic"
     ],
     "lastName": "Pjanić"
+  },
+  {
+    "id": "tm-player-33357",
+    "displayName": "Miranda Filho",
+    "acceptedNames": [
+      "Miranda Filho",
+      "Filho",
+      "João Miranda de Souza Filho",
+      "Miranda",
+      "miranda"
+    ],
+    "lastName": "Filho"
   },
   {
     "id": "tm-player-315852",
@@ -13825,11 +13846,10 @@
   },
   {
     "id": "tm-player-225083",
-    "displayName": "N&#039;Golo Kanté",
+    "displayName": "N'Golo Kanté",
     "acceptedNames": [
-      "N&#039;Golo Kanté",
-      "Kanté",
       "N'Golo Kanté",
+      "Kanté",
       "ngolo kante"
     ],
     "lastName": "Kanté"
@@ -13903,6 +13923,17 @@
     "lastName": "Kim"
   },
   {
+    "id": "tm-player-33706",
+    "displayName": "Nani",
+    "acceptedNames": [
+      "Nani",
+      "Luís Carlos Almeida da Cunha",
+      "Cunha",
+      "nani"
+    ],
+    "lastName": "Nani"
+  },
+  {
     "id": "tm-player-177476",
     "displayName": "Nathan Aké",
     "acceptedNames": [
@@ -13950,17 +13981,6 @@
     "lastName": "Taylor"
   },
   {
-    "id": "tm-player-5800",
-    "displayName": "Dida",
-    "acceptedNames": [
-      "Nélson de Jesús da Silva",
-      "Silva",
-      "Dida",
-      "dida"
-    ],
-    "lastName": "Dida"
-  },
-  {
     "id": "tm-player-72768",
     "displayName": "Nélson Oliveira",
     "acceptedNames": [
@@ -13991,14 +14011,25 @@
     "id": "tm-player-19726",
     "displayName": "Nemanja Vidic",
     "acceptedNames": [
+      "Nemanja Vidic",
+      "Vidic",
       "Nemanja Vidic‎",
       "Vidic‎",
       "nemanja vidic lrm",
-      "lrm",
-      "Nemanja Vidic",
-      "Vidic"
+      "lrm"
     ],
     "lastName": "Vidic"
+  },
+  {
+    "id": "tm-player-111819",
+    "displayName": "Neto Murara",
+    "acceptedNames": [
+      "Neto Murara",
+      "Murara",
+      "Norberto Murara Neto",
+      "Neto"
+    ],
+    "lastName": "Murara"
   },
   {
     "id": "tm-player-40995",
@@ -14014,9 +14045,9 @@
     "id": "tm-player-68290",
     "displayName": "Neymar",
     "acceptedNames": [
+      "Neymar",
       "Neymar da Silva Santos Júnior",
       "Júnior",
-      "Neymar",
       "neymar"
     ],
     "lastName": "Neymar"
@@ -14082,24 +14113,22 @@
     "id": "tm-player-486031",
     "displayName": "Nico Gonzalez",
     "acceptedNames": [
-      "Nico González",
-      "González",
       "Nico Gonzalez",
       "Gonzalez",
+      "Nico González",
+      "González",
       "nico gonzalez"
     ],
     "lastName": "Gonzalez"
   },
   {
     "id": "tm-player-743413",
-    "displayName": "Nico O&#039;Reilly",
+    "displayName": "Nico O'Reilly",
     "acceptedNames": [
-      "Nico O&#039;Reilly",
-      "O&#039;Reilly",
       "Nico O'Reilly",
       "O'Reilly"
     ],
-    "lastName": "O&#039;Reilly"
+    "lastName": "O'Reilly"
   },
   {
     "id": "tm-player-948294",
@@ -14333,17 +14362,6 @@
     "lastName": "Madueke"
   },
   {
-    "id": "tm-player-111819",
-    "displayName": "Neto Murara",
-    "acceptedNames": [
-      "Norberto Murara Neto",
-      "Neto",
-      "Neto Murara",
-      "Murara"
-    ],
-    "lastName": "Murara"
-  },
-  {
     "id": "tm-player-348026",
     "displayName": "Nordi Mukiele",
     "acceptedNames": [
@@ -14433,17 +14451,6 @@
     "lastName": "Morais"
   },
   {
-    "id": "tm-player-9822",
-    "displayName": "Maniche",
-    "acceptedNames": [
-      "Nuno Ricardo de Oliveira Ribeiro",
-      "Ribeiro",
-      "Maniche",
-      "maniche"
-    ],
-    "lastName": "Maniche"
-  },
-  {
     "id": "tm-player-9831",
     "displayName": "nuno valente",
     "acceptedNames": [
@@ -14514,12 +14521,12 @@
     "id": "tm-player-3394",
     "displayName": "Ole Gunnar Solskjær",
     "acceptedNames": [
+      "Ole Gunnar Solskjær",
+      "Solskjær",
       "Ole Gunnar Solskjaer",
       "Solskjaer",
       "ole gunnar solskjaer",
-      "solskjaer",
-      "Ole Gunnar Solskjær",
-      "Solskjær"
+      "solskjaer"
     ],
     "lastName": "Solskjær"
   },
@@ -14546,9 +14553,9 @@
     "id": "tm-player-7916",
     "displayName": "Oleguer",
     "acceptedNames": [
+      "Oleguer",
       "Oleguer Presas Renom",
       "Renom",
-      "Oleguer",
       "oleguer"
     ],
     "lastName": "Oleguer"
@@ -14707,18 +14714,6 @@
     "lastName": "Romeu"
   },
   {
-    "id": "tm-player-85314",
-    "displayName": "Oscar Júnior",
-    "acceptedNames": [
-      "Oscar dos Santos Emboaba Júnior",
-      "Júnior",
-      "Oscar Júnior",
-      "Oscar",
-      "oscar"
-    ],
-    "lastName": "Júnior"
-  },
-  {
     "id": "tm-player-7897",
     "displayName": "Óscar García",
     "acceptedNames": [
@@ -14726,6 +14721,18 @@
       "García"
     ],
     "lastName": "García"
+  },
+  {
+    "id": "tm-player-85314",
+    "displayName": "Oscar Júnior",
+    "acceptedNames": [
+      "Oscar Júnior",
+      "Júnior",
+      "Oscar dos Santos Emboaba Júnior",
+      "Oscar",
+      "oscar"
+    ],
+    "lastName": "Júnior"
   },
   {
     "id": "tm-player-288230",
@@ -14775,16 +14782,6 @@
       "Amo"
     ],
     "lastName": "Amo"
-  },
-  {
-    "id": "tm-player-646740",
-    "displayName": "Gavi",
-    "acceptedNames": [
-      "Pablo Martín Páez Gavira",
-      "Gavira",
-      "Gavi"
-    ],
-    "lastName": "Gavi"
   },
   {
     "id": "tm-player-74230",
@@ -15190,17 +15187,15 @@
     "lastName": "Srnicek"
   },
   {
-    "id": "tm-player-65278",
-    "displayName": "Pedro Rodríguez",
+    "id": "tm-player-683840",
+    "displayName": "Pedri",
     "acceptedNames": [
-      "Pedro Eliezer Rodríguez Ledesma",
-      "Ledesma",
-      "Pedro Rodríguez",
-      "Rodríguez",
-      "Pedro",
-      "pedro"
+      "Pedri",
+      "Pedro González López",
+      "López",
+      "pedri"
     ],
-    "lastName": "Rodríguez"
+    "lastName": "Pedri"
   },
   {
     "id": "tm-player-9812",
@@ -15219,17 +15214,6 @@
       "Espinha"
     ],
     "lastName": "Espinha"
-  },
-  {
-    "id": "tm-player-683840",
-    "displayName": "Pedri",
-    "acceptedNames": [
-      "Pedro González López",
-      "López",
-      "Pedri",
-      "pedri"
-    ],
-    "lastName": "Pedri"
   },
   {
     "id": "tm-player-9811",
@@ -15272,6 +15256,19 @@
     "lastName": "Porro"
   },
   {
+    "id": "tm-player-65278",
+    "displayName": "Pedro Rodríguez",
+    "acceptedNames": [
+      "Pedro Rodríguez",
+      "Rodríguez",
+      "Pedro Eliezer Rodríguez Ledesma",
+      "Ledesma",
+      "Pedro",
+      "pedro"
+    ],
+    "lastName": "Rodríguez"
+  },
+  {
     "id": "tm-player-1095",
     "displayName": "Peer Kluge",
     "acceptedNames": [
@@ -15289,6 +15286,20 @@
       "Guardiola"
     ],
     "lastName": "guardiola"
+  },
+  {
+    "id": "tm-player-14132",
+    "displayName": "Pepe (Képler Laverán Lima Ferreira)",
+    "acceptedNames": [
+      "Pepe (Képler Laverán Lima Ferreira)",
+      "Ferreira",
+      "Ferreira)",
+      "Pepe Ferreira",
+      "Képler Laveran Lima Ferreira",
+      "Pepe",
+      "pepe"
+    ],
+    "lastName": "Ferreira"
   },
   {
     "id": "tm-player-7825",
@@ -15560,10 +15571,10 @@
     "id": "tm-player-181136",
     "displayName": "Piotr Zieliński",
     "acceptedNames": [
-      "Piotr Zielinski",
-      "Zielinski",
       "Piotr Zieliński",
-      "Zieliński"
+      "Zieliński",
+      "Piotr Zielinski",
+      "Zielinski"
     ],
     "lastName": "Zieliński"
   },
@@ -15686,18 +15697,6 @@
     "lastName": "Silva"
   },
   {
-    "id": "tm-player-129473",
-    "displayName": "Rafinha Alcântara",
-    "acceptedNames": [
-      "Rafael Alcântara do Nascimento",
-      "Nascimento",
-      "Rafinha Alcântara",
-      "Alcântara",
-      "Rafinha"
-    ],
-    "lastName": "Alcântara"
-  },
-  {
     "id": "tm-player-357164",
     "displayName": "Rafael Leão",
     "acceptedNames": [
@@ -15709,13 +15708,14 @@
   },
   {
     "id": "tm-player-61892",
-    "displayName": "Rafael da Silva",
+    "displayName": "Rafael (Rafael Pereira da Silva)",
     "acceptedNames": [
-      "Rafael Pereira da Silva",
-      "Silva",
       "Rafael da Silva",
+      "Silva",
+      "Rafael Pereira da Silva",
       "Rafael",
-      "rafael"
+      "rafael",
+      "Rafael (Rafael Pereira da Silva)"
     ],
     "lastName": "Silva"
   },
@@ -15747,6 +15747,32 @@
       "Di Gennaro"
     ],
     "lastName": "Gennaro"
+  },
+  {
+    "id": "tm-player-33947",
+    "displayName": "Rafinha (Marcio Rafael Ferreira de Souza)",
+    "acceptedNames": [
+      "Rafinha Souza",
+      "Souza",
+      "Marcio Rafael Ferreira de Souza",
+      "Rafinha",
+      "rafinha",
+      "Rafinha (Marcio Rafael Ferreira de Souza)"
+    ],
+    "lastName": "Souza"
+  },
+  {
+    "id": "tm-player-129473",
+    "displayName": "Rafinha (Rafael Alcântara do Nascimento)",
+    "acceptedNames": [
+      "Rafinha Alcântara",
+      "Alcântara",
+      "Rafael Alcântara do Nascimento",
+      "Nascimento",
+      "Rafinha",
+      "Rafinha (Rafael Alcântara do Nascimento)"
+    ],
+    "lastName": "Nascimento"
   },
   {
     "id": "tm-player-26669",
@@ -15782,9 +15808,9 @@
     "id": "tm-player-54170",
     "displayName": "Ramires",
     "acceptedNames": [
+      "Ramires",
       "Ramires Santos do Nascimento",
       "Nascimento",
-      "Ramires",
       "ramires"
     ],
     "lastName": "Ramires"
@@ -15810,17 +15836,6 @@
     "lastName": "Bellanova"
   },
   {
-    "id": "tm-player-411295",
-    "displayName": "Raphinha",
-    "acceptedNames": [
-      "Raphael Dias Belloli",
-      "Belloli",
-      "Raphinha",
-      "raphinha"
-    ],
-    "lastName": "Raphinha"
-  },
-  {
     "id": "tm-player-170986",
     "displayName": "Raphaël Guerreiro",
     "acceptedNames": [
@@ -15839,6 +15854,17 @@
       "raphael varane"
     ],
     "lastName": "Varane"
+  },
+  {
+    "id": "tm-player-411295",
+    "displayName": "Raphinha",
+    "acceptedNames": [
+      "Raphinha",
+      "Raphael Dias Belloli",
+      "Belloli",
+      "raphinha"
+    ],
+    "lastName": "Raphinha"
   },
   {
     "id": "tm-player-15452",
@@ -15864,10 +15890,10 @@
     "id": "tm-player-7349",
     "displayName": "Raúl González",
     "acceptedNames": [
-      "Raúl González Blanco",
-      "Blanco",
       "Raúl González",
       "González",
+      "Raúl González Blanco",
+      "Blanco",
       "Raúl",
       "raul"
     ],
@@ -16061,17 +16087,6 @@
       "Fernandes"
     ],
     "lastName": "Fernandes"
-  },
-  {
-    "id": "tm-player-3366",
-    "displayName": "Kaká",
-    "acceptedNames": [
-      "Ricardo Izecson dos Santos Leite",
-      "Leite",
-      "Kaká",
-      "kaka"
-    ],
-    "lastName": "Kaká"
   },
   {
     "id": "tm-player-13833",
@@ -16398,6 +16413,17 @@
     "lastName": "Arruabarrena"
   },
   {
+    "id": "tm-player-357565",
+    "displayName": "Rodri",
+    "acceptedNames": [
+      "Rodri",
+      "Rodrigo Hernández Cascante",
+      "Cascante",
+      "rodri"
+    ],
+    "lastName": "Rodri"
+  },
+  {
     "id": "tm-player-255901",
     "displayName": "Rodrigo De Paul",
     "acceptedNames": [
@@ -16407,17 +16433,6 @@
       "rodrigo de paul"
     ],
     "lastName": "Paul"
-  },
-  {
-    "id": "tm-player-357565",
-    "displayName": "Rodri",
-    "acceptedNames": [
-      "Rodrigo Hernández Cascante",
-      "Cascante",
-      "Rodri",
-      "rodri"
-    ],
-    "lastName": "Rodri"
   },
   {
     "id": "tm-player-961297",
@@ -16441,9 +16456,9 @@
     "id": "tm-player-412363",
     "displayName": "Rodrygo",
     "acceptedNames": [
+      "Rodrygo",
       "Rodrygo Silva de Goes",
       "Goes",
-      "Rodrygo",
       "rodrygo"
     ],
     "lastName": "Rodrygo"
@@ -16632,14 +16647,15 @@
   },
   {
     "id": "tm-player-3140",
-    "displayName": "Ronaldo Luís Nazário de Lima",
+    "displayName": "Ronaldo (Ronaldo Luís Nazário de Lima)",
     "acceptedNames": [
-      "Ronaldo Luís Nazário de Lima",
-      "Lima",
       "Ronaldo Nazario",
       "Nazario",
+      "Ronaldo Luís Nazário de Lima",
+      "Lima",
       "Ronaldo",
-      "ronaldo"
+      "ronaldo",
+      "Ronaldo (Ronaldo Luís Nazário de Lima)"
     ],
     "lastName": "Lima"
   },
@@ -16997,10 +17013,10 @@
     "id": "tm-player-28021",
     "displayName": "Samir Handanovič",
     "acceptedNames": [
-      "Samir Handanovic",
-      "Handanovic",
       "Samir Handanovič",
-      "Handanovič"
+      "Handanovič",
+      "Samir Handanovic",
+      "Handanovic"
     ],
     "lastName": "Handanovič"
   },
@@ -17026,15 +17042,13 @@
   },
   {
     "id": "tm-player-4257",
-    "displayName": "Samuel Eto&#039;o",
+    "displayName": "Samuel Eto'o",
     "acceptedNames": [
-      "Samuel Eto&#039;o",
-      "Eto&#039;o",
       "Samuel Eto'o",
       "Eto'o",
       "samuel etoo"
     ],
-    "lastName": "Eto&#039;o"
+    "lastName": "Eto'o"
   },
   {
     "id": "tm-player-208",
@@ -17307,10 +17321,10 @@
     "id": "tm-player-34593",
     "displayName": "Serdar Taşçı",
     "acceptedNames": [
-      "Serdar Tasci",
-      "Tasci",
       "Serdar Taşçı",
-      "Taşçı"
+      "Taşçı",
+      "Serdar Tasci",
+      "Tasci"
     ],
     "lastName": "Taşçı"
   },
@@ -17393,6 +17407,17 @@
     "lastName": "Roberto"
   },
   {
+    "id": "tm-player-5819",
+    "displayName": "Serginho",
+    "acceptedNames": [
+      "Serginho",
+      "Sergio Claudio dos Santos",
+      "Santos",
+      "serginho"
+    ],
+    "lastName": "Serginho"
+  },
+  {
     "id": "tm-player-26399",
     "displayName": "Sergio Agüero",
     "acceptedNames": [
@@ -17429,17 +17454,6 @@
       "sergio busquets"
     ],
     "lastName": "Busquets"
-  },
-  {
-    "id": "tm-player-5819",
-    "displayName": "Serginho",
-    "acceptedNames": [
-      "Sergio Claudio dos Santos",
-      "Santos",
-      "Serginho",
-      "serginho"
-    ],
-    "lastName": "Serginho"
   },
   {
     "id": "tm-player-7912",
@@ -17638,9 +17652,9 @@
     "id": "tm-player-8019",
     "displayName": "Simão",
     "acceptedNames": [
+      "Simão",
       "Simão Pedro Fonseca Sabrosa",
-      "Sabrosa",
-      "Simão"
+      "Sabrosa"
     ],
     "lastName": "Simão"
   },
@@ -18202,9 +18216,9 @@
     "id": "tm-player-3359",
     "displayName": "Sylvinho",
     "acceptedNames": [
+      "Sylvinho",
       "Sylvio Mendes Campos Júnior",
       "Júnior",
-      "Sylvinho",
       "sylvinho"
     ],
     "lastName": "Sylvinho"
@@ -19260,6 +19274,17 @@
     "lastName": "Kosovskyi"
   },
   {
+    "id": "tm-player-487469",
+    "displayName": "Vitinha",
+    "acceptedNames": [
+      "Vitinha",
+      "Vítor Machado Ferreira",
+      "Ferreira",
+      "vitinha"
+    ],
+    "lastName": "Vitinha"
+  },
+  {
     "id": "tm-player-33781",
     "displayName": "Vito Mannone",
     "acceptedNames": [
@@ -19277,17 +19302,6 @@
       "vitor baia"
     ],
     "lastName": "Baía"
-  },
-  {
-    "id": "tm-player-487469",
-    "displayName": "Vitinha",
-    "acceptedNames": [
-      "Vítor Machado Ferreira",
-      "Ferreira",
-      "Vitinha",
-      "vitinha"
-    ],
-    "lastName": "Vitinha"
   },
   {
     "id": "tm-player-106",
@@ -19546,9 +19560,9 @@
     "id": "tm-player-52769",
     "displayName": "Willian",
     "acceptedNames": [
+      "Willian",
       "Willian Borges da Silva",
       "Silva",
-      "Willian",
       "willian"
     ],
     "lastName": "Willian"
@@ -19663,6 +19677,17 @@
     "lastName": "Alonso"
   },
   {
+    "id": "tm-player-7607",
+    "displayName": "Xavi",
+    "acceptedNames": [
+      "Xavi",
+      "Xavier Hernández Creus",
+      "Creus",
+      "xavi"
+    ],
+    "lastName": "Xavi"
+  },
+  {
     "id": "tm-player-566931",
     "displayName": "Xavi Simons",
     "acceptedNames": [
@@ -19671,17 +19696,6 @@
       "xavi simons"
     ],
     "lastName": "Simons"
-  },
-  {
-    "id": "tm-player-7607",
-    "displayName": "Xavi",
-    "acceptedNames": [
-      "Xavier Hernández Creus",
-      "Creus",
-      "Xavi",
-      "xavi"
-    ],
-    "lastName": "Xavi"
   },
   {
     "id": "tm-player-86792",
@@ -19752,17 +19766,6 @@
       "yannick carrasco"
     ],
     "lastName": "Carrasco"
-  },
-  {
-    "id": "tm-player-207834",
-    "displayName": "Bono",
-    "acceptedNames": [
-      "Yassine Bounou",
-      "Bounou",
-      "Bono",
-      "yassine bounou"
-    ],
-    "lastName": "Bono"
   },
   {
     "id": "tm-player-13091",

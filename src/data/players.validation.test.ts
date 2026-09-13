@@ -78,6 +78,30 @@ describe('football player dataset', () => {
     }
   })
 
+  it('labels approved single-name players with their full names and preserves former labels', () => {
+    const expected = new Map([
+      ['44501', ['Marcelo (Marcelo Vieira da Silva Júnior)', 'Marcelo Vieira']],
+      ['3140', ['Ronaldo (Ronaldo Luís Nazário de Lima)', 'Ronaldo Nazario']],
+      ['5876', ['Adriano (Adriano Leite Ribeiro)', 'Adriano Leite']],
+      ['34495', ['Adriano (Adriano Correia Claro)', 'Adriano Correia']],
+      ['33947', ['Rafinha (Marcio Rafael Ferreira de Souza)', 'Rafinha Souza']],
+      ['129473', ['Rafinha (Rafael Alcântara do Nascimento)', 'Rafinha Alcântara']],
+      ['145707', ['Danilo (Danilo Luiz da Silva)', 'Danilo Luiz']],
+      ['15420', ['Alex (Alex Rodrigo Dias da Costa)', 'Alex Costa']],
+      ['4248', ['Diego (Diego Ribas da Cunha)', 'Diego Ribas']],
+      ['102586', ['Leonardo (Leonardo Nascimento de Araujo)', 'Leonardo Araújo']],
+      ['1599', ['Juan (Juan Silveira dos Santos)', 'Juan Silveira']],
+      ['61892', ['Rafael (Rafael Pereira da Silva)', 'Rafael da Silva']],
+      ['14132', ['Pepe (Képler Laverán Lima Ferreira)', 'Pepe Ferreira']],
+    ])
+
+    for (const [sourcePlayerId, [displayName, formerLabel]] of expected) {
+      const player = players.find((candidate) => candidate.sourcePlayerId === sourcePlayerId)
+      expect(player?.displayName).toBe(displayName)
+      expect(player?.acceptedNames).toContain(formerLabel)
+    }
+  })
+
   it('bundles a badge for every referenced club', () => {
     const badgePaths = new Set(
       players.flatMap((player) => player.clubs.map((club) => club.logoPath)),

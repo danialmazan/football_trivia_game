@@ -36,8 +36,11 @@ describe('localization', () => {
     expect(translateFootballTerm('es', 'Midfielder')).toBe('Centrocampista')
     expect(translateFootballTerm('es', 'Semi-final · First leg')).toBe('Semifinal · Ida')
     expect(translateCountryName('es', 'Brazil / Spain')).toBe('Brasil / España')
-    expect(translate('es', 'One club from the Big-Five leagues this player represented:'))
-      .toBe('Un club de las ligas del Big Five que representó este jugador:')
+    expect(translate('es', 'One club this player represented:'))
+      .toBe('Un club que representó este jugador:')
+    expect(translate('es', 'Daily games')).toBe('Juegos diarios')
+    expect(translate('es', 'Want more more guessing?')).toBe('¿Quieres adivinar aún más?')
+    expect(translate('es', "Understood, let's play!")).toBe('¡Entendido, a jugar!')
     expect(translate('es', '{club} badge', { club: 'Barcelona' })).toBe('Escudo de Barcelona')
   })
 

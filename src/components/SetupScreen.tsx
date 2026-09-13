@@ -2,12 +2,10 @@ import type { Player } from '../data/types'
 import {
   DECADES,
   GAME_CONFIG,
-  GAME_MODES,
 } from '../game/config'
 import { getActivePool } from '../game/selection'
 import type { GameSettings, PracticeLeague, SavedData } from '../game/types'
 import { GoatCrest } from './GoatCrest'
-import { useState } from 'react'
 import { useI18n } from '../i18n'
 
 interface SetupScreenProps {
@@ -15,7 +13,7 @@ interface SetupScreenProps {
   savedData: SavedData
   players: Player[]
   onSettingsChange: (settings: GameSettings) => void
-  onStart: () => void
+  onStart: (settings?: GameSettings) => void
   onResume: () => void
   onResumeLineup: () => void
   onOpenLeaderboard: () => void
@@ -32,18 +30,20 @@ export function SetupScreen({
   onOpenLeaderboard,
 }: SetupScreenProps) {
   const { t, modeLabel, poolLabel, leagueLabel } = useI18n()
-  const [moreFormatsOpen, setMoreFormatsOpen] = useState(false)
   const isLineupMode = settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge'
+  const isDailyMode = settings.mode === 'daily' || settings.mode === 'lineup-daily'
   const filter = settings.mode === 'practice' ? settings.practiceFilter : undefined
   const effectivePool = settings.mode === 'daily' ? 'normal' : settings.pool
   const poolCount = isLineupMode ? GAME_CONFIG.lineupActiveMatchCount : getActivePool(players, effectivePool, filter).length
 
   function selectMode(mode: GameSettings['mode']) {
-    onSettingsChange({
+    const nextSettings: GameSettings = {
       ...settings,
       mode,
       pool: mode === 'daily' ? 'normal' : settings.pool,
-    })
+    }
+    onSettingsChange(nextSettings)
+    if (mode === 'daily' || mode === 'lineup-daily') onStart(nextSettings)
   }
 
   return (
@@ -51,8 +51,6 @@ export function SetupScreen({
       <section className="hero" aria-labelledby="game-title">
         <div className="hero__kicker">
           <span>{t('European football knowledge test')}</span>
-          <span className="hero__kicker-line" />
-          <span>{t('Big Five · Since 1995')}</span>
         </div>
         <div className="hero__brand">
           <h1 id="game-title">
@@ -64,31 +62,18 @@ export function SetupScreen({
           </div>
         </div>
         <p className="hero__lead">{t('Can you become the G.O.A.T. of player guessing?')}</p>
-        <div className="hero__scope">
-          <strong>{t('What does “Big Five” mean?')}</strong>
-          <p>{t('England, Spain, Italy, Germany and France. The player pool only includes footballers who appeared in at least one of those countries’ top leagues from 1995 onwards.')}</p>
-        </div>
-        <div className="hero__records">
-          <button className="hero__leaderboard-button" type="button" onClick={onOpenLeaderboard}>
-            {t('Check the leaderboard')} <span aria-hidden="true">↗</span>
-          </button>
-        </div>
       </section>
 
       <section className="setup-panel" aria-label={t('Game setup')}>
-        <div className="setup-panel__header">
-          <span className="step-marker">01</span>
-          <div>
-            <span className="eyebrow">{t('Choose the fixture')}</span>
-            <h2>{t('Game format')}</h2>
-          </div>
+        <div className="game-section-heading">
+          <span className="eyebrow">{t('Play today')}</span>
+          <h2>{t('Daily games')}</h2>
         </div>
-        <div className="choice-grid choice-grid--modes">
-          {GAME_MODES.filter((mode) => !['endless', 'practice'].includes(mode)).map((mode) => (
+        <div className="choice-grid choice-grid--daily">
+          {(['daily', 'lineup-daily'] as const).map((mode) => (
             <button
               type="button"
-              className={`choice-card ${settings.mode === mode ? 'choice-card--active' : ''}`}
-              aria-pressed={settings.mode === mode}
+              className="choice-card choice-card--daily"
               key={mode}
               onClick={() => selectMode(mode)}
             >
@@ -96,46 +81,41 @@ export function SetupScreen({
               <small>
                 {mode === 'daily'
                   ? t('A player each day. Same for everyone.')
-                  : mode === 'challenge'
-                  ? t('10 players · 1,000 max')
-                  : mode === 'lineup-daily'
-                    ? t('One missing starter. Same for everyone.')
-                    : mode === 'lineup-challenge'
-                      ? t('10 historic lineups · 1,000 max')
-                  : mode === 'endless'
-                    ? t('Play through the pool')
-                    : t('10 players from your chosen filter')}
+                  : t('One missing starter. Same for everyone.')}
               </small>
+              <b aria-hidden="true">↗</b>
             </button>
           ))}
         </div>
-        <button
-          className="more-formats-toggle"
-          type="button"
-          aria-expanded={moreFormatsOpen}
-          aria-controls="more-game-formats"
-          onClick={() => setMoreFormatsOpen((open) => !open)}
-        >
-          {t('More game formats')} <span aria-hidden="true">{moreFormatsOpen ? '−' : '+'}</span>
-        </button>
-        {moreFormatsOpen && (
-          <div className="choice-grid choice-grid--more" id="more-game-formats">
-            {(['endless', 'practice'] as const).map((mode) => (
-              <button
-                type="button"
-                className={`choice-card ${settings.mode === mode ? 'choice-card--active' : ''}`}
-                aria-pressed={settings.mode === mode}
-                key={mode}
-                onClick={() => selectMode(mode)}
-              >
-                <span>{modeLabel(mode)}</span>
-                <small>{mode === 'endless' ? t('Play through the pool') : t('10 players from your chosen filter')}</small>
-              </button>
-            ))}
-          </div>
-        )}
 
-        {settings.mode === 'practice' && (
+        <div className="game-section-heading game-section-heading--more">
+          <span className="eyebrow">{t('Want more more guessing?')}</span>
+          <h2>{t('More games')}</h2>
+        </div>
+        <div className="choice-grid choice-grid--more" id="more-game-formats">
+          {(['challenge', 'lineup-challenge', 'endless', 'practice'] as const).map((mode) => (
+            <button
+              type="button"
+              className={`choice-card ${settings.mode === mode ? 'choice-card--active' : ''}`}
+              aria-pressed={settings.mode === mode}
+              key={mode}
+              onClick={() => selectMode(mode)}
+            >
+              <span>{t(
+                mode === 'challenge' ? 'Guess the player — 10-round challenge'
+                  : mode === 'lineup-challenge' ? 'Guess the lineup — 10-round challenge'
+                    : mode === 'endless' ? 'Guess the player — endless mode'
+                      : 'Guess the player — by decade/league',
+              )}</span>
+            </button>
+          ))}
+        </div>
+
+        <button className="setup-leaderboard-button" type="button" onClick={onOpenLeaderboard}>
+          {t('Check the leaderboard')} <span aria-hidden="true">↗</span>
+        </button>
+
+        {!isDailyMode && settings.mode === 'practice' && (
           <div className="practice-builder">
             <div className="practice-kind" aria-label={t('Practice filter type')}>
               <button
@@ -203,14 +183,13 @@ export function SetupScreen({
           </div>
         )}
 
-        {!isLineupMode && <div className="setup-panel__header setup-panel__header--pool">
-          <span className="step-marker">02</span>
+        {!isDailyMode && !isLineupMode && <div className="setup-panel__header setup-panel__header--pool">
           <div>
-            <span className="eyebrow">{t('Set the squad depth')}</span>
+            <span className="eyebrow">{t('Choose your player pool')}</span>
             <h2>{t('Player pool')}</h2>
           </div>
         </div>}
-        {!isLineupMode && <div className="pool-toggle">
+        {!isDailyMode && !isLineupMode && <div className="pool-toggle">
           {(['normal', 'hardcore'] as const).map((pool) => (
             <button
               type="button"
@@ -222,23 +201,21 @@ export function SetupScreen({
             >
               <span>{poolLabel(pool)}</span>
               <small>
-                {settings.mode === 'daily' && pool === 'hardcore'
-                  ? t('Player of the day uses the Normal pool.')
-                  : t(pool === 'normal' ? '250 recognised players with 50+ Big-Five appearances since 1995.' : '800 ranked players with 150+ career Big-Five appearances.')}
+                {t(pool === 'normal' ? '250 recognised players with 50+ Big-Five appearances since 1995.' : '800 ranked players with 150+ career Big-Five appearances.')}
               </small>
             </button>
           ))}
         </div>}
 
-        <div className="setup-actions">
+        {!isDailyMode && <div className="setup-actions">
           <div className="roster-count">
             <strong>{poolCount}</strong>
             <span>{isLineupMode ? t('historic matches available') : t('players available')}</span>
           </div>
-          <button className="primary-button primary-button--large" type="button" onClick={onStart}>
+          <button className="primary-button primary-button--large" type="button" onClick={() => onStart()}>
             {t('Kick off')} <span aria-hidden="true">↗</span>
           </button>
-        </div>
+        </div>}
         {savedData.unfinishedGame && (
           <button className="resume-button" type="button" onClick={onResume}>
             {t('Continue unfinished {mode}', { mode: modeLabel(savedData.unfinishedGame.settings.mode).toLowerCase() })}

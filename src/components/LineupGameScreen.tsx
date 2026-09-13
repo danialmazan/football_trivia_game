@@ -183,9 +183,9 @@ export function LineupGameScreen({
             </div>
           ) : (
             <>
-              <div className="answer-zone__header"><span className="eyebrow">{t('The blank shirt')}</span><span>{t('Guess · give up')}</span></div>
+              <div className="answer-zone__header"><span className="eyebrow">{t('Guess now, next clue or give up')}</span></div>
               <form onSubmit={submit}>
-                <label htmlFor="lineup-player-guess">{t('Who is missing?')} <span>· −{GAME_CONFIG.lineupWrongGuessPenalty} pts</span></label>
+                <label htmlFor="lineup-player-guess">{t('Player name')}</label>
                 <div className="guess-row">
                   <div className="player-autocomplete">
                     <input id="lineup-player-guess" ref={inputRef} value={guess} onChange={(event) => { setGuess(event.target.value); setSuggestionsOpen(true); setActiveSuggestion(-1) }} onFocus={() => setSuggestionsOpen(true)} onBlur={() => setSuggestionsOpen(false)} onKeyDown={onKeyDown} placeholder={t('Player name')} autoComplete="off" spellCheck="false" role="combobox" aria-autocomplete="list" aria-expanded={showSuggestions} aria-controls="lineup-player-suggestions" aria-activedescendant={showSuggestions && activeSuggestion >= 0 ? `lineup-player-suggestion-${suggestions[activeSuggestion].id}` : undefined} />
@@ -206,12 +206,12 @@ export function LineupGameScreen({
                 {game.round.cluesUsed < 2 && (
                   <button className="lineup-clue-button" type="button" onClick={onClue}>
                     {game.round.cluesUsed === 0
-                      ? t(match.competition === 'ucl' ? 'Get nationality clue — max 40 pts' : 'Get club clue — max 40 pts')
-                      : t('Get initials clue — max 20 pts')}
+                      ? t(match.competition === 'ucl' ? 'Next clue — and play for 40 pts' : 'Next clue — and play for 40 pts')
+                      : t('Next clue — and play for 20 pts')}
                   </button>
                 )}
               </div>
-              <button className="give-up-button" type="button" onClick={onGiveUp}>{t('Give up and reveal')}</button>
+              <button className="give-up-button" type="button" onClick={onGiveUp}>{t('Give up')}</button>
             </>
           )}
         </aside>

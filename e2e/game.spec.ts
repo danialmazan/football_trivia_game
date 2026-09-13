@@ -21,10 +21,10 @@ test.beforeEach(async ({ page }) => {
 })
 
 async function startGame(page: import('@playwright/test').Page) {
-  await page.getByRole('button', { name: /10-round challenge/i }).click()
+  await page.getByRole('button', { name: /^Guess the player — 10-round/i }).click()
   await page.getByRole('button', { name: /kick off/i }).click()
-  await expect(page.getByRole('heading', { name: /know your three moves/i })).toBeVisible()
-  await page.getByRole('button', { name: /let's go/i }).click()
+  await expect(page.getByRole('heading', { name: /quick rules/i })).toBeVisible()
+  await page.getByRole('button', { name: /understood, let's play/i }).click()
 }
 
 test('switches the full interface to Spanish and preserves an active game', async ({ page }) => {
@@ -33,7 +33,7 @@ test('switches the full interface to Spanish and preserves an active game', asyn
   await expect(page).toHaveURL(/\?lang=es$/)
   await expect(page).toHaveTitle('Leo Guessi — Trivia de fútbol')
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /identifica futbolistas/i)
-  await expect(page.getByRole('heading', { name: 'Formato de juego' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Juegos diarios' })).toBeVisible()
   await expect(page.getByText('¿Puedes convertirte en el G.O.A.T. de adivinar futbolistas?')).toBeVisible()
 
   await page.getByRole('button', { name: 'Abrir ajustes' }).click()
@@ -44,27 +44,27 @@ test('switches the full interface to Spanish and preserves an active game', asyn
   await expect(page.getByRole('heading', { name: /consulta la clasificación/i })).toBeVisible()
   await page.getByRole('button', { name: /volver a la página de inicio/i }).click()
 
-  await page.getByRole('button', { name: /^Reto de 10 rondas/i }).click()
+  await page.getByRole('button', { name: /Adivina el jugador — reto de 10 rondas/i }).click()
   await page.getByRole('button', { name: /empezar/i }).click()
-  await expect(page.getByRole('heading', { name: /conoce tus tres opciones/i })).toBeVisible()
-  await page.getByRole('button', { name: /vamos/i }).click()
-  await expect(page.getByText('Un club de las ligas del Big Five que representó este jugador:')).toBeVisible()
+  await expect(page.getByRole('heading', { name: /reglas rápidas/i })).toBeVisible()
+  await page.getByRole('button', { name: /entendido, a jugar/i }).click()
+  await expect(page.getByText(/Un club que representó este jugador:/)).toBeVisible()
   await expect(page.getByText('Career decades in the Big-Five leagues:')).toHaveCount(0)
-  const input = page.getByLabel(/responde ahora/i)
+  const input = page.getByLabel(/nombre del jugador/i)
   await input.fill('Lionel')
 
   await page.getByRole('button', { name: 'Inglés' }).click()
   await expect(page).toHaveURL(/\?lang=en$/)
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')
-  await expect(page.getByLabel(/guess now/i)).toHaveValue('Lionel')
+  await expect(page.getByLabel(/player name/i)).toHaveValue('Lionel')
 
   await page.getByRole('button', { name: 'Spanish' }).click()
   await expect(page).toHaveURL(/\?lang=es$/)
-  await expect(page.getByLabel(/responde ahora/i)).toHaveValue('Lionel')
+  await expect(page.getByLabel(/nombre del jugador/i)).toHaveValue('Lionel')
 })
 
-test('enters the homepage in Player of the Day mode with a non-overlapping crest', async ({ page }) => {
-  await expect(page.getByRole('button', { name: /^Player of the day/i })).toHaveAttribute('aria-pressed', 'true')
+test('puts both daily games first, side by side, with a non-overlapping crest', async ({ page }) => {
+  await expect(page.getByRole('button', { name: /^Player of the day/i })).toBeVisible()
   await expect(page.getByText(/Five clues, hardest first.*no transfer gossip, no luck/i)).toHaveCount(0)
   await expect(page.getByLabel('Saved high scores')).toHaveCount(0)
   await expect(page.getByText(/Player of the day best|Normal best|Hardcore best|Lineup challenge best/i)).toHaveCount(0)
@@ -97,10 +97,12 @@ test('enters the homepage in Player of the Day mode with a non-overlapping crest
     window.localStorage.setItem(key, JSON.stringify(saved))
   })
   await page.reload()
-  await expect(page.getByRole('button', { name: /^Player of the day/i })).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByRole('button', { name: /^Lineup of the day/i })).toHaveAttribute('aria-pressed', 'false')
-  await page.getByRole('button', { name: /^10-round challenge/i }).click()
-  await expect(page.getByRole('button', { name: /^10-round challenge/i })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: /^Player of the day/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Lineup of the day/i })).toBeVisible()
+  const dailyBoxes = await page.locator('.choice-grid--daily .choice-card').evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().top))
+  expect(dailyBoxes[0]).toBe(dailyBoxes[1])
+  await page.getByRole('button', { name: /^Guess the player — 10-round/i }).click()
+  await expect(page.getByRole('button', { name: /^Guess the player — 10-round/i })).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('plays the shared daily player once and restores its leaderboard after reload', async ({ page }) => {
@@ -173,17 +175,15 @@ test('plays the shared daily player once and restores its leaderboard after relo
   })
 
   const dailyMode = page.locator('.choice-card').filter({ hasText: 'Player of the day' })
-  await expect(dailyMode).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByRole('button', { name: /hardcore/i })).toBeDisabled()
   await expect(dailyMode).toContainText('A player each day. Same for everyone.')
 
-  await page.getByRole('button', { name: /kick off/i }).click()
-  await expect(page.getByRole('heading', { name: /one player. one shared fixture/i })).toBeVisible()
-  await expect(page.getByText(/00:00:00 UTC/i)).toBeVisible()
-  await page.getByRole('button', { name: /let's go/i }).click()
+  await dailyMode.click()
+  await expect(page.getByRole('heading', { name: /quick rules/i })).toBeVisible()
+  await expect(page.getByText(/midnight UTC/i)).toBeVisible()
+  await page.getByRole('button', { name: /understood, let's play/i }).click()
   await expect(page.getByText('1 / 1')).toBeVisible()
 
-  await page.getByLabel(/guess now/i).fill('Lionel Messi')
+  await page.getByLabel(/player name/i).fill('Lionel Messi')
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
   await page.getByLabel(/enter your nickname to save this result/i).fill('LeoFan')
@@ -224,7 +224,7 @@ test('plays the shared daily player once and restores its leaderboard after relo
   await expect(page.getByRole('status')).toBeEmpty()
 
   await page.reload()
-  await page.getByRole('button', { name: /kick off/i }).click()
+  await page.getByRole('button', { name: /player of the day/i }).click()
   await expect(page.getByRole('heading', { name: /score saved/i })).toBeVisible()
   await expect(page.getByRole('button', { name: /share your result/i })).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('AwayDays')
@@ -326,7 +326,7 @@ test('gates the homepage leaderboard by today’s nickname and switches game and
   await expect(page.getByLabel('Public nickname')).toHaveValue('')
   await expect(page.getByLabel('Unlocked leaderboards')).toHaveCount(0)
   await page.getByRole('button', { name: /back to home page/i }).click()
-  await expect(page.getByRole('heading', { name: /game format/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /daily games/i })).toBeVisible()
 })
 
 test('keeps secondary formats collapsed and plays the shared lineup daily with bench autocomplete', async ({ page }) => {
@@ -372,21 +372,12 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ date: dailyDate, leaderboard: [], boards }) })
   })
 
-  await expect(page.getByRole('button', { name: /^Endless mode/i })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: /^By decade or league/i })).toHaveCount(0)
-  const more = page.getByRole('button', { name: /more game formats/i })
-  await expect(more).toHaveAttribute('aria-expanded', 'false')
-  await more.click()
-  await expect(page.getByRole('button', { name: /^Endless mode/i })).toBeVisible()
-  await expect(page.getByRole('button', { name: /^By decade or league/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Guess the player — endless mode/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Guess the player — by decade\/league/i })).toBeVisible()
 
   await page.getByRole('button', { name: /^Lineup of the day/i }).click()
-  await expect(page.getByText('historic matches available')).toBeVisible()
-  await expect(page.locator('.roster-count strong')).toHaveText('136')
-  await expect(page.getByRole('button', { name: /^Hardcore/i })).toHaveCount(0)
-  await page.getByRole('button', { name: /kick off/i }).click()
-  await expect(page.getByRole('heading', { name: /read the shape/i })).toBeVisible()
-  await page.getByRole('button', { name: /let's go/i }).click()
+  await expect(page.getByRole('heading', { name: /quick rules/i })).toBeVisible()
+  await page.getByRole('button', { name: /understood, let's play/i }).click()
 
   await expect(page.getByRole('heading', { name: /AC Milan.*FC Barcelona/i })).toBeVisible()
   await expect(page.getByTestId('lineup-competition-label')).toHaveText('2005/06 - UCL Semi-Final - First leg')
@@ -394,7 +385,7 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
   await expect(page.getByLabel(/missing AC Milan starter/i)).toBeVisible()
   await expect(page.getByText(/CEST \(Europe\/Rome\)/)).toBeVisible()
 
-  const input = page.getByLabel(/who is missing/i)
+  const input = page.getByLabel(/player name/i)
   await input.fill('Kal')
   await expect(page.getByRole('option', { name: /Zeljko Kalac/i })).toBeVisible()
   await page.getByRole('option', { name: /Zeljko Kalac/i }).click()
@@ -405,10 +396,10 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
   await expect(page.getByTestId('lineup-available-score')).toHaveText('80')
   await expect(page.getByRole('status')).toContainText('Already guessed')
 
-  await page.getByRole('button', { name: /get nationality clue.*max 40 pts/i }).click()
+  await page.getByRole('button', { name: /next clue.*play for 40 pts/i }).click()
   await expect(page.getByTestId('lineup-primary-clue')).toHaveText(/NationalityBrazil/i)
   await expect(page.getByTestId('lineup-available-score')).toHaveText('40')
-  await page.getByRole('button', { name: /get initials clue.*max 20 pts/i }).click()
+  await page.getByRole('button', { name: /next clue.*play for 20 pts/i }).click()
   await expect(page.getByTestId('lineup-initials-clue')).toHaveText(/Player initialsK\./i)
   await expect(page.getByTestId('lineup-available-score')).toHaveText('20')
 
@@ -506,13 +497,13 @@ test('plays ten distinct lineup matches and submits the lineup challenge', async
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ date: '2026-08-05', points: 0, boards }) })
   })
 
-  await page.getByRole('button', { name: /^10-round lineup challenge/i }).click()
+  await page.getByRole('button', { name: /^Guess the lineup — 10-round/i }).click()
   await page.getByRole('button', { name: /kick off/i }).click()
-  await page.getByRole('button', { name: /let's go/i }).click()
+  await page.getByRole('button', { name: /understood, let's play/i }).click()
   const matches = new Set<string>()
   for (let round = 0; round < 10; round += 1) {
     matches.add(await page.locator('.lineup-match-card h1').innerText())
-    await page.getByRole('button', { name: /give up and reveal/i }).click()
+    await page.getByRole('button', { name: /^give up$/i }).click()
     await expect(page.getByTestId('lineup-answer-reveal')).toBeVisible()
     await page.getByRole('button', { name: round === 9 ? /see final results/i : /next lineup/i }).click()
   }
@@ -540,14 +531,14 @@ test('plays ten distinct lineup matches and submits the lineup challenge', async
 
 test('keeps the portrait lineup pitch inside a 390px viewport without autofocus', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.getByRole('button', { name: /^10-round lineup challenge/i }).click()
+  await page.getByRole('button', { name: /^Guess the lineup — 10-round/i }).click()
   await page.getByRole('button', { name: /kick off/i }).click()
-  await page.getByRole('button', { name: /let's go/i }).click()
+  await page.getByRole('button', { name: /understood, let's play/i }).click()
   const bounds = await page.locator('.lineup-pitch').boundingBox()
   expect(bounds).not.toBeNull()
   expect(bounds!.x).toBeGreaterThanOrEqual(0)
   expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390)
-  await expect(page.getByLabel(/who is missing/i)).not.toBeFocused()
+  await expect(page.getByLabel(/player name/i)).not.toBeFocused()
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   expect(overflow).toBe(0)
 })
@@ -561,11 +552,11 @@ test('keeps daily errors inside the guide and leaves local modes available', asy
     }),
   )
 
-  await page.getByRole('button', { name: /kick off/i }).click()
-  await page.getByRole('button', { name: /let's go/i }).click()
+  await page.getByRole('button', { name: /player of the day/i }).click()
+  await page.getByRole('button', { name: /understood, let's play/i }).click()
   await expect(page.getByRole('alert')).toHaveText('Daily service is offline for maintenance.')
   await page.getByRole('button', { name: /back/i }).click()
-  await page.getByRole('button', { name: /10-round challenge/i }).click()
+  await page.getByRole('button', { name: /^Guess the player — 10-round/i }).click()
   await expect(page.getByRole('button', { name: /hardcore/i })).toBeEnabled()
 })
 
@@ -593,8 +584,8 @@ test('gives independent browsers the same daily player and clue set', async ({ b
           }),
         )
         await dailyPage.goto('/')
-        await dailyPage.getByRole('button', { name: /kick off/i }).click()
-        await dailyPage.getByRole('button', { name: /let's go/i }).click()
+        await dailyPage.getByRole('button', { name: /player of the day/i }).click()
+        await dailyPage.getByRole('button', { name: /understood, let's play/i }).click()
       }),
     )
 
@@ -615,7 +606,7 @@ test('starts a Normal challenge, deducts misses, reveals clues and accepts the a
   await expect(page.locator('.scorebar-points')).toHaveText(/for100PTS/i)
   await expect(page.getByText('Previous guesses')).toHaveCount(0)
 
-  await page.getByLabel(/guess now/i).fill('David Beckham')
+  await page.getByLabel(/player name/i).fill('David Beckham')
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId('available-score')).toHaveText('90')
   await expect(page.locator('.previous-guesses-inline')).toHaveText('David Beckham.')
@@ -623,7 +614,7 @@ test('starts a Normal challenge, deducts misses, reveals clues and accepts the a
   await page.getByRole('button', { name: /next clue/i }).click()
   await expect(page.getByTestId('available-score')).toHaveText('70')
 
-  await page.getByLabel(/guess now/i).fill('Lionel Messi')
+  await page.getByLabel(/player name/i).fill('Lionel Messi')
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId('answer-reveal')).toContainText('Lionel Messi')
   await expect(page.getByTestId('answer-reveal')).toContainText('70')
@@ -632,7 +623,7 @@ test('starts a Normal challenge, deducts misses, reveals clues and accepts the a
 test('does not summon the keyboard by focusing the guess input on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await startGame(page)
-  const input = page.getByLabel(/guess now/i)
+  const input = page.getByLabel(/player name/i)
   await expect(input).not.toBeFocused()
   await input.fill('David Beckham')
   await expect(input).toBeFocused()
@@ -644,7 +635,7 @@ test('does not summon the keyboard by focusing the guess input on mobile', async
 
 test('suggests in-scope players after three contiguous matching characters', async ({ page }) => {
   await startGame(page)
-  const input = page.getByLabel(/guess now/i)
+  const input = page.getByLabel(/player name/i)
 
   await input.fill('Be')
   await expect(page.getByRole('listbox', { name: 'Player suggestions' })).toHaveCount(0)
@@ -671,7 +662,7 @@ test('giving up reveals the answer and scores zero', async ({ page }) => {
 
 test('persists and resumes an unfinished game under the football save', async ({ page }) => {
   await startGame(page)
-  await page.getByLabel(/guess now/i).fill('David Beckham')
+  await page.getByLabel(/player name/i).fill('David Beckham')
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId('available-score')).toHaveText('90')
 
@@ -730,7 +721,7 @@ test('completes ten rounds, submits its nickname and persists a high score', asy
   })
   await startGame(page)
   for (const [index, answer] of firstTenAnswers.entries()) {
-    await page.getByLabel(/guess now/i).fill(answer)
+    await page.getByLabel(/player name/i).fill(answer)
     await page.getByRole('button', { name: 'Submit' }).click()
     await expect(page.getByTestId('answer-reveal')).toContainText('100')
     await page.getByRole('button', { name: index === 9 ? /see final results/i : /next player/i }).click()

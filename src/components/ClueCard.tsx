@@ -20,15 +20,12 @@ export function ClueCard({ clue, index, newlyRevealed = false }: ClueCardProps) 
           <div className="team-clue">
             <div className="team-clue__copy">
               <p>
-                {t('One club from the Big-Five leagues this player represented:')}{' '}
-                <strong>{clue.teams[0].clubName}</strong>
+                {t('Career decades in the Big Five European leagues (Spain, England, Germany, Italy, France):')}{' '}
+                <strong>{clue.decades.join(' · ')}</strong>
               </p>
               <p className="career-decades">
-                {t('Career decades in the Big-Five leagues:')} <strong>{clue.decades.join(' · ')}</strong>
+                {t('One club this player represented:')} <strong>{clue.teams[0].clubName}</strong>
               </p>
-              <small>
-                {t('The decades cover the full eligible career—not necessarily the years with this club.')}
-              </small>
             </div>
             <div className="team-logos" aria-label={locale === 'es' ? 'Escudos de los equipos' : 'Team logos'}>
               {clue.teams.map((team) => (

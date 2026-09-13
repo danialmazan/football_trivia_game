@@ -643,11 +643,11 @@ function rosterVersion(matches) {
 }
 
 function normalizeWhitespace(value) {
-  return String(value ?? '').trim().replace(/\s+/g, ' ')
+  return decodeHtml(String(value ?? '')).trim().replace(/\s+/g, ' ')
 }
 
 function nameTokens(value) {
-  return normalizeWhitespace(value).split(/\s+/).filter(Boolean)
+  return normalizeWhitespace(value).replace(/[()]/g, '').split(/\s+/).filter(Boolean)
 }
 
 function codePointLength(value) {

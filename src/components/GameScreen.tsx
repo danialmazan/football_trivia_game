@@ -281,13 +281,10 @@ export function GameScreen({
           ) : (
             <>
               <div className="answer-zone__header">
-                <span className="eyebrow">{t('Your call')}</span>
-                <span>{t('Guess · clue · give up')}</span>
+                <span className="eyebrow">{t('Guess now, next clue or give up')}</span>
               </div>
               <form onSubmit={handleSubmit}>
-                <label htmlFor="player-guess">
-                  {t('Guess now')} <span>· −{GAME_CONFIG.incorrectGuessPenalty} pts</span>
-                </label>
+                <label htmlFor="player-guess">{t('Player name')}</label>
                 <div className="guess-row">
                   <div className="player-autocomplete">
                     <input
@@ -342,9 +339,7 @@ export function GameScreen({
                   <button className="primary-button" type="submit">{t('Submit')}</button>
                 </div>
               </form>
-              <p className="status-message" role="status" aria-live="polite">
-                {game.round.statusMessage ? feedback(game.round.statusMessage) : t('Full names, unique surnames and common short names work.')}
-              </p>
+              {game.round.statusMessage && <p className="status-message" role="status" aria-live="polite">{feedback(game.round.statusMessage)}</p>}
               <div className="round-actions">
                 <button
                   className="secondary-button"
@@ -353,7 +348,7 @@ export function GameScreen({
                   disabled={game.round.clueLevel >= GAME_CONFIG.cluesPerRound}
                 >
                   {t('Next clue')}
-                  <span>{game.round.clueLevel >= 5 ? t('All shown') : t('{points} pts base', { points: GAME_CONFIG.clueBaseScores[game.round.clueLevel] })}</span>
+                  <span>{game.round.clueLevel >= 5 ? t('All shown') : t('and play for {points} pts', { points: GAME_CONFIG.clueBaseScores[game.round.clueLevel] })}</span>
                 </button>
                 <button className="give-up-button" type="button" onClick={onGiveUp}>
                   {t('Give up')}

@@ -285,10 +285,11 @@ export function App() {
     }
   }
 
-  function startGame() {
+  function startGame(selectedSettings: GameSettings = settings) {
+    setSettings(selectedSettings)
     setDailyError(null)
-    if (settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge') {
-      if (settings.mode === 'lineup-daily') {
+    if (selectedSettings.mode === 'lineup-daily' || selectedSettings.mode === 'lineup-challenge') {
+      if (selectedSettings.mode === 'lineup-daily') {
         const currentDaily = savedData.lineupDailyGame
         if (currentDaily?.dailyChallenge?.date === getUtcDateKey()) {
           setDailyLoading(true)
@@ -304,14 +305,14 @@ export function App() {
         }
       }
       if (
-        settings.mode === 'lineup-challenge' &&
+        selectedSettings.mode === 'lineup-challenge' &&
         savedData.unfinishedLineupGame &&
         !window.confirm(known('Start a new lineup challenge and abandon the saved one?'))
       ) return
       setShowGuide(true)
       return
     }
-    if (settings.mode === 'daily') {
+    if (selectedSettings.mode === 'daily') {
       const currentDaily = savedData.dailyGame
       if (currentDaily?.dailyChallenge?.date === getUtcDateKey()) {
         setDailyBoards(savedData.dailyCompletion?.boards ?? EMPTY_LEADERBOARD_BOARDS)

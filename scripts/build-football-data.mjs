@@ -100,6 +100,7 @@ function seasonStartYear(season) {
 
 function cleanPlayerName(name) {
   return name
+    .replace(/&#0*39;|&apos;/gi, "'")
     .replace(/\p{Cf}/gu, '')
     .replace(/\s*\(\d+\)\s*$/, '')
     .replace(/\s+/g, ' ')
@@ -110,20 +111,20 @@ const playerNameOverrides = {
   '3540': "John O'Shea",
   '55769': "Danilo D'Ambrosio",
   '65278': 'Pedro Rodríguez',
-  '44501': 'Marcelo Vieira',
+  '44501': 'Marcelo (Marcelo Vieira da Silva Júnior)',
   '7349': 'Raúl González',
-  '14132': 'Pepe Ferreira',
-  '34495': 'Adriano Correia',
-  '3140': 'Ronaldo Nazario',
-  '33947': 'Rafinha Souza',
-  '145707': 'Danilo Luiz',
-  '15420': 'Alex Costa',
-  '102586': 'Leonardo Araújo',
-  '129473': 'Rafinha Alcântara',
-  '4248': 'Diego Ribas',
-  '5876': 'Adriano Leite',
-  '1599': 'Juan Silveira',
-  '61892': 'Rafael da Silva',
+  '14132': 'Pepe (Képler Laverán Lima Ferreira)',
+  '34495': 'Adriano (Adriano Correia Claro)',
+  '3140': 'Ronaldo (Ronaldo Luís Nazário de Lima)',
+  '33947': 'Rafinha (Marcio Rafael Ferreira de Souza)',
+  '145707': 'Danilo (Danilo Luiz da Silva)',
+  '15420': 'Alex (Alex Rodrigo Dias da Costa)',
+  '102586': 'Leonardo (Leonardo Nascimento de Araujo)',
+  '129473': 'Rafinha (Rafael Alcântara do Nascimento)',
+  '4248': 'Diego (Diego Ribas da Cunha)',
+  '5876': 'Adriano (Adriano Leite Ribeiro)',
+  '1599': 'Juan (Juan Silveira dos Santos)',
+  '61892': 'Rafael (Rafael Pereira da Silva)',
   '7500': 'Sergio González',
 }
 
@@ -169,6 +170,7 @@ function flagCode(teamCode, teamName) {
 
 function createInitials(name) {
   return name
+    .replace(/[()]/g, '')
     .split(/[\s-]+/)
     .filter(Boolean)
     .map((part) => `${part[0].toLocaleUpperCase()}.`)
@@ -646,6 +648,22 @@ const aliasOverrides = {
   'erling-haaland': ['Haaland'],
 }
 
+const playerAliasOverrides = {
+  '44501': ['Marcelo Vieira'],
+  '14132': ['Pepe', 'Pepe Ferreira'],
+  '34495': ['Adriano Correia'],
+  '3140': ['Ronaldo Nazario'],
+  '33947': ['Rafinha Souza'],
+  '145707': ['Danilo Luiz'],
+  '15420': ['Alex Costa'],
+  '102586': ['Leonardo Araújo'],
+  '129473': ['Rafinha Alcântara'],
+  '4248': ['Diego Ribas'],
+  '5876': ['Adriano Leite'],
+  '1599': ['Juan Silveira'],
+  '61892': ['Rafael da Silva'],
+}
+
 const selectedIds = new Set([...hardcoreIds, ...practiceRanks.keys()])
 const selectedCandidates = candidates
   .filter((candidate) => selectedIds.has(candidate.sourcePlayerId))
@@ -658,7 +676,7 @@ const selectedCandidates = candidates
   )
 
 const players = selectedCandidates.map((candidate) => {
-  const nameParts = candidate.displayName.split(/\s+/)
+  const nameParts = candidate.displayName.replace(/[()]/g, '').split(/\s+/)
   const profilePosition = candidate.profile.position || candidate.profile.main_position || 'Attack'
   const role = candidate.profile.main_position || profilePosition.split(' - ').at(-1) || 'Forward'
   const homeName = cleanPlayerName(candidate.profile.name_in_home_country || '')
@@ -666,6 +684,7 @@ const players = selectedCandidates.map((candidate) => {
     candidate.displayName,
     ...(homeName && homeName !== candidate.displayName ? [homeName] : []),
     ...(aliasOverrides[candidate.slug] ?? []),
+    ...(playerAliasOverrides[candidate.sourcePlayerId] ?? []),
   ]
   const titles = candidate.titles
   return {
@@ -722,8 +741,9 @@ writeFileSync(
           candidate.displayName,
           ...(homeName && homeName !== candidate.displayName ? [homeName] : []),
           ...(aliasOverrides[candidate.slug] ?? []),
+          ...(playerAliasOverrides[candidate.sourcePlayerId] ?? []),
         ],
-        lastName: candidate.displayName.split(/\s+/).at(-1),
+        lastName: candidate.displayName.replace(/[()]/g, '').split(/\s+/).at(-1),
       }
     }),
     null,

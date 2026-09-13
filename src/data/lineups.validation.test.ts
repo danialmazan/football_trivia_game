@@ -39,6 +39,14 @@ describe('lineup data snapshot', () => {
   })
 
   it('retains the fullest sourced name for players seen under multiple labels', () => {
+    expect(search.some((player) => /&#0*39;|&apos;/i.test(player.displayName))).toBe(false)
+    expect(search.find((player) => player.id === 'tm-player-225083')).toMatchObject({
+      displayName: "N'Golo Kanté",
+    })
+    expect(search.find((player) => player.id === 'tm-player-14132')).toMatchObject({
+      displayName: 'Pepe (Képler Laverán Lima Ferreira)',
+      acceptedNames: expect.arrayContaining(['Pepe', 'Pepe Ferreira']),
+    })
     expect(search.find((player) => player.id === 'tm-player-294')).toMatchObject({
       displayName: 'Hans Jörg Butt',
     })
