@@ -64,6 +64,7 @@ export interface GameState {
   poolCycle: number
   poolResetMessage: FeedbackMessage | null
   startedAt: string
+  nickname?: string
   dailyChallenge?: DailyChallenge
 }
 
@@ -74,7 +75,7 @@ export interface EndlessStats {
 }
 
 export interface SavedData {
-  schemaVersion: 6
+  schemaVersion: 7
   highScores: Record<Pool, number>
   endlessStats: Record<Pool, EndlessStats>
   lastSettings: GameSettings
@@ -122,6 +123,7 @@ export interface LineupGameState {
   usedMatchIds: string[]
   totalScore: number
   startedAt: string
+  nickname?: string
   dailyChallenge?: LineupDailyChallenge
 }
 

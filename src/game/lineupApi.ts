@@ -45,6 +45,12 @@ export function submitLineupDailyResult(submission: LineupDailyResultSubmission)
   return request(endpoint('result'), { method: 'POST', body: JSON.stringify(submission) })
 }
 
+export function expireLineupDailyResult(
+  submission: LineupDailyResultSubmission,
+): Promise<{ expired: true }> {
+  return request<{ expired: true }>(endpoint('expire-result'), { method: 'POST', body: JSON.stringify(submission) })
+}
+
 export function getLineupDailyLeaderboard(): Promise<{ date: string; leaderboard: LeaderboardEntry[]; boards: LeaderboardBoards }> {
   return request(endpoint('leaderboard'))
 }

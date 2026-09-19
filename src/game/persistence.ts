@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
 }
 
 export const DEFAULT_SAVED_DATA: SavedData = {
-  schemaVersion: 6,
+  schemaVersion: 7,
   highScores: { normal: 0, hardcore: 0 },
   endlessStats: {
     normal: { totalScore: 0, solved: 0, rounds: 0 },
@@ -35,26 +35,13 @@ function createInstallationId(): string {
   return `browser-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-function isCurrentDailyGame(game: SavedData['dailyGame']): boolean {
-  return Boolean(
-    game?.settings.mode === 'daily' &&
-      game.dailyChallenge?.date === getUtcDateKey(),
-  )
-}
-
-function isCurrentLineupDailyGame(game: SavedData['lineupDailyGame']): boolean {
-  return Boolean(
-    game?.mode === 'lineup-daily' &&
-      game.dailyChallenge?.date === getUtcDateKey(),
-  )
-}
-
 function migratePlayerGame(game: SavedData['dailyGame']): SavedData['dailyGame']
 function migratePlayerGame(game: SavedData['unfinishedGame']): SavedData['unfinishedGame']
 function migratePlayerGame(game: SavedData['dailyGame'] | SavedData['unfinishedGame']) {
   if (!game) return null
   return {
     ...game,
+    nickname: game.nickname ?? '',
     round: {
       ...game.round,
       statusMessage:
@@ -71,6 +58,7 @@ function migrateLineupGame(game: SavedData['lineupDailyGame'] | SavedData['unfin
   if (!game) return null
   return {
     ...game,
+    nickname: game.nickname ?? '',
     version: 2 as const,
     round: {
       ...game.round,
@@ -98,13 +86,13 @@ export function loadSavedData(): SavedData {
     }
     const parsed = JSON.parse(stored) as Partial<SavedData>
     const migrated = !parsed.schemaVersion || parsed.schemaVersion < 2
-    const parsedDailyGame = isCurrentDailyGame(parsed.dailyGame ?? null)
-      ? parsed.dailyGame ?? null
+    const parsedDailyGame = parsed.dailyGame?.settings?.mode === 'daily' && parsed.dailyGame.round && parsed.dailyGame.dailyChallenge
+      ? migratePlayerGame(parsed.dailyGame)
       : null
     const parsedDailyCompletion =
       parsed.dailyCompletion?.date === getUtcDateKey() ? parsed.dailyCompletion : null
-    const parsedLineupDailyGame = isCurrentLineupDailyGame(parsed.lineupDailyGame ?? null)
-      ? migrateLineupGame(parsed.lineupDailyGame ?? null)
+    const parsedLineupDailyGame = parsed.lineupDailyGame?.mode === 'lineup-daily' && parsed.lineupDailyGame.round && parsed.lineupDailyGame.results && parsed.lineupDailyGame.dailyChallenge
+      ? migrateLineupGame(parsed.lineupDailyGame)
       : null
     const parsedLineupDailyCompletion =
       parsed.lineupDailyCompletion?.date === getUtcDateKey()
@@ -113,7 +101,7 @@ export function loadSavedData(): SavedData {
     return {
       ...DEFAULT_SAVED_DATA,
       ...parsed,
-      schemaVersion: 6,
+      schemaVersion: 7,
       highScores: { ...DEFAULT_SAVED_DATA.highScores, ...parsed.highScores },
       endlessStats: { ...DEFAULT_SAVED_DATA.endlessStats, ...parsed.endlessStats },
       lastSettings: migrated

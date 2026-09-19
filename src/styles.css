@@ -733,6 +733,40 @@ button:disabled {
   display: block;
 }
 
+.guide-name-field {
+  display: grid;
+  margin: 1.4rem clamp(1rem, 3vw, 2.5rem) 0;
+  gap: 0.45rem;
+}
+
+.guide-name-field label {
+  color: var(--paper);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guide-name-field input {
+  min-height: 3rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--line);
+  outline: 0;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--paper);
+  font: inherit;
+}
+
+.guide-name-field input:focus {
+  border-color: var(--lime);
+  box-shadow: inset 0 -2px var(--lime);
+}
+
+.guide-name-field small {
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+
 .guide-error,
 .daily-service-error {
   margin: 1rem clamp(1rem, 3vw, 2.5rem) 0;
@@ -1288,9 +1322,13 @@ button:disabled {
 
 .round-actions .secondary-button {
   display: flex;
+  min-width: 0;
+  width: 100%;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .round-actions .secondary-button span {
@@ -2180,7 +2218,16 @@ button:disabled {
 }
 
 .leaderboard-hub-toolbar__share {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-content: start;
+  flex-wrap: nowrap;
+}
+
+.leaderboard-hub-toolbar__share .share-result {
+  grid-column: 1 / -1;
+  justify-self: start;
 }
 
 .leaderboard-hub-toolbar__share .share-result,

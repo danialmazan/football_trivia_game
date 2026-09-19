@@ -21,6 +21,7 @@ import {
   getDailyLeaderboard,
   getChallengeLeaderboard,
   getLeaderboardHub,
+  expireDailyResult,
   submitChallengeResult,
   submitDailyResult,
 } from './game/dailyApi'
@@ -46,6 +47,7 @@ import {
   getLineupLeaderboardHub,
   submitLineupChallengeResult,
   submitLineupDailyResult,
+  expireLineupDailyResult,
 } from './game/lineupApi'
 import { getActivePool, selectNextPlayer } from './game/selection'
 import type {
@@ -140,13 +142,24 @@ export function App() {
   }, [lineupGame, lineupChallengeSubmitted])
 
   useEffect(() => {
+    if (savedData.dailyGame?.dailyChallenge?.date && savedData.dailyGame.dailyChallenge.date < getUtcDateKey()) {
+      void settleExpiredDailyGame(savedData.dailyGame)
+    }
+    if (savedData.lineupDailyGame?.dailyChallenge?.date && savedData.lineupDailyGame.dailyChallenge.date < getUtcDateKey()) {
+      void settleExpiredLineupGame(savedData.lineupDailyGame)
+    }
+    // Recovery for a browser that was closed at midnight.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
     if (game?.settings.mode !== 'daily' || !game.dailyChallenge) return
     const delay = new Date(game.dailyChallenge.expiresAt).getTime() - Date.now()
     if (delay <= 0) {
-      expireDailyGame()
+      void settleExpiredDailyGame(game)
       return
     }
-    const timer = window.setTimeout(expireDailyGame, Math.min(delay, 2_147_000_000))
+    const timer = window.setTimeout(() => void settleExpiredDailyGame(game), Math.min(delay, 2_147_000_000))
     return () => window.clearTimeout(timer)
   }, [game?.dailyChallenge?.expiresAt])
 
@@ -154,10 +167,10 @@ export function App() {
     if (lineupGame?.mode !== 'lineup-daily' || !lineupGame.dailyChallenge) return
     const delay = new Date(lineupGame.dailyChallenge.expiresAt).getTime() - Date.now()
     if (delay <= 0) {
-      expireLineupDailyGame()
+      void settleExpiredLineupGame(lineupGame)
       return
     }
-    const timer = window.setTimeout(expireLineupDailyGame, Math.min(delay, 2_147_000_000))
+    const timer = window.setTimeout(() => void settleExpiredLineupGame(lineupGame), Math.min(delay, 2_147_000_000))
     return () => window.clearTimeout(timer)
   }, [lineupGame?.dailyChallenge?.expiresAt])
 
@@ -215,6 +228,7 @@ export function App() {
       poolCycle: 1,
       poolResetMessage: null,
       startedAt: new Date().toISOString(),
+      nickname: dailyNickname.trim(),
     }
   }
 
@@ -234,6 +248,7 @@ export function App() {
       poolCycle: 1,
       poolResetMessage: null,
       startedAt: new Date().toISOString(),
+      nickname: dailyNickname.trim(),
       dailyChallenge: challenge,
     }
   }
@@ -250,21 +265,27 @@ export function App() {
       usedMatchIds: [match.id],
       totalScore: 0,
       startedAt: new Date().toISOString(),
+      nickname: dailyNickname.trim(),
       dailyChallenge: challenge,
     }
   }
 
   async function confirmLineupGameStart() {
+    if (!isValidNickname(dailyNickname)) {
+      setDailyError('Enter your name or nickname before playing.')
+      return
+    }
     setDailyLoading(true)
     setDailyError(null)
     try {
       const loaded = await ensureLineupData()
-      const newGame = settings.mode === 'lineup-daily'
+      const builtGame = settings.mode === 'lineup-daily'
         ? buildLineupDailyGame(
             await getLineupDailyChallenge(savedData.installationId),
             loaded.dataset.matches,
           )
         : buildLineupChallenge(loaded.dataset.matches)
+      const newGame = { ...builtGame, nickname: dailyNickname.trim() }
       setLineupChallengeBoards(null)
       setLineupChallengeSubmitted(false)
       setLineupGame(newGame)
@@ -291,12 +312,12 @@ export function App() {
     if (selectedSettings.mode === 'lineup-daily' || selectedSettings.mode === 'lineup-challenge') {
       if (selectedSettings.mode === 'lineup-daily') {
         const currentDaily = savedData.lineupDailyGame
-        if (currentDaily?.dailyChallenge?.date === getUtcDateKey()) {
+        if (currentDaily?.dailyChallenge?.date === getUtcDateKey() && currentDaily.nickname) {
           setDailyLoading(true)
           void ensureLineupData()
             .then(() => {
               setLineupDailyBoards(savedData.lineupDailyCompletion?.boards ?? EMPTY_LEADERBOARD_BOARDS)
-              setDailyNickname(savedData.lineupDailyCompletion?.nickname ?? savedData.lastNickname)
+              setDailyNickname(currentDaily.nickname ?? savedData.lineupDailyCompletion?.nickname ?? savedData.lastNickname)
               setLineupGame(currentDaily)
             })
             .catch((error) => setDailyError(error instanceof Error ? error.message : 'Could not load lineup data.'))
@@ -314,9 +335,9 @@ export function App() {
     }
     if (selectedSettings.mode === 'daily') {
       const currentDaily = savedData.dailyGame
-      if (currentDaily?.dailyChallenge?.date === getUtcDateKey()) {
+      if (currentDaily?.dailyChallenge?.date === getUtcDateKey() && currentDaily.nickname) {
         setDailyBoards(savedData.dailyCompletion?.boards ?? EMPTY_LEADERBOARD_BOARDS)
-        setDailyNickname(savedData.dailyCompletion?.nickname ?? '')
+        setDailyNickname(currentDaily.nickname)
         setGame(currentDaily)
         return
       }
@@ -335,6 +356,10 @@ export function App() {
   async function confirmGameStart() {
     if (settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge') {
       await confirmLineupGameStart()
+      return
+    }
+    if (!isValidNickname(dailyNickname)) {
+      setDailyError('Enter your name or nickname before playing.')
       return
     }
     if (settings.mode !== 'daily') {
@@ -377,6 +402,7 @@ export function App() {
       setChallengeSubmitted(false)
       setShowGuide(false)
       setSettings(savedData.unfinishedGame.settings)
+      setDailyNickname(savedData.unfinishedGame.nickname ?? savedData.lastNickname)
       setGame(savedData.unfinishedGame)
     }
   }
@@ -391,6 +417,7 @@ export function App() {
         setLineupChallengeSubmitted(false)
         setShowGuide(false)
         setSettings((current) => ({ ...current, mode: 'lineup-challenge' }))
+        setDailyNickname(unfinished.nickname ?? savedData.lastNickname)
         setLineupGame(unfinished)
       })
       .catch((error) => setDailyError(error instanceof Error ? error.message : 'Could not load lineup data.'))
@@ -666,7 +693,7 @@ export function App() {
     try {
       const response = await getLineupDailyLeaderboard()
       if (response.date !== lineupGame.dailyChallenge?.date) {
-        expireLineupDailyGame()
+        void settleExpiredLineupGame(lineupGame)
         return
       }
       setLineupDailyBoards(response.boards)
@@ -781,7 +808,7 @@ export function App() {
     try {
       const response = await getDailyLeaderboard()
       if (response.date !== game.dailyChallenge?.date) {
-        expireDailyGame()
+        void settleExpiredDailyGame(game)
         return
       }
       setDailyBoards(response.boards)
@@ -804,28 +831,63 @@ export function App() {
     }
   }
 
-  function expireDailyGame() {
-    setGame(null)
-    setShowGuide(false)
-    setSettings((current) => homepageSettings(current))
-    setDailyBoards(EMPTY_LEADERBOARD_BOARDS)
-    setDailyNickname('')
-    setDailyError('A new Player of the day is now available.')
-    setSavedData((current) => ({
-      ...current,
-      dailyGame: null,
-      dailyCompletion: null,
-    }))
+  async function settleExpiredDailyGame(expiredGame: GameState) {
+    const challenge = expiredGame.dailyChallenge
+    if (!challenge) return
+    const nickname = expiredGame.nickname?.trim() || dailyNickname.trim() || savedData.lastNickname.trim()
+    try {
+      if (expiredGame.phase !== 'results' && isValidNickname(nickname)) {
+        setDailyLoading(true)
+        await expireDailyResult({
+          challengeDate: challenge.date,
+          attemptToken: challenge.attemptToken,
+          nickname,
+          outcome: 'gave-up',
+          cluesUsed: expiredGame.round.clueLevel,
+          incorrectGuesses: expiredGame.round.incorrectGuesses.length,
+        })
+      }
+      if (game?.dailyChallenge?.date === challenge.date) setGame(null)
+      setShowGuide(false)
+      setSettings((current) => homepageSettings(current))
+      setDailyBoards(EMPTY_LEADERBOARD_BOARDS)
+      setDailyError('A new Player of the day is now available.')
+      setSavedData((current) => ({ ...current, dailyGame: null, dailyCompletion: null }))
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not save the expired Player of the Day.')
+    } finally {
+      setDailyLoading(false)
+    }
   }
 
-  function expireLineupDailyGame() {
-    setLineupGame(null)
-    setShowGuide(false)
-    setSettings((current) => homepageSettings(current))
-    setLineupDailyBoards(EMPTY_LEADERBOARD_BOARDS)
-    setDailyNickname('')
-    setDailyError('A new Lineup of the day is now available.')
-    setSavedData((current) => ({ ...current, lineupDailyGame: null, lineupDailyCompletion: null }))
+  async function settleExpiredLineupGame(expiredGame: LineupGameState) {
+    const challenge = expiredGame.dailyChallenge
+    if (!challenge) return
+    const nickname = expiredGame.nickname?.trim() || dailyNickname.trim() || savedData.lastNickname.trim()
+    try {
+      if (expiredGame.phase !== 'results' && isValidNickname(nickname)) {
+        setDailyLoading(true)
+        await expireLineupDailyResult({
+          challengeDate: challenge.date,
+          attemptToken: challenge.attemptToken,
+          nickname,
+          outcome: 'gave-up',
+          cluesUsed: expiredGame.round.cluesUsed,
+          clueIncorrectGuessCounts: expiredGame.round.clueIncorrectGuessCounts,
+          incorrectGuesses: expiredGame.round.incorrectGuesses.length,
+        })
+      }
+      if (lineupGame?.dailyChallenge?.date === challenge.date) setLineupGame(null)
+      setShowGuide(false)
+      setSettings((current) => homepageSettings(current))
+      setLineupDailyBoards(EMPTY_LEADERBOARD_BOARDS)
+      setDailyError('A new Lineup of the day is now available.')
+      setSavedData((current) => ({ ...current, lineupDailyGame: null, lineupDailyCompletion: null }))
+    } catch (error) {
+      setDailyError(error instanceof Error ? error.message : 'Could not save the expired Lineup of the Day.')
+    } finally {
+      setDailyLoading(false)
+    }
   }
 
   function exitGame() {
@@ -986,8 +1048,8 @@ export function App() {
       )}
       {!game && !lineupGame && showGuide && (
         settings.mode === 'lineup-daily' || settings.mode === 'lineup-challenge'
-          ? <LineupGuide settings={settings} loading={dailyLoading} error={dailyError} onBack={() => { setShowGuide(false); setSettings((current) => homepageSettings(current)) }} onConfirm={confirmGameStart} />
-          : <GameGuide settings={settings} loading={dailyLoading} error={dailyError} onBack={() => { setShowGuide(false); setSettings((current) => homepageSettings(current)) }} onConfirm={confirmGameStart} />
+          ? <LineupGuide settings={settings} loading={dailyLoading} error={dailyError} nickname={dailyNickname} onNicknameChange={setDailyNickname} onBack={() => { setShowGuide(false); setSettings((current) => homepageSettings(current)) }} onConfirm={confirmGameStart} />
+          : <GameGuide settings={settings} loading={dailyLoading} error={dailyError} nickname={dailyNickname} onNicknameChange={setDailyNickname} onBack={() => { setShowGuide(false); setSettings((current) => homepageSettings(current)) }} onConfirm={confirmGameStart} />
       )}
       {game && game.phase !== 'results' && currentPlayer && (
         <GameScreen

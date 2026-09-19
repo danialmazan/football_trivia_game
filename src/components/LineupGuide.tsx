@@ -7,9 +7,11 @@ interface LineupGuideProps {
   error: string | null
   onBack: () => void
   onConfirm: () => void
+  nickname: string
+  onNicknameChange: (nickname: string) => void
 }
 
-export function LineupGuide({ settings, loading, error, onBack, onConfirm }: LineupGuideProps) {
+export function LineupGuide({ settings, loading, error, onBack, onConfirm, nickname, onNicknameChange }: LineupGuideProps) {
   const { t, modeLabel, known } = useI18n()
   const daily = settings.mode === 'lineup-daily'
   return (
@@ -31,6 +33,11 @@ export function LineupGuide({ settings, loading, error, onBack, onConfirm }: Lin
             <article><span className="guide-rule__number">03</span><p>{t('The first clue lets you play for 40 points. The initials clue lets you play for 20 points.')}</p></article>
           </div>
           {daily && <div className="guide-daily-note guide-daily-note--stacked"><strong>{t('Same Lineup of the Day and missing player for everyone playing today.')}</strong><span>{t('A new lineup is generated every day at midnight UTC.')}</span></div>}
+          <div className="guide-name-field">
+            <label htmlFor="lineup-game-nickname">{t('Your name or nickname')}</label>
+            <input id="lineup-game-nickname" value={nickname} onChange={(event) => onNicknameChange(event.target.value)} maxLength={24} placeholder={t('Name or nickname')} autoComplete="nickname" />
+            <small>{t('Required before the game starts.')}</small>
+          </div>
           {error && <p className="guide-error" role="alert">{known(error)}</p>}
           <button className="primary-button primary-button--large guide-confirm" type="button" onClick={onConfirm} disabled={loading}>
             {loading ? t('Loading the teamsheet…') : t("Understood, let's play!")} <span aria-hidden="true">→</span>

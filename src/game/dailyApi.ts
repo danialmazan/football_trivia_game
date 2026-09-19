@@ -55,6 +55,15 @@ export function submitDailyResult(
   })
 }
 
+export function expireDailyResult(
+  submission: DailyResultSubmission,
+): Promise<{ expired: true }> {
+  return request<{ expired: true }>(endpoint('expire-result'), {
+    method: 'POST',
+    body: JSON.stringify(submission),
+  })
+}
+
 export async function getDailyLeaderboard(): Promise<{
   date: string
   leaderboard: LeaderboardEntry[]

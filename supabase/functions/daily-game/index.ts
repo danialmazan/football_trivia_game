@@ -155,9 +155,11 @@ Deno.serve(async (request) => {
       })
     }
 
-    if (request.method === 'POST' && action === 'result') {
+    if (request.method === 'POST' && (action === 'result' || action === 'expire-result')) {
       const body = await request.json().catch(() => null) as Record<string, unknown> | null
-      if (!body || body.challengeDate !== today) {
+      const challengeDate = String(body?.challengeDate ?? '')
+      const expiring = action === 'expire-result'
+      if (!body || (!expiring && challengeDate !== today) || (expiring && (challengeDate >= today || body.outcome !== 'gave-up'))) {
         return json(request, { error: 'This daily challenge has expired.' }, 409)
       }
       if (!isValidDailyNickname(body.nickname)) {
@@ -175,17 +177,17 @@ Deno.serve(async (request) => {
         return json(request, { error: 'The submitted round statistics are invalid.' }, 400)
       }
 
-      const participantHash = await verifyAttemptToken(today, String(body.attemptToken ?? ''))
+      const participantHash = await verifyAttemptToken(challengeDate, String(body.attemptToken ?? ''))
       if (!participantHash) {
         return json(request, { error: 'The daily attempt token is invalid.' }, 401)
       }
 
-      await getOrCreateChallenge(client, today)
+      await getOrCreateChallenge(client, challengeDate)
       const cluesUsed = Number(body.cluesUsed)
       const incorrectGuesses = Number(body.incorrectGuesses)
       const points = calculateDailyScore(body.outcome, cluesUsed, incorrectGuesses)
       const inserted = await client.rpc('submit_locked_daily_result', {
-        p_challenge_date: today,
+        p_challenge_date: challengeDate,
         p_participant_hash: participantHash,
         p_nickname: body.nickname.trim(),
         p_points: points,
@@ -198,17 +200,20 @@ Deno.serve(async (request) => {
         return json(request, { error: 'That nickname has already submitted today.' }, 409)
       }
       if (inserted.data === 'participant-used') {
+        if (expiring) return json(request, { expired: true })
         return json(request, { error: 'This browser has already submitted today.' }, 409)
       }
 
+      if (expiring) return json(request, { expired: true })
+
       const allResults = await getDailyResults(client)
-      const todayResults = allResults.filter((row) => row.challenge_date === today)
+      const todayResults = allResults.filter((row) => row.challenge_date === challengeDate)
       const ranked = rankResults(todayResults)
       const ownResult = ranked.find((result) => result.participant_hash === participantHash)
       if (!ownResult) throw new Error('The saved daily result could not be read back.')
 
       return json(request, {
-        date: today,
+        date: challengeDate,
         points: ownResult.points,
         rank: ownResult.rank,
         leaderboard: publicLeaderboard(todayResults),

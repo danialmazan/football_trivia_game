@@ -24,6 +24,7 @@ async function startGame(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: /^Guess the player — 10-round/i }).click()
   await page.getByRole('button', { name: /kick off/i }).click()
   await expect(page.getByRole('heading', { name: /quick rules/i })).toBeVisible()
+  await page.getByLabel(/your name or nickname/i).fill('TestPlayer')
   await page.getByRole('button', { name: /understood, let's play/i }).click()
 }
 
@@ -47,6 +48,7 @@ test('switches the full interface to Spanish and preserves an active game', asyn
   await page.getByRole('button', { name: /Adivina el jugador — reto de 10 rondas/i }).click()
   await page.getByRole('button', { name: /empezar/i }).click()
   await expect(page.getByRole('heading', { name: /reglas rápidas/i })).toBeVisible()
+  await page.getByLabel(/tu nombre o apodo/i).fill('TestPlayer')
   await page.getByRole('button', { name: /entendido, a jugar/i }).click()
   await expect(page.getByText(/Un club que representó este jugador:/)).toBeVisible()
   await expect(page.getByText('Career decades in the Big-Five leagues:')).toHaveCount(0)
@@ -180,6 +182,7 @@ test('plays the shared daily player once and restores its leaderboard after relo
   await dailyMode.click()
   await expect(page.getByRole('heading', { name: /quick rules/i })).toBeVisible()
   await expect(page.getByText(/midnight UTC/i)).toBeVisible()
+  await page.getByLabel(/your name or nickname/i).fill('LeoFan')
   await page.getByRole('button', { name: /understood, let's play/i }).click()
   await expect(page.getByText('1 / 1')).toBeVisible()
 
@@ -377,6 +380,7 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
 
   await page.getByRole('button', { name: /^Lineup of the day/i }).click()
   await expect(page.getByRole('heading', { name: /quick rules/i })).toBeVisible()
+  await page.getByLabel(/your name or nickname/i).fill('ShapeReader')
   await page.getByRole('button', { name: /understood, let's play/i }).click()
 
   await expect(page.getByRole('heading', { name: /AC Milan.*FC Barcelona/i })).toBeVisible()
@@ -499,6 +503,7 @@ test('plays ten distinct lineup matches and submits the lineup challenge', async
 
   await page.getByRole('button', { name: /^Guess the lineup — 10-round/i }).click()
   await page.getByRole('button', { name: /kick off/i }).click()
+  await page.getByLabel(/your name or nickname/i).fill('Tactics')
   await page.getByRole('button', { name: /understood, let's play/i }).click()
   const matches = new Set<string>()
   for (let round = 0; round < 10; round += 1) {
@@ -533,6 +538,7 @@ test('keeps the portrait lineup pitch inside a 390px viewport without autofocus'
   await page.setViewportSize({ width: 390, height: 844 })
   await page.getByRole('button', { name: /^Guess the lineup — 10-round/i }).click()
   await page.getByRole('button', { name: /kick off/i }).click()
+  await page.getByLabel(/your name or nickname/i).fill('Tactics')
   await page.getByRole('button', { name: /understood, let's play/i }).click()
   const bounds = await page.locator('.lineup-pitch').boundingBox()
   expect(bounds).not.toBeNull()
@@ -553,6 +559,7 @@ test('keeps daily errors inside the guide and leaves local modes available', asy
   )
 
   await page.getByRole('button', { name: /player of the day/i }).click()
+  await page.getByLabel(/your name or nickname/i).fill('OfflinePlayer')
   await page.getByRole('button', { name: /understood, let's play/i }).click()
   await expect(page.getByRole('alert')).toHaveText('Daily service is offline for maintenance.')
   await page.getByRole('button', { name: /back/i }).click()
@@ -585,6 +592,7 @@ test('gives independent browsers the same daily player and clue set', async ({ b
         )
         await dailyPage.goto('/')
         await dailyPage.getByRole('button', { name: /player of the day/i }).click()
+        await dailyPage.getByLabel(/your name or nickname/i).fill('SharedPlayer')
         await dailyPage.getByRole('button', { name: /understood, let's play/i }).click()
       }),
     )
