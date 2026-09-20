@@ -107,6 +107,21 @@ test('puts both daily games first, side by side, with a non-overlapping crest', 
   await expect(page.getByRole('button', { name: /^Guess the player — 10-round/i })).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('keeps the first-clue actions clear of the focused player input', async ({ page }) => {
+  await page.setViewportSize({ width: 840, height: 540 })
+  await startGame(page)
+
+  const input = page.getByLabel(/player name/i)
+  const nextClue = page.getByRole('button', { name: /next clue/i })
+  await input.focus()
+  const inputBox = await input.boundingBox()
+  const nextClueBox = await nextClue.boundingBox()
+
+  expect(inputBox).not.toBeNull()
+  expect(nextClueBox).not.toBeNull()
+  expect(nextClueBox!.y - (inputBox!.y + inputBox!.height)).toBeGreaterThanOrEqual(12)
+})
+
 test('plays the shared daily player once and restores its leaderboard after reload', async ({ page }) => {
   const dailyDate = new Date().toISOString().slice(0, 10)
   const leaderboard = [
@@ -417,7 +432,16 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
   await page.getByRole('button', { name: /save score/i }).click()
   await expect(page.getByRole('heading', { name: /lineup score saved/i })).toBeVisible()
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('ShapeReader')
-  await expect(page.getByRole('button', { name: /share your result/i })).toBeVisible()
+  const shareButton = page.getByRole('button', { name: /share your result/i })
+  await expect(shareButton).toBeVisible()
+  const shareBox = await shareButton.boundingBox()
+  const resultsHeroBox = await page.locator('.daily-results-hero').boundingBox()
+  const leaderboardBox = await page.locator('.leaderboard-tabs').boundingBox()
+  expect(shareBox).not.toBeNull()
+  expect(resultsHeroBox).not.toBeNull()
+  expect(leaderboardBox).not.toBeNull()
+  expect(Math.abs(shareBox!.x - resultsHeroBox!.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(resultsHeroBox!.x - leaderboardBox!.x)).toBeLessThanOrEqual(1)
   await page.evaluate(() => {
     Object.defineProperty(navigator, 'share', {
       configurable: true,
