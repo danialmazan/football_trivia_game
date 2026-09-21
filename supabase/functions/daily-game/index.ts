@@ -2,6 +2,7 @@ import {
   consumeRateLimit,
   createAdminClient,
   createAttemptToken,
+  createServerAttemptToken,
   getOrCreateChallenge,
   isOriginAllowed,
   json,
@@ -9,6 +10,8 @@ import {
   rankResults,
   utcDateKey,
   verifyAttemptToken,
+  verifyServerAttemptToken,
+  type StoredAttempt,
   type StoredResult,
 } from '../_shared/daily.ts'
 import {
@@ -31,7 +34,7 @@ function publicLeaderboard(results: StoredResult[]) {
 }
 
 const DAILY_FIELDS =
-  'challenge_date,participant_hash,nickname,normalized_nickname,points,outcome,clues_used,incorrect_guesses,submitted_at'
+  'id,challenge_date,participant_hash,nickname,normalized_nickname,points,outcome,clues_used,incorrect_guesses,submitted_at'
 
 async function getDailyResults(
   client: ReturnType<typeof createAdminClient>,
@@ -77,6 +80,66 @@ function isPool(value: unknown): value is 'normal' | 'hardcore' {
   return value === 'normal' || value === 'hardcore'
 }
 
+const DEFAULT_PROGRESS = {
+  clueLevel: 1,
+  incorrectGuesses: [],
+  normalizedIncorrectGuesses: [],
+}
+
+function validProgress(value: unknown): value is typeof DEFAULT_PROGRESS {
+  if (!value || typeof value !== 'object') return false
+  const progress = value as Record<string, unknown>
+  return Number.isInteger(progress.clueLevel) && Number(progress.clueLevel) >= 1 &&
+    Number(progress.clueLevel) <= 5 && Array.isArray(progress.incorrectGuesses) &&
+    Array.isArray(progress.normalizedIncorrectGuesses) &&
+    progress.incorrectGuesses.length === progress.normalizedIncorrectGuesses.length &&
+    progress.incorrectGuesses.length <= 50
+}
+
+async function completionResponse(
+  client: ReturnType<typeof createAdminClient>,
+  attempt: StoredAttempt,
+) {
+  const allResults = await getDailyResults(client)
+  const todayResults = allResults.filter((row) => row.challenge_date === attempt.challenge_date)
+  const ownResult = rankResults(todayResults).find((row) => row.id === attempt.result_id) ??
+    rankResults(todayResults).find((row) => row.normalized_nickname === attempt.normalized_nickname)
+  if (!ownResult) throw new Error('The saved daily result could not be read back.')
+  return {
+    status: 'resolved',
+    date: attempt.challenge_date,
+    nickname: attempt.nickname,
+    points: ownResult.points,
+    rank: ownResult.rank,
+    leaderboard: publicLeaderboard(todayResults),
+    boards: buildDailyLeaderboardBoards(allResults, utcDateKey()),
+  }
+}
+
+async function attemptPayload(
+  attempt: StoredAttempt,
+  challenge: Awaited<ReturnType<typeof getOrCreateChallenge>>,
+  participantHash: string,
+) {
+  return {
+    status: 'in-progress',
+    nickname: attempt.nickname,
+    revision: attempt.revision,
+    progress: attempt.progress,
+    startedAt: attempt.started_at,
+    updatedAt: attempt.updated_at,
+    challenge: {
+      date: challenge.challenge_date,
+      expiresAt: nextUtcMidnight(),
+      playerId: challenge.player_id,
+      clueSeed: challenge.clue_seed,
+      rosterVersion: challenge.roster_version,
+      attemptToken: await createServerAttemptToken('player', challenge.challenge_date, attempt.id, participantHash),
+      attemptRevision: attempt.revision,
+    },
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return json(request, { ok: true })
   if (!isOriginAllowed(request)) return json(request, { error: 'Origin is not allowed.' }, 403)
@@ -90,6 +153,113 @@ Deno.serve(async (request) => {
     const url = new URL(request.url)
     const action = url.searchParams.get('action')
     const today = utcDateKey()
+
+    if (request.method === 'POST' && action === 'start-attempt') {
+      const body = await request.json().catch(() => null) as Record<string, unknown> | null
+      const installationId = String(body?.installationId ?? '')
+      if (!body || installationId.length < 8 || installationId.length > 128 || !isValidDailyNickname(body.nickname)) {
+        return json(request, { error: 'A valid nickname and browser installation ID are required.' }, 400)
+      }
+      const challenge = await getOrCreateChallenge(client, today)
+      const participantHash = (await createAttemptToken(today, installationId)).split('.')[0]
+      const initialProgress = validProgress(body.localProgress) ? body.localProgress : DEFAULT_PROGRESS
+      const started = await client.rpc('start_daily_attempt', {
+        p_challenge_date: today,
+        p_participant_hash: participantHash,
+        p_nickname: String(body.nickname),
+        p_progress: initialProgress,
+        p_confirm_resume: body.confirmResume === true,
+      })
+      if (started.error) throw started.error
+      const payload = started.data as { access: boolean; participantConflict?: boolean; attempt: StoredAttempt | null }
+      if (payload.participantConflict) return json(request, { error: `This browser already started today's game as ${payload.attempt?.nickname ?? 'another nickname'}.` }, 409)
+      if (!payload.attempt) return json(request, { error: 'That nickname is already locked today.' }, 409)
+      if (payload.attempt.status !== 'in_progress') {
+        return json(request, await completionResponse(client, payload.attempt))
+      }
+      if (!payload.access) {
+        return json(request, {
+          status: 'resume-required',
+          nickname: payload.attempt.nickname,
+          startedAt: payload.attempt.started_at,
+          updatedAt: payload.attempt.updated_at,
+        })
+      }
+      return json(request, await attemptPayload(payload.attempt, challenge, participantHash))
+    }
+
+    if (request.method === 'POST' && action === 'attempt-event') {
+      const body = await request.json().catch(() => null) as Record<string, unknown> | null
+      const challengeDate = String(body?.challengeDate ?? '')
+      const verified = await verifyServerAttemptToken('player', challengeDate, String(body?.attemptToken ?? ''))
+      if (!body || !verified) return json(request, { error: 'The daily attempt token is invalid.' }, 401)
+      const selected = await client.from('daily_attempts').select('*').eq('id', verified.attemptId).maybeSingle()
+      if (selected.error) throw selected.error
+      const attempt = selected.data as StoredAttempt | null
+      if (!attempt || attempt.challenge_date !== challengeDate || !attempt.participant_hashes.includes(verified.participantHash)) {
+        return json(request, { error: 'The daily attempt token is invalid.' }, 401)
+      }
+      if (attempt.status !== 'in_progress') return json(request, await completionResponse(client, attempt))
+      if (attempt.revision !== Number(body.revision)) {
+        const challenge = await getOrCreateChallenge(client, challengeDate)
+        return json(request, { ...(await attemptPayload(attempt, challenge, verified.participantHash)), status: 'stale' }, 409)
+      }
+      const progress = validProgress(attempt.progress) ? structuredClone(attempt.progress) : structuredClone(DEFAULT_PROGRESS)
+      const event = body.event as Record<string, unknown> | undefined
+      if (!event || !['reveal-clue', 'incorrect-guess', 'correct', 'give-up'].includes(String(event.type))) {
+        return json(request, { error: 'The daily attempt event is invalid.' }, 400)
+      }
+      if (event.type === 'reveal-clue') progress.clueLevel = Math.min(5, progress.clueLevel + 1)
+      if (event.type === 'incorrect-guess') {
+        const guess = String(event.guess ?? '').trim()
+        const normalized = String(event.normalizedGuess ?? '').trim()
+        if (!guess || !normalized || progress.incorrectGuesses.length >= 50) return json(request, { error: 'The guess is invalid.' }, 400)
+        if (!progress.normalizedIncorrectGuesses.includes(normalized)) {
+          progress.incorrectGuesses.push(guess)
+          progress.normalizedIncorrectGuesses.push(normalized)
+        }
+      }
+      const resolving = event.type === 'correct' || event.type === 'give-up'
+      if (event.type === 'correct') {
+        const challenge = await getOrCreateChallenge(client, challengeDate)
+        if (event.answerId !== challenge.player_id) return json(request, { error: 'The resolved answer is invalid.' }, 400)
+      }
+      if (resolving) {
+        const outcome = event.type === 'correct' ? 'correct' : 'gave-up'
+        const points = calculateDailyScore(outcome, progress.clueLevel, progress.incorrectGuesses.length)
+        const resolved = await client.rpc('resolve_daily_attempt', {
+          p_attempt_id: attempt.id,
+          p_expected_revision: attempt.revision,
+          p_points: points,
+          p_outcome: outcome,
+          p_clues_used: progress.clueLevel,
+          p_incorrect_guesses: progress.incorrectGuesses.length,
+        })
+        if (resolved.error) throw resolved.error
+        const refreshed = await client.from('daily_attempts').select('*').eq('id', attempt.id).single()
+        if (refreshed.error) throw refreshed.error
+        if (resolved.data === 'stale') {
+          const challenge = await getOrCreateChallenge(client, challengeDate)
+          return json(request, { ...(await attemptPayload(refreshed.data as StoredAttempt, challenge, verified.participantHash)), status: 'stale' }, 409)
+        }
+        return json(request, await completionResponse(client, refreshed.data as StoredAttempt))
+      }
+      const updated = await client.from('daily_attempts').update({
+        progress,
+        revision: attempt.revision + 1,
+        updated_at: new Date().toISOString(),
+      }).eq('id', attempt.id).eq('revision', attempt.revision).eq('status', 'in_progress').select('*').maybeSingle()
+      if (updated.error) throw updated.error
+      if (!updated.data) {
+        const refreshed = await client.from('daily_attempts').select('*').eq('id', attempt.id).single()
+        if (refreshed.error) throw refreshed.error
+        if ((refreshed.data as StoredAttempt).status !== 'in_progress') return json(request, await completionResponse(client, refreshed.data as StoredAttempt))
+        const challenge = await getOrCreateChallenge(client, challengeDate)
+        return json(request, { ...(await attemptPayload(refreshed.data as StoredAttempt, challenge, verified.participantHash)), status: 'stale' }, 409)
+      }
+      const challenge = await getOrCreateChallenge(client, challengeDate)
+      return json(request, await attemptPayload(updated.data as StoredAttempt, challenge, verified.participantHash))
+    }
 
     if (request.method === 'GET' && action === 'challenge') {
       const installationId = url.searchParams.get('installationId') ?? ''

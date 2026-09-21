@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
 }
 
 export const DEFAULT_SAVED_DATA: SavedData = {
-  schemaVersion: 7,
+  schemaVersion: 8,
   highScores: { normal: 0, hardcore: 0 },
   endlessStats: {
     normal: { totalScore: 0, solved: 0, rounds: 0 },
@@ -26,6 +26,8 @@ export const DEFAULT_SAVED_DATA: SavedData = {
   lineupBestScore: 0,
   installationId: '',
   lastNickname: '',
+  pendingDailyEvents: [],
+  pendingLineupDailyEvents: [],
 }
 
 function createInstallationId(): string {
@@ -101,7 +103,7 @@ export function loadSavedData(): SavedData {
     return {
       ...DEFAULT_SAVED_DATA,
       ...parsed,
-      schemaVersion: 7,
+      schemaVersion: 8,
       highScores: { ...DEFAULT_SAVED_DATA.highScores, ...parsed.highScores },
       endlessStats: { ...DEFAULT_SAVED_DATA.endlessStats, ...parsed.endlessStats },
       lastSettings: migrated
@@ -120,6 +122,8 @@ export function loadSavedData(): SavedData {
       lineupBestScore: parsed.lineupBestScore ?? 0,
       installationId: parsed.installationId || createInstallationId(),
       lastNickname: parsed.lastNickname ?? parsed.dailyCompletion?.nickname ?? '',
+      pendingDailyEvents: parsed.pendingDailyEvents ?? [],
+      pendingLineupDailyEvents: parsed.pendingLineupDailyEvents ?? [],
     }
   } catch {
     return { ...DEFAULT_SAVED_DATA, installationId: createInstallationId() }

@@ -4,6 +4,9 @@ import type {
   ChallengeResultSubmission,
   DailyResultResponse,
   DailyResultSubmission,
+  DailyAttemptEvent,
+  DailyAttemptResponse,
+  PlayerDailyProgress,
   LeaderboardEntry,
   LeaderboardBoards,
   LeaderboardHubResponse,
@@ -33,11 +36,29 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const payload = (await response.json().catch(() => null)) as
     | (T & { error?: string })
     | null
-  if (!response.ok) {
+  if (!response.ok && !(response.status === 409 && payload && 'status' in payload && payload.status === 'stale')) {
     throw new Error(payload?.error || 'The daily game service is unavailable. Please retry.')
   }
   if (!payload) throw new Error('The daily game service returned an empty response.')
   return payload
+}
+
+export function startDailyAttempt(input: {
+  installationId: string
+  nickname: string
+  confirmResume?: boolean
+  localProgress?: PlayerDailyProgress
+}): Promise<DailyAttemptResponse<DailyChallenge, PlayerDailyProgress>> {
+  return request(endpoint('start-attempt'), { method: 'POST', body: JSON.stringify(input) })
+}
+
+export function sendDailyAttemptEvent(input: {
+  challengeDate: string
+  attemptToken: string
+  revision: number
+  event: DailyAttemptEvent
+}): Promise<DailyAttemptResponse<DailyChallenge, PlayerDailyProgress>> {
+  return request(endpoint('attempt-event'), { method: 'POST', body: JSON.stringify(input) })
 }
 
 export function getDailyChallenge(installationId: string): Promise<DailyChallenge> {

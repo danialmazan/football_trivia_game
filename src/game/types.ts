@@ -75,7 +75,7 @@ export interface EndlessStats {
 }
 
 export interface SavedData {
-  schemaVersion: 7
+  schemaVersion: 8
   highScores: Record<Pool, number>
   endlessStats: Record<Pool, EndlessStats>
   lastSettings: GameSettings
@@ -88,6 +88,8 @@ export interface SavedData {
   lineupBestScore: number
   installationId: string
   lastNickname: string
+  pendingDailyEvents: DailyAttemptEvent[]
+  pendingLineupDailyEvents: DailyAttemptEvent[]
 }
 
 export interface LineupRoundState {
@@ -134,6 +136,7 @@ export interface LineupDailyChallenge {
   missingPlayerId: string
   rosterVersion: string
   attemptToken: string
+  attemptRevision?: number
 }
 
 export interface DailyChallenge {
@@ -143,7 +146,27 @@ export interface DailyChallenge {
   clueSeed: number
   rosterVersion: string
   attemptToken: string
+  attemptRevision?: number
 }
+
+export interface PlayerDailyProgress {
+  clueLevel: number
+  incorrectGuesses: string[]
+  normalizedIncorrectGuesses: string[]
+}
+
+export interface LineupDailyProgress {
+  cluesUsed: number
+  clueIncorrectGuessCounts: number[]
+  incorrectGuesses: string[]
+  normalizedIncorrectGuesses: string[]
+}
+
+export type DailyAttemptEvent =
+  | { type: 'reveal-clue' }
+  | { type: 'incorrect-guess'; guess: string; normalizedGuess: string }
+  | { type: 'correct'; answerId: string }
+  | { type: 'give-up' }
 
 export interface LeaderboardEntry {
   rank: number
@@ -206,6 +229,24 @@ export interface DailyResultResponse {
   leaderboard: LeaderboardEntry[]
   boards: LeaderboardBoards
 }
+
+export type DailyAttemptResponse<TChallenge, TProgress> =
+  | {
+      status: 'resume-required'
+      nickname: string
+      startedAt: string
+      updatedAt: string
+    }
+  | {
+      status: 'in-progress' | 'stale'
+      nickname: string
+      revision: number
+      progress: TProgress
+      startedAt: string
+      updatedAt: string
+      challenge: TChallenge
+    }
+  | ({ status: 'resolved'; nickname: string } & DailyResultResponse)
 
 export interface DailyCompletion {
   date: string

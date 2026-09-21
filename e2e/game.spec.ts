@@ -144,6 +144,15 @@ test('plays the shared daily player once and restores its leaderboard after relo
     average: [],
     best: leaderboard.map((entry) => ({ ...entry, value: entry.points, gamesPlayed: 1 })),
   }
+  const challenge = {
+    date: dailyDate,
+    expiresAt: '2099-07-30T00:00:00.000Z',
+    playerId: 'lionel-messi-28003',
+    clueSeed: 0,
+    rosterVersion: 'test-roster',
+    attemptToken: `${'a'.repeat(64)}.${'b'.repeat(64)}`,
+    attemptRevision: 0,
+  }
   await page.route('**/api/functions/v1/daily-game**', async (route) => {
     const request = route.request()
     const action = new URL(request.url()).searchParams.get('action')
@@ -151,31 +160,28 @@ test('plays the shared daily player once and restores its leaderboard after relo
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          date: dailyDate,
-          expiresAt: '2099-07-30T00:00:00.000Z',
-          playerId: 'lionel-messi-28003',
-          clueSeed: 0,
-          rosterVersion: 'test-roster',
-          attemptToken: `${'a'.repeat(64)}.${'b'.repeat(64)}`,
-        }),
+        body: JSON.stringify(challenge),
       })
       return
     }
-    if (action === 'result') {
+    if (action === 'start-attempt') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        status: 'in-progress', nickname: 'LeoFan', revision: 0,
+        progress: { clueLevel: 1, incorrectGuesses: [], normalizedIncorrectGuesses: [] },
+        startedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), challenge,
+      }) })
+      return
+    }
+    if (action === 'attempt-event') {
       const body = request.postDataJSON()
-      expect(body).toMatchObject({
-        challengeDate: dailyDate,
-        nickname: 'LeoFan',
-        outcome: 'correct',
-        cluesUsed: 1,
-        incorrectGuesses: 0,
-      })
+      expect(body).toMatchObject({ challengeDate: dailyDate, revision: 0, event: { type: 'correct', answerId: 'lionel-messi-28003' } })
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
+          status: 'resolved',
           date: dailyDate,
+          nickname: 'LeoFan',
           points: 100,
           rank: 1,
           leaderboard,
@@ -203,9 +209,6 @@ test('plays the shared daily player once and restores its leaderboard after relo
 
   await page.getByLabel(/player name/i).fill('Lionel Messi')
   await page.getByRole('button', { name: 'Submit' }).click()
-  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
-  await page.getByLabel(/enter your nickname to save this result/i).fill('LeoFan')
-  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
   await page.evaluate(() => {
     Object.defineProperty(navigator, 'share', {
       configurable: true,
@@ -214,9 +217,8 @@ test('plays the shared daily player once and restores its leaderboard after relo
       },
     })
   })
-  await page.getByRole('button', { name: /save score/i }).click()
-
   await expect(page.getByRole('heading', { name: /score saved/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /save score/i })).toHaveCount(0)
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('LeoFan')
   await expect(page.getByText(/rank #1/i)).toBeVisible()
   await page.getByRole('button', { name: /share your result/i }).click()
@@ -250,6 +252,55 @@ test('plays the shared daily player once and restores its leaderboard after relo
   await expect(page.getByText('Player of the day best')).toHaveCount(0)
   await expect(page.getByText('Your best player-of-the-day score')).toHaveCount(0)
   await expect(page.getByRole('button', { name: /check the leaderboard/i })).toBeVisible()
+})
+
+test('confirms and restores an unfinished daily player from another browser', async ({ page }) => {
+  const date = new Date().toISOString().slice(0, 10)
+  const challenge = { date, expiresAt: '2099-12-31T00:00:00.000Z', playerId: 'lionel-messi-28003', clueSeed: 0, rosterVersion: 'test', attemptToken: `${'a'.repeat(64)}.${'b'.repeat(64)}`, attemptRevision: 4 }
+  let starts = 0
+  await page.route('**/api/functions/v1/daily-game**', async (route) => {
+    const action = new URL(route.request().url()).searchParams.get('action')
+    if (action !== 'start-attempt') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(challenge) })
+    starts += 1
+    if (starts === 1) return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'resume-required', nickname: 'Traveller', startedAt: '2026-09-21T08:00:00Z', updatedAt: '2026-09-21T09:00:00Z' }) })
+    expect(route.request().postDataJSON()).toMatchObject({ nickname: 'Traveller', confirmResume: true })
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'in-progress', nickname: 'Traveller', revision: 4, progress: { clueLevel: 3, incorrectGuesses: ['Wrong Player'], normalizedIncorrectGuesses: ['wrong player'] }, startedAt: '2026-09-21T08:00:00Z', updatedAt: '2026-09-21T09:00:00Z', challenge }) })
+  })
+  page.once('dialog', async (dialog) => {
+    expect(dialog.message()).toContain('unfinished Player of the Day already exists for Traveller')
+    await dialog.accept()
+  })
+  await page.getByRole('button', { name: /player of the day/i }).click()
+  await page.getByLabel(/your name or nickname/i).fill('Traveller')
+  await page.getByRole('button', { name: /understood, let's play/i }).click()
+  await expect(page.getByText('Clue 3 / 5')).toBeVisible()
+  await expect(page.getByText(/Wrong Player/)).toBeVisible()
+})
+
+test('keeps an automatically resolved daily score pending offline and retries it', async ({ page }) => {
+  const date = new Date().toISOString().slice(0, 10)
+  const challenge = { date, expiresAt: '2099-12-31T00:00:00.000Z', playerId: 'lionel-messi-28003', clueSeed: 0, rosterVersion: 'test', attemptToken: `${'a'.repeat(64)}.${'b'.repeat(64)}`, attemptRevision: 0 }
+  let eventCalls = 0
+  const boards = { today: [{ rank: 1, nickname: 'Offline', value: 100, gamesPlayed: 1 }], cumulative: [], average: [], best: [] }
+  await page.route('**/api/functions/v1/daily-game**', async (route) => {
+    const action = new URL(route.request().url()).searchParams.get('action')
+    if (action === 'start-attempt') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'in-progress', nickname: 'Offline', revision: 0, progress: { clueLevel: 1, incorrectGuesses: [], normalizedIncorrectGuesses: [] }, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), challenge }) })
+    if (action === 'attempt-event') {
+      eventCalls += 1
+      if (eventCalls === 1) return route.abort('internetdisconnected')
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'resolved', date, nickname: 'Offline', points: 100, rank: 1, leaderboard: [{ rank: 1, nickname: 'Offline', points: 100, submittedAt: new Date().toISOString() }], boards }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(challenge) })
+  })
+  await page.getByRole('button', { name: /player of the day/i }).click()
+  await page.getByLabel(/your name or nickname/i).fill('Offline')
+  await page.getByRole('button', { name: /understood, let's play/i }).click()
+  await page.getByLabel(/player name/i).fill('Lionel Messi')
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(page.getByText('Waiting to sync')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Save score' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Retry' }).click()
+  await expect(page.getByRole('heading', { name: /score saved/i })).toBeVisible()
 })
 
 test('gates the homepage leaderboard by today’s nickname and switches game and pool views', async ({ page }) => {
@@ -355,31 +406,37 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
     average: [],
     best: [{ rank: 1, nickname: 'ShapeReader', value: 20, gamesPlayed: 1 }],
   }
+  let revision = 0
+  const challenge = {
+    date: dailyDate,
+    expiresAt: '2099-08-06T00:00:00.000Z',
+    matchId: 'tm-53455',
+    missingPlayerId: 'tm-player-3366',
+    rosterVersion: 'lineups-test',
+    attemptToken: `${'c'.repeat(64)}.${'d'.repeat(64)}`,
+    attemptRevision: 0,
+  }
   await page.route('**/api/functions/v1/lineup-game**', async (route) => {
     const request = route.request()
     const action = new URL(request.url()).searchParams.get('action')
     if (action === 'challenge') {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
-        date: dailyDate,
-        expiresAt: '2099-08-06T00:00:00.000Z',
-        matchId: 'tm-53455',
-        missingPlayerId: 'tm-player-3366',
-        rosterVersion: 'lineups-test',
-        attemptToken: `${'c'.repeat(64)}.${'d'.repeat(64)}`,
-      }) })
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(challenge) })
       return
     }
-    if (action === 'result') {
-      expect(request.postDataJSON()).toMatchObject({
-        challengeDate: dailyDate,
-        nickname: 'ShapeReader',
-        outcome: 'correct',
-        cluesUsed: 2,
-        clueIncorrectGuessCounts: [1, 1],
-        incorrectGuesses: 1,
-      })
+    if (action === 'start-attempt') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'in-progress', nickname: 'ShapeReader', revision: 0, progress: { cluesUsed: 0, clueIncorrectGuessCounts: [], incorrectGuesses: [], normalizedIncorrectGuesses: [] }, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), challenge }) })
+      return
+    }
+    if (action === 'attempt-event') {
+      const body = request.postDataJSON()
+      if (body.event.type !== 'correct') {
+        revision += 1
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'in-progress', nickname: 'ShapeReader', revision, progress: { cluesUsed: 0, clueIncorrectGuessCounts: [], incorrectGuesses: [], normalizedIncorrectGuesses: [] }, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), challenge: { ...challenge, attemptRevision: revision } }) })
+        return
+      }
+      expect(body.event).toMatchObject({ type: 'correct', answerId: 'tm-player-3366' })
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
-        date: dailyDate,
+        status: 'resolved', date: dailyDate, nickname: 'ShapeReader',
         points: 20,
         rank: 1,
         leaderboard: [{ rank: 1, nickname: 'ShapeReader', points: 20, submittedAt: '2026-08-05T12:00:00Z' }],
@@ -426,11 +483,8 @@ test('keeps secondary formats collapsed and plays the shared lineup daily with b
   await expect(page.getByRole('option', { name: /Kaká/i })).toBeVisible()
   await input.fill('Kaká')
   await page.getByRole('button', { name: 'Submit' }).click()
-  await expect(page.getByTestId('lineup-answer-reveal')).toContainText('Kaká')
-  await expect(page.getByRole('button', { name: /share your result/i })).toHaveCount(0)
-  await page.getByLabel(/enter your nickname to save this result/i).fill('ShapeReader')
-  await page.getByRole('button', { name: /save score/i }).click()
   await expect(page.getByRole('heading', { name: /lineup score saved/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /save score/i })).toHaveCount(0)
   await expect(page.getByRole('table', { name: /today leaderboard/i })).toContainText('ShapeReader')
   const shareButton = page.getByRole('button', { name: /share your result/i })
   await expect(shareButton).toBeVisible()
@@ -600,20 +654,23 @@ test('gives independent browsers the same daily player and clue set', async ({ b
         await dailyPage.addInitScript(() => {
           Math.random = () => 0.999
         })
-        await dailyPage.route('**/api/functions/v1/daily-game**', (route) =>
-          route.fulfill({
+        await dailyPage.route('**/api/functions/v1/daily-game**', (route) => {
+          const action = new URL(route.request().url()).searchParams.get('action')
+          const challenge = {
+            date: new Date().toISOString().slice(0, 10),
+            expiresAt: '2099-07-30T00:00:00.000Z',
+            playerId: 'lionel-messi-28003',
+            clueSeed: 0,
+            rosterVersion: 'test-roster',
+            attemptToken: `${'a'.repeat(64)}.${'b'.repeat(64)}`,
+            attemptRevision: 0,
+          }
+          return route.fulfill({
             status: 200,
             contentType: 'application/json',
-            body: JSON.stringify({
-              date: '2026-07-29',
-              expiresAt: '2099-07-30T00:00:00.000Z',
-              playerId: 'lionel-messi-28003',
-              clueSeed: 0,
-              rosterVersion: 'test-roster',
-              attemptToken: `${'a'.repeat(64)}.${'b'.repeat(64)}`,
-            }),
-          }),
-        )
+            body: JSON.stringify(action === 'start-attempt' ? { status: 'in-progress', nickname: 'SharedPlayer', revision: 0, progress: { clueLevel: 1, incorrectGuesses: [], normalizedIncorrectGuesses: [] }, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), challenge } : challenge),
+          })
+        })
         await dailyPage.goto('/')
         await dailyPage.getByRole('button', { name: /player of the day/i }).click()
         await dailyPage.getByLabel(/your name or nickname/i).fill('SharedPlayer')

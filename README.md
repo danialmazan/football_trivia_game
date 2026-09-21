@@ -71,13 +71,16 @@ when it would collide with a word in another player’s name—for example,
 ## Modes and pools
 
 - **Player of the day:** one Normal-pool player and one clue seed shared by
-  everyone from 00:00:00 UTC to the next UTC midnight. The first submission
-  locks that normalized nickname for the day, regardless of browser.
+  everyone from 00:00:00 UTC to the next UTC midnight. Starting the game locks
+  that normalized nickname for the day, regardless of browser. Progress is
+  resumable from another browser after confirmation and the resolved score is
+  submitted automatically.
 - **10-round challenge:** ten repeat-free rounds, maximum 1,000 points. A
   nickname can submit unlimited games from any browser; matching nicknames
   share one history.
 - **Lineup of the day:** one historical semifinal or final and one missing
-  starter shared worldwide from 00:00:00 UTC to the next UTC midnight.
+  starter shared worldwide from 00:00:00 UTC to the next UTC midnight, with the
+  same server-side attempt, cross-browser resume, and automatic-save behavior.
 - **10-round lineup challenge:** ten distinct historical matches with an
   independently selected missing starter in each, maximum 1,000 points.
 - **Endless:** no repeats until the selected pool is exhausted, then a clearly
@@ -185,7 +188,9 @@ Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as GitHub Actions
 repository variables before the Pages build. The service-role key and selection
 secrets never belong in GitHub Pages or any `VITE_` variable.
 
-The cron function creates private, non-overwriting Player-of-the-Day reports at
+Before archiving, the cron function resolves every unfinished prior-day Player
+and Lineup attempt as gave-up for zero points. It then creates private,
+non-overwriting Player-of-the-Day reports at
 `daily-leaderboards/YYYY-MM-DD.csv` in the
 `daily-leaderboard-archives` Storage bucket. Inspect or download them through
 the Supabase Storage dashboard. The database retains the original dated rows

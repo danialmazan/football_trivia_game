@@ -4,7 +4,6 @@ import { getPlayerSuggestions } from '../game/answerMatching'
 import { GAME_CONFIG } from '../game/config'
 import { generateClues, getCareerSummary } from '../game/clues'
 import { calculateAvailableScore } from '../game/scoring'
-import { isValidNickname } from '../game/daily'
 import type { GameState } from '../game/types'
 import { ClueCard } from './ClueCard'
 import { useI18n } from '../i18n'
@@ -18,11 +17,9 @@ interface GameScreenProps {
   onGiveUp: () => void
   onNext: () => void
   onExit: () => void
-  dailyNickname?: string
   dailySubmitting?: boolean
   dailyError?: string | null
-  onDailyNicknameChange?: (nickname: string) => void
-  onDailySubmit?: () => void
+  onDailyRetry?: () => void
 }
 
 function shouldAutoFocusGuess(): boolean {
@@ -38,11 +35,9 @@ export function GameScreen({
   onGiveUp,
   onNext,
   onExit,
-  dailyNickname = '',
   dailySubmitting = false,
   dailyError = null,
-  onDailyNicknameChange,
-  onDailySubmit,
+  onDailyRetry,
 }: GameScreenProps) {
   const { locale, t, modeLabel, poolLabel, leagueLabel, feedback, known } = useI18n()
   const [guess, setGuess] = useState('')
@@ -235,39 +230,12 @@ export function GameScreen({
                 </div>
               )}
               {isDaily ? (
-                <form
-                  className="daily-submit"
-                  onSubmit={(event) => {
-                    event.preventDefault()
-                    onDailySubmit?.()
-                  }}
-                >
-                  <label htmlFor="daily-nickname">
-                    {t('Enter your nickname to save this result, build your stats history and unlock sharing.')}
-                    <span>{t('Your nickname is public and can submit once today.')}</span>
-                  </label>
-                  <div className="daily-submit__row">
-                    <input
-                      id="daily-nickname"
-                      value={dailyNickname}
-                      onChange={(event) => onDailyNicknameChange?.(event.target.value)}
-                      maxLength={48}
-                      placeholder={t('Name or nickname')}
-                      autoComplete="nickname"
-                    />
-                    <button
-                      className="primary-button"
-                      type="submit"
-                      disabled={dailySubmitting || !isValidNickname(dailyNickname)}
-                    >
-                      {dailySubmitting ? t('Saving…') : t('Save score')}
-                    </button>
-                  </div>
-                  <small>
-                    {t('Use the same nickname every time for your stats history to stay together.')}
-                  </small>
-                  {dailyError && <p className="daily-service-error" role="alert">{known(dailyError)}</p>}
-                </form>
+                <div className="daily-submit" role="status">
+                  <strong>{dailySubmitting ? t('Saving…') : t('Waiting to sync')}</strong>
+                  <span>{t('Your score is saved automatically when this round ends.')}</span>
+                  {dailyError && <p className="daily-service-error">{known(dailyError)}</p>}
+                  {dailyError && <button className="primary-button" type="button" onClick={onDailyRetry}>{t('Retry')}</button>}
+                </div>
               ) : (
                 <button className="primary-button primary-button--large" type="button" onClick={onNext}>
                   {(game.settings.mode === 'challenge' || game.settings.mode === 'practice') &&

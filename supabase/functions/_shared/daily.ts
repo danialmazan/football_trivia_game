@@ -9,6 +9,7 @@ export interface StoredChallenge {
 }
 
 export interface StoredResult {
+  id?: string
   challenge_date: string
   participant_hash: string
   nickname: string
@@ -29,6 +30,22 @@ export interface StoredLineupChallenge {
 
 export interface StoredLineupResult extends StoredResult {
   clue_incorrect_guess_counts: number[]
+}
+
+export interface StoredAttempt {
+  id: string
+  challenge_date: string
+  nickname: string
+  normalized_nickname: string
+  participant_hashes: string[]
+  status: 'in_progress' | 'resolved' | 'expired'
+  revision: number
+  progress: Record<string, unknown> | null
+  outcome: 'correct' | 'gave-up' | null
+  points: number | null
+  result_id: string | null
+  started_at: string
+  updated_at: string
 }
 
 export function createAdminClient(): SupabaseClient {
@@ -260,6 +277,34 @@ export async function verifyLineupAttemptToken(
   const secret = Deno.env.get('DAILY_SELECTION_SECRET') ?? ''
   const expected = await hmacHex(secret, `${date}:lineup:${participantHash}`)
   return timingSafeEqual(signature, expected) ? participantHash : null
+}
+
+export async function createServerAttemptToken(
+  family: 'player' | 'lineup',
+  date: string,
+  attemptId: string,
+  participantHash: string,
+): Promise<string> {
+  const secret = Deno.env.get('DAILY_SELECTION_SECRET') ?? ''
+  const signature = await hmacHex(secret, `${family}:${date}:${attemptId}:${participantHash}`)
+  return `${attemptId}.${participantHash}.${signature}`
+}
+
+export async function verifyServerAttemptToken(
+  family: 'player' | 'lineup',
+  date: string,
+  token: string,
+): Promise<{ attemptId: string; participantHash: string } | null> {
+  const [attemptId, participantHash, signature, extra] = token.split('.')
+  if (
+    extra ||
+    !/^[0-9a-f-]{36}$/.test(attemptId ?? '') ||
+    !/^[a-f0-9]{64}$/.test(participantHash ?? '') ||
+    !/^[a-f0-9]{64}$/.test(signature ?? '')
+  ) return null
+  const secret = Deno.env.get('DAILY_SELECTION_SECRET') ?? ''
+  const expected = await hmacHex(secret, `${family}:${date}:${attemptId}:${participantHash}`)
+  return timingSafeEqual(signature, expected) ? { attemptId, participantHash } : null
 }
 
 function timingSafeEqual(left: string, right: string): boolean {

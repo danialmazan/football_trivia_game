@@ -6,6 +6,9 @@ import type {
   LineupChallengeResultSubmission,
   LineupDailyChallenge,
   LineupDailyResultSubmission,
+  DailyAttemptEvent,
+  DailyAttemptResponse,
+  LineupDailyProgress,
   LineupLeaderboardHubResponse,
 } from './types'
 
@@ -30,9 +33,27 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     },
   })
   const payload = (await response.json().catch(() => null)) as (T & { error?: string }) | null
-  if (!response.ok) throw new Error(payload?.error || 'The lineup service is unavailable. Please retry.')
+  if (!response.ok && !(response.status === 409 && payload && 'status' in payload && payload.status === 'stale')) throw new Error(payload?.error || 'The lineup service is unavailable. Please retry.')
   if (!payload) throw new Error('The lineup service returned an empty response.')
   return payload
+}
+
+export function startLineupDailyAttempt(input: {
+  installationId: string
+  nickname: string
+  confirmResume?: boolean
+  localProgress?: LineupDailyProgress
+}): Promise<DailyAttemptResponse<LineupDailyChallenge, LineupDailyProgress>> {
+  return request(endpoint('start-attempt'), { method: 'POST', body: JSON.stringify(input) })
+}
+
+export function sendLineupDailyAttemptEvent(input: {
+  challengeDate: string
+  attemptToken: string
+  revision: number
+  event: DailyAttemptEvent
+}): Promise<DailyAttemptResponse<LineupDailyChallenge, LineupDailyProgress>> {
+  return request(endpoint('attempt-event'), { method: 'POST', body: JSON.stringify(input) })
 }
 
 export function getLineupDailyChallenge(installationId: string): Promise<LineupDailyChallenge> {

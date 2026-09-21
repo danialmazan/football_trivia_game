@@ -22,6 +22,8 @@ import {
   getChallengeLeaderboard,
   getLeaderboardHub,
   expireDailyResult,
+  sendDailyAttemptEvent,
+  startDailyAttempt,
   submitChallengeResult,
   submitDailyResult,
 } from './game/dailyApi'
@@ -48,6 +50,8 @@ import {
   submitLineupChallengeResult,
   submitLineupDailyResult,
   expireLineupDailyResult,
+  sendLineupDailyAttemptEvent,
+  startLineupDailyAttempt,
 } from './game/lineupApi'
 import { getActivePool, selectNextPlayer } from './game/selection'
 import type {
@@ -62,6 +66,7 @@ import type {
   LineupLeaderboardHubResponse,
   RoundOutcome,
   RoundResult,
+  DailyAttemptEvent,
   SavedData,
 } from './game/types'
 import { LANGUAGE_STORAGE_KEY, LanguageToggle, useI18n } from './i18n'
@@ -107,10 +112,115 @@ export function App() {
   const [lineupLeaderboardHubResponse, setLineupLeaderboardHubResponse] =
     useState<LineupLeaderboardHubResponse | null>(null)
   const [leaderboardFamily, setLeaderboardFamily] = useState<LeaderboardFamily | null>(null)
+  const [syncingDailyEvent, setSyncingDailyEvent] = useState(false)
+  const [syncingLineupEvent, setSyncingLineupEvent] = useState(false)
+  const [dailySyncPaused, setDailySyncPaused] = useState(false)
+  const [lineupSyncPaused, setLineupSyncPaused] = useState(false)
 
   useEffect(() => {
     saveData(savedData)
   }, [savedData])
+
+  useEffect(() => {
+    const resumeSync = () => {
+      setDailySyncPaused(false)
+      setLineupSyncPaused(false)
+    }
+    window.addEventListener('online', resumeSync)
+    return () => window.removeEventListener('online', resumeSync)
+  }, [])
+
+  useEffect(() => {
+    const event = savedData.pendingDailyEvents[0]
+    if (!event || !game?.dailyChallenge || game.settings.mode !== 'daily' || syncingDailyEvent || dailySyncPaused) return
+    setSyncingDailyEvent(true)
+    setDailyError(null)
+    void sendDailyAttemptEvent({
+      challengeDate: game.dailyChallenge.date,
+      attemptToken: game.dailyChallenge.attemptToken,
+      revision: game.dailyChallenge.attemptRevision ?? 0,
+      event,
+    }).then((response) => {
+      if (response.status === 'resolved') {
+        const resolvedBoards = response.boards ?? EMPTY_LEADERBOARD_BOARDS
+        const player = players.find((candidate) => candidate.id === game.round.playerId)
+        const outcome = game.round.outcome ?? (event.type === 'correct' ? 'correct' : 'gave-up')
+        const finished: GameState = game.phase === 'review'
+          ? { ...game, phase: 'results', totalScore: response.points }
+          : {
+              ...game,
+              phase: 'results',
+              round: { ...game.round, outcome, pointsEarned: response.points },
+              results: [{ playerId: game.round.playerId, playerName: player?.displayName ?? '', outcome, points: response.points, cluesUsed: game.round.clueLevel, incorrectGuesses: game.round.incorrectGuesses }],
+              totalScore: response.points,
+            }
+        const completion: DailyCompletion = { date: response.date, nickname: response.nickname, points: response.points, rank: response.rank, leaderboard: response.leaderboard, boards: resolvedBoards }
+        setDailyBoards(resolvedBoards)
+        setGame(finished)
+        setSavedData((current) => ({ ...current, dailyGame: finished, dailyCompletion: completion, lastNickname: response.nickname, pendingDailyEvents: [] }))
+        return
+      }
+      if (response.status === 'stale') {
+        setGame((current) => current ? {
+          ...current,
+          phase: 'playing',
+          results: [],
+          totalScore: 0,
+          dailyChallenge: response.challenge,
+          round: { ...current.round, ...response.progress, outcome: null, pointsEarned: null, statusMessage: null },
+        } : current)
+        setDailyError('This game was updated in another browser. The latest progress has been restored.')
+        setSavedData((current) => ({ ...current, pendingDailyEvents: [] }))
+        return
+      }
+      if (response.status === 'resume-required') return
+      setGame((current) => current ? { ...current, dailyChallenge: response.challenge } : current)
+      setSavedData((current) => ({ ...current, pendingDailyEvents: current.pendingDailyEvents.slice(1) }))
+    }).catch((error) => {
+      setDailySyncPaused(true)
+      setDailyError(error instanceof Error ? error.message : 'Could not save your result. Your progress is waiting to sync.')
+    }).finally(() => setSyncingDailyEvent(false))
+  }, [dailySyncPaused, game, savedData.pendingDailyEvents, syncingDailyEvent])
+
+  useEffect(() => {
+    const event = savedData.pendingLineupDailyEvents[0]
+    if (!event || !lineupGame?.dailyChallenge || lineupGame.mode !== 'lineup-daily' || syncingLineupEvent || lineupSyncPaused) return
+    setSyncingLineupEvent(true)
+    setDailyError(null)
+    void sendLineupDailyAttemptEvent({
+      challengeDate: lineupGame.dailyChallenge.date,
+      attemptToken: lineupGame.dailyChallenge.attemptToken,
+      revision: lineupGame.dailyChallenge.attemptRevision ?? 0,
+      event,
+    }).then((response) => {
+      if (response.status === 'resolved') {
+        const resolvedBoards = response.boards ?? EMPTY_LEADERBOARD_BOARDS
+        const match = lineupDataset?.matches.find((candidate) => candidate.id === lineupGame.round.matchId)
+        const player = match?.teams.flatMap((team) => team.starters).find((candidate) => candidate.id === lineupGame.round.missingPlayerId)
+        const outcome = lineupGame.round.outcome ?? (event.type === 'correct' ? 'correct' : 'gave-up')
+        const finished: LineupGameState = lineupGame.phase === 'review'
+          ? { ...lineupGame, phase: 'results', totalScore: response.points }
+          : { ...lineupGame, phase: 'results', round: { ...lineupGame.round, outcome, pointsEarned: response.points }, results: [{ matchId: lineupGame.round.matchId, matchLabel: match ? `${match.homeTeam.name} vs ${match.awayTeam.name}` : '', playerId: lineupGame.round.missingPlayerId, playerName: player?.displayName ?? '', outcome, points: response.points, cluesUsed: lineupGame.round.cluesUsed, clueIncorrectGuessCounts: lineupGame.round.clueIncorrectGuessCounts, incorrectGuesses: lineupGame.round.incorrectGuesses }], totalScore: response.points }
+        const completion: DailyCompletion = { date: response.date, nickname: response.nickname, points: response.points, rank: response.rank, leaderboard: response.leaderboard, boards: resolvedBoards }
+        setLineupDailyBoards(resolvedBoards)
+        setLineupGame(finished)
+        setSavedData((current) => ({ ...current, lineupDailyGame: finished, lineupDailyCompletion: completion, lastNickname: response.nickname, pendingLineupDailyEvents: [] }))
+        return
+      }
+      if (response.status === 'stale') {
+        setLineupGame((current) => current ? { ...current, phase: 'playing', results: [], totalScore: 0, dailyChallenge: response.challenge, round: { ...current.round, ...response.progress, outcome: null, pointsEarned: null, statusMessage: null } } : current)
+        setDailyError('This game was updated in another browser. The latest progress has been restored.')
+        setSavedData((current) => ({ ...current, pendingLineupDailyEvents: [] }))
+        return
+      }
+      if (response.status === 'resume-required') return
+      setLineupGame((current) => current ? { ...current, dailyChallenge: response.challenge } : current)
+      setSavedData((current) => ({ ...current, pendingLineupDailyEvents: current.pendingLineupDailyEvents.slice(1) }))
+    }).catch((error) => {
+      setLineupSyncPaused(true)
+      setDailyError(error instanceof Error ? error.message : 'Could not save your lineup result. Your progress is waiting to sync.')
+    }).finally(() => setSyncingLineupEvent(false))
+  }, [lineupDataset, lineupGame, lineupSyncPaused, savedData.pendingLineupDailyEvents, syncingLineupEvent])
 
   useEffect(() => {
     if (!game) return
@@ -279,13 +389,45 @@ export function App() {
     setDailyError(null)
     try {
       const loaded = await ensureLineupData()
-      const builtGame = settings.mode === 'lineup-daily'
-        ? buildLineupDailyGame(
-            await getLineupDailyChallenge(savedData.installationId),
-            loaded.dataset.matches,
-          )
-        : buildLineupChallenge(loaded.dataset.matches)
-      const newGame = { ...builtGame, nickname: dailyNickname.trim() }
+      let builtGame: LineupGameState
+      if (settings.mode === 'lineup-daily') {
+        const local = savedData.lineupDailyGame?.dailyChallenge?.date === getUtcDateKey()
+          ? savedData.lineupDailyGame.round
+          : null
+        let response = await startLineupDailyAttempt({
+          installationId: savedData.installationId,
+          nickname: dailyNickname.trim(),
+          localProgress: local ? {
+            cluesUsed: local.cluesUsed,
+            clueIncorrectGuessCounts: local.clueIncorrectGuessCounts,
+            incorrectGuesses: local.incorrectGuesses,
+            normalizedIncorrectGuesses: local.normalizedIncorrectGuesses,
+          } : undefined,
+        })
+        if (response.status === 'resume-required') {
+          if (!window.confirm(t('An unfinished Lineup of the Day already exists for {nickname}. Continue it here?', { nickname: response.nickname }))) return
+          response = await startLineupDailyAttempt({ installationId: savedData.installationId, nickname: dailyNickname.trim(), confirmResume: true })
+        }
+        if (response.status === 'resolved') {
+          const challenge = await getLineupDailyChallenge(savedData.installationId)
+          const base = buildLineupDailyGame(challenge, loaded.dataset.matches)
+          const match = loaded.dataset.matches.find((candidate) => candidate.id === challenge.matchId)!
+          const player = match.teams.flatMap((team) => team.starters).find((candidate) => candidate.id === challenge.missingPlayerId)!
+          const finished: LineupGameState = { ...base, phase: 'results', round: { ...base.round, outcome: response.points > 0 ? 'correct' : 'gave-up', pointsEarned: response.points }, results: [{ matchId: match.id, matchLabel: `${match.homeTeam.name} vs ${match.awayTeam.name}`, playerId: player.id, playerName: player.displayName, outcome: response.points > 0 ? 'correct' : 'gave-up', points: response.points, cluesUsed: 0, clueIncorrectGuessCounts: [], incorrectGuesses: [] }], totalScore: response.points }
+          const completion: DailyCompletion = { date: response.date, nickname: response.nickname, points: response.points, rank: response.rank, leaderboard: response.leaderboard, boards: response.boards }
+          setLineupDailyBoards(response.boards)
+          setLineupGame(finished)
+          setShowGuide(false)
+          setSavedData((current) => ({ ...current, lineupDailyGame: finished, lineupDailyCompletion: completion, lastNickname: response.nickname, pendingLineupDailyEvents: [] }))
+          return
+        }
+        if (response.status === 'resume-required') throw new Error('Could not confirm the unfinished lineup game.')
+        builtGame = buildLineupDailyGame(response.challenge, loaded.dataset.matches)
+        builtGame = { ...builtGame, nickname: response.nickname, round: { ...builtGame.round, ...response.progress } }
+      } else {
+        builtGame = buildLineupChallenge(loaded.dataset.matches)
+      }
+      const newGame = { ...builtGame, nickname: builtGame.nickname ?? dailyNickname.trim() }
       setLineupChallengeBoards(null)
       setLineupChallengeSubmitted(false)
       setLineupGame(newGame)
@@ -313,6 +455,11 @@ export function App() {
       if (selectedSettings.mode === 'lineup-daily') {
         const currentDaily = savedData.lineupDailyGame
         if (currentDaily?.dailyChallenge?.date === getUtcDateKey() && currentDaily.nickname) {
+          if (currentDaily.phase !== 'results' || !savedData.lineupDailyCompletion) {
+            setDailyNickname(currentDaily.nickname)
+            setShowGuide(true)
+            return
+          }
           setDailyLoading(true)
           void ensureLineupData()
             .then(() => {
@@ -336,6 +483,11 @@ export function App() {
     if (selectedSettings.mode === 'daily') {
       const currentDaily = savedData.dailyGame
       if (currentDaily?.dailyChallenge?.date === getUtcDateKey() && currentDaily.nickname) {
+        if (currentDaily.phase !== 'results' || !savedData.dailyCompletion) {
+          setDailyNickname(currentDaily.nickname)
+          setShowGuide(true)
+          return
+        }
         setDailyBoards(savedData.dailyCompletion?.boards ?? EMPTY_LEADERBOARD_BOARDS)
         setDailyNickname(currentDaily.nickname)
         setGame(currentDaily)
@@ -379,8 +531,32 @@ export function App() {
     setDailyLoading(true)
     setDailyError(null)
     try {
-      const challenge = await getDailyChallenge(savedData.installationId)
-      const newGame = buildDailyGame(challenge)
+      const local = savedData.dailyGame?.dailyChallenge?.date === getUtcDateKey() ? savedData.dailyGame.round : null
+      let response = await startDailyAttempt({
+        installationId: savedData.installationId,
+        nickname: dailyNickname.trim(),
+        localProgress: local ? { clueLevel: local.clueLevel, incorrectGuesses: local.incorrectGuesses, normalizedIncorrectGuesses: local.normalizedIncorrectGuesses } : undefined,
+      })
+      if (response.status === 'resume-required') {
+        if (!window.confirm(t('An unfinished Player of the Day already exists for {nickname}. Continue it here?', { nickname: response.nickname }))) return
+        response = await startDailyAttempt({ installationId: savedData.installationId, nickname: dailyNickname.trim(), confirmResume: true })
+      }
+      if (response.status === 'resolved') {
+        const challenge = await getDailyChallenge(savedData.installationId)
+        const base = buildDailyGame(challenge)
+        const player = players.find((candidate) => candidate.id === challenge.playerId)!
+        const outcome: RoundOutcome = response.points > 0 ? 'correct' : 'gave-up'
+        const finished: GameState = { ...base, phase: 'results', round: { ...base.round, outcome, pointsEarned: response.points }, results: [{ playerId: player.id, playerName: player.displayName, outcome, points: response.points, cluesUsed: 1, incorrectGuesses: [] }], totalScore: response.points }
+        const completion: DailyCompletion = { date: response.date, nickname: response.nickname, points: response.points, rank: response.rank, leaderboard: response.leaderboard, boards: response.boards }
+        setDailyBoards(response.boards)
+        setGame(finished)
+        setShowGuide(false)
+        setSavedData((current) => ({ ...current, dailyGame: finished, dailyCompletion: completion, lastNickname: response.nickname, pendingDailyEvents: [] }))
+        return
+      }
+      if (response.status === 'resume-required') throw new Error('Could not confirm the unfinished daily game.')
+      let newGame = buildDailyGame(response.challenge)
+      newGame = { ...newGame, nickname: response.nickname, round: { ...newGame.round, ...response.progress } }
       setGame(newGame)
       setShowGuide(false)
       setSavedData((current) => ({
@@ -432,6 +608,16 @@ export function App() {
     setDailyError(null)
   }
 
+  function queueDailyEvent(event: DailyAttemptEvent) {
+    setDailySyncPaused(false)
+    setSavedData((current) => ({ ...current, pendingDailyEvents: [...current.pendingDailyEvents, event] }))
+  }
+
+  function queueLineupDailyEvent(event: DailyAttemptEvent) {
+    setLineupSyncPaused(false)
+    setSavedData((current) => ({ ...current, pendingLineupDailyEvents: [...current.pendingLineupDailyEvents, event] }))
+  }
+
   function finalizeRound(outcome: RoundOutcome, points: number) {
     if (!game || !currentPlayer || game.phase !== 'playing') return
     const result: RoundResult = {
@@ -450,6 +636,11 @@ export function App() {
       totalScore: game.totalScore + points,
     }
     setGame(nextGame)
+    if (game.settings.mode === 'daily') {
+      queueDailyEvent(outcome === 'correct'
+        ? { type: 'correct', answerId: currentPlayer.id }
+        : { type: 'give-up' })
+    }
     if (game.settings.mode === 'endless') {
       setSavedData((current) => {
         const existing = current.endlessStats[game.settings.pool]
@@ -490,11 +681,16 @@ export function App() {
     }
     const update = recordIncorrectGuess(game.round, guess, normalizeAnswer(guess))
     setGame({ ...game, round: update.round })
+    if (game.settings.mode === 'daily' && !update.duplicate) {
+      queueDailyEvent({ type: 'incorrect-guess', guess: guess.trim(), normalizedGuess: normalizeAnswer(guess) })
+    }
   }
 
   function revealClue() {
     if (!game || game.phase !== 'playing') return
-    setGame({ ...game, round: revealNextClue(game.round) })
+    const round = revealNextClue(game.round)
+    setGame({ ...game, round })
+    if (game.settings.mode === 'daily' && round.clueLevel !== game.round.clueLevel) queueDailyEvent({ type: 'reveal-clue' })
   }
 
   function giveUp() {
@@ -568,6 +764,11 @@ export function App() {
       ],
       totalScore: lineupGame.totalScore + points,
     })
+    if (lineupGame.mode === 'lineup-daily') {
+      queueLineupDailyEvent(outcome === 'correct'
+        ? { type: 'correct', answerId: currentMissingPlayer.id }
+        : { type: 'give-up' })
+    }
   }
 
   function submitLineupGuess(guess: string) {
@@ -589,11 +790,16 @@ export function App() {
     }
     const update = recordLineupIncorrectGuess(lineupGame.round, guess, normalizeAnswer(guess))
     setLineupGame({ ...lineupGame, round: update.round })
+    if (lineupGame.mode === 'lineup-daily' && !update.duplicate) {
+      queueLineupDailyEvent({ type: 'incorrect-guess', guess: guess.trim(), normalizedGuess: normalizeAnswer(guess) })
+    }
   }
 
   function revealLineupClue() {
     if (!lineupGame || lineupGame.phase !== 'playing') return
-    setLineupGame({ ...lineupGame, round: revealNextLineupClue(lineupGame.round) })
+    const round = revealNextLineupClue(lineupGame.round)
+    setLineupGame({ ...lineupGame, round })
+    if (lineupGame.mode === 'lineup-daily' && round.cluesUsed !== lineupGame.round.cluesUsed) queueLineupDailyEvent({ type: 'reveal-clue' })
   }
 
   function nextLineup() {
@@ -838,14 +1044,18 @@ export function App() {
     try {
       if (expiredGame.phase !== 'results' && isValidNickname(nickname)) {
         setDailyLoading(true)
-        await expireDailyResult({
-          challengeDate: challenge.date,
-          attemptToken: challenge.attemptToken,
-          nickname,
-          outcome: 'gave-up',
-          cluesUsed: expiredGame.round.clueLevel,
-          incorrectGuesses: expiredGame.round.incorrectGuesses.length,
-        })
+        if (challenge.attemptRevision !== undefined) {
+          await sendDailyAttemptEvent({ challengeDate: challenge.date, attemptToken: challenge.attemptToken, revision: challenge.attemptRevision, event: { type: 'give-up' } })
+        } else {
+          await expireDailyResult({
+            challengeDate: challenge.date,
+            attemptToken: challenge.attemptToken,
+            nickname,
+            outcome: 'gave-up',
+            cluesUsed: expiredGame.round.clueLevel,
+            incorrectGuesses: expiredGame.round.incorrectGuesses.length,
+          })
+        }
       }
       if (game?.dailyChallenge?.date === challenge.date) setGame(null)
       setShowGuide(false)
@@ -867,15 +1077,19 @@ export function App() {
     try {
       if (expiredGame.phase !== 'results' && isValidNickname(nickname)) {
         setDailyLoading(true)
-        await expireLineupDailyResult({
-          challengeDate: challenge.date,
-          attemptToken: challenge.attemptToken,
-          nickname,
-          outcome: 'gave-up',
-          cluesUsed: expiredGame.round.cluesUsed,
-          clueIncorrectGuessCounts: expiredGame.round.clueIncorrectGuessCounts,
-          incorrectGuesses: expiredGame.round.incorrectGuesses.length,
-        })
+        if (challenge.attemptRevision !== undefined) {
+          await sendLineupDailyAttemptEvent({ challengeDate: challenge.date, attemptToken: challenge.attemptToken, revision: challenge.attemptRevision, event: { type: 'give-up' } })
+        } else {
+          await expireLineupDailyResult({
+            challengeDate: challenge.date,
+            attemptToken: challenge.attemptToken,
+            nickname,
+            outcome: 'gave-up',
+            cluesUsed: expiredGame.round.cluesUsed,
+            clueIncorrectGuessCounts: expiredGame.round.clueIncorrectGuessCounts,
+            incorrectGuesses: expiredGame.round.incorrectGuesses.length,
+          })
+        }
       }
       if (lineupGame?.dailyChallenge?.date === challenge.date) setLineupGame(null)
       setShowGuide(false)
@@ -1061,11 +1275,9 @@ export function App() {
           onGiveUp={giveUp}
           onNext={nextPlayer}
           onExit={exitGame}
-          dailyNickname={dailyNickname}
-          dailySubmitting={dailyLoading}
+          dailySubmitting={syncingDailyEvent}
           dailyError={dailyError}
-          onDailyNicknameChange={setDailyNickname}
-          onDailySubmit={submitDailyScore}
+          onDailyRetry={() => { setDailyError(null); setDailySyncPaused(false) }}
         />
       )}
       {game?.phase === 'results' && game.settings.mode !== 'daily' && (
@@ -1106,11 +1318,9 @@ export function App() {
           onClue={revealLineupClue}
           onNext={nextLineup}
           onExit={exitLineupGame}
-          nickname={dailyNickname}
-          submitting={dailyLoading}
+          submitting={syncingLineupEvent}
           error={dailyError}
-          onNicknameChange={setDailyNickname}
-          onDailySubmit={submitLineupDailyScore}
+          onDailyRetry={() => { setDailyError(null); setLineupSyncPaused(false) }}
         />
       )}
       {lineupGame?.phase === 'results' && lineupGame.mode === 'lineup-challenge' && (

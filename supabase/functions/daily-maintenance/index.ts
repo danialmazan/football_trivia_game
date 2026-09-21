@@ -157,6 +157,13 @@ Deno.serve(async (request) => {
     await getOrCreateChallenge(client, today)
     await getOrCreateLineupChallenge(client, today)
 
+    const [expiredPlayer, expiredLineup] = await Promise.all([
+      client.rpc('expire_open_daily_attempts', { p_before: today }),
+      client.rpc('expire_open_lineup_daily_attempts', { p_before: today }),
+    ])
+    if (expiredPlayer.error) throw expiredPlayer.error
+    if (expiredLineup.error) throw expiredLineup.error
+
     const pending = await getPendingChallengeDates(client, today)
 
     const created: Array<{ date: string; rows: number; path: string }> = []
@@ -207,6 +214,8 @@ Deno.serve(async (request) => {
     return json(request, {
       ok: true,
       currentChallenge: today,
+      expiredPlayerAttempts: expiredPlayer.data,
+      expiredLineupAttempts: expiredLineup.data,
       archivesCreated: created,
       lineupArchivesCreated: lineupCreated,
     })

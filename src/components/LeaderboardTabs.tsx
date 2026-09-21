@@ -39,7 +39,7 @@ export function LeaderboardTabs({ mode, boards, currentNickname }: LeaderboardTa
   const labels = mode === 'daily' || mode === 'lineup-daily' ? DAILY_LABELS : CHALLENGE_LABELS
   const [active, setActive] = useState<BoardKey>('today')
   const entries = useMemo(
-    () => ((boards[active] ?? []) as LeaderboardMetricEntry[]),
+    () => ((boards?.[active] ?? []) as LeaderboardMetricEntry[]),
     [active, boards],
   )
   const unit = active === 'gamesPlayed' ? t('games') : 'pts'

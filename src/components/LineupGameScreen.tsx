@@ -3,7 +3,6 @@ import type { LineupMatch } from '../data/lineupTypes'
 import type { SearchPlayer } from '../data/types'
 import { getPlayerSuggestions } from '../game/answerMatching'
 import { GAME_CONFIG } from '../game/config'
-import { isValidNickname } from '../game/daily'
 import { calculateLineupScore } from '../game/lineups'
 import type { LineupGameState } from '../game/types'
 import { LineupPitch } from './LineupPitch'
@@ -19,11 +18,9 @@ interface LineupGameScreenProps {
   onClue: () => void
   onNext: () => void
   onExit: () => void
-  nickname: string
   submitting: boolean
   error: string | null
-  onNicknameChange: (nickname: string) => void
-  onDailySubmit: () => void
+  onDailyRetry: () => void
 }
 
 function shouldAutoFocusGuess(): boolean {
@@ -48,11 +45,9 @@ export function LineupGameScreen({
   onClue,
   onNext,
   onExit,
-  nickname,
   submitting,
   error,
-  onNicknameChange,
-  onDailySubmit,
+  onDailyRetry,
 }: LineupGameScreenProps) {
   const { locale, t, modeLabel, term, country, feedback, known } = useI18n()
   const [guess, setGuess] = useState('')
@@ -168,15 +163,7 @@ export function LineupGameScreen({
               <div className="earned-stamp"><strong>{game.round.pointsEarned}</strong><span>{t('points earned')}</span></div>
               {game.round.incorrectGuesses.length > 0 && <div className="review-guesses"><span>{t('Missed guesses')}</span><p>{game.round.incorrectGuesses.join(' · ')}</p></div>}
               {daily ? (
-                <form className="daily-submit" onSubmit={(event) => { event.preventDefault(); onDailySubmit() }}>
-                  <label htmlFor="lineup-daily-nickname">{t('Enter your nickname to save this result and unlock Guess the lineup leaderboards.')}<span>{t('Your nickname is public and can submit once today.')}</span></label>
-                  <div className="daily-submit__row">
-                    <input id="lineup-daily-nickname" value={nickname} onChange={(event) => onNicknameChange(event.target.value)} maxLength={24} placeholder={t('Name or nickname')} autoComplete="nickname" />
-                    <button className="primary-button" type="submit" disabled={submitting || !isValidNickname(nickname)}>{submitting ? t('Saving…') : t('Save score')}</button>
-                  </div>
-                  <small>{t('Use the same nickname every time for your stats history to stay together.')}</small>
-                  {error && <p className="daily-service-error" role="alert">{known(error)}</p>}
-                </form>
+                <div className="daily-submit" role="status"><strong>{submitting ? t('Saving…') : t('Waiting to sync')}</strong><span>{t('Your score is saved automatically when this round ends.')}</span>{error && <p className="daily-service-error">{known(error)}</p>}{error && <button className="primary-button" type="button" onClick={onDailyRetry}>{t('Retry')}</button>}</div>
               ) : (
                 <button className="primary-button primary-button--large" type="button" onClick={onNext}>{game.results.length >= GAME_CONFIG.challengeRounds ? t('See final results') : t('Next lineup')} <span aria-hidden="true">→</span></button>
               )}
