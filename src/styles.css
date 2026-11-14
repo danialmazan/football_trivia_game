@@ -648,6 +648,16 @@ button:disabled {
   text-transform: uppercase;
 }
 
+/* Shared Ko-fi pill (danielalmazan.com site-footer drop-in), appended to the end of the setup panel.
+   A centred, ruled-off footer so it reads apart from the "Continue unfinished…" links above it. */
+.setup-panel > .dsf[data-dani-support] {
+  --dsf-gap: 2rem;
+  display: flex;
+  justify-content: center;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
 .resume-button {
   margin-top: 1rem;
   border: 0;
