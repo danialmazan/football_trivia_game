@@ -5,6 +5,7 @@ import type { GameState, LeaderboardBoards } from '../game/types'
 import { LeaderboardTabs } from './LeaderboardTabs'
 import { SavedResultShare } from './SavedResultShare'
 import { useI18n } from '../i18n'
+import { SupportPill } from './SupportPill'
 
 interface ResultsScreenProps {
   game: GameState
@@ -168,6 +169,7 @@ export function ResultsScreen({
         <button className="primary-button primary-button--large" type="button" onClick={onPlayAgain}>{t('Play again')}</button>
         <button className="secondary-button" type="button" onClick={onHome}>{t('Back to home page')}</button>
       </div>
+      <SupportPill />
     </main>
   )
 }

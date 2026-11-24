@@ -5,6 +5,7 @@ import type { LeaderboardBoards, LineupGameState } from '../game/types'
 import { useI18n } from '../i18n'
 import { LeaderboardTabs } from './LeaderboardTabs'
 import { SavedResultShare } from './SavedResultShare'
+import { SupportPill } from './SupportPill'
 
 interface LineupResultsScreenProps {
   game: LineupGameState
@@ -45,6 +46,7 @@ export function LineupResultsScreen(props: LineupResultsScreenProps) {
       <section className="result-stats" aria-label={t('Lineup game statistics')}><div><strong>{correct}</strong><span>{t('Identified')}</span></div><div><strong>{firstTry}</strong><span>{t('First try')}</span></div><div><strong>{misses}</strong><span>{t('Wrong guesses')}</span></div><div><strong>{Math.max(0, ...game.results.map((result) => result.points))}</strong><span>{t('Best round')}</span></div></section>
       <section className="round-recap"><div className="section-heading"><div><span className="eyebrow">{t('Teamsheet log')}</span><h2>{t('Round by round')}</h2></div></div><div className="recap-table" role="table" aria-label={t('Lineup round results')}><div className="recap-row recap-row--head" role="row"><span>{t('Rnd')}</span><span>{t('Match')}</span><span>{t('Player')}</span><span>{t('Misses · clues')}</span><span>Pts</span></div>{game.results.map((result, index) => <div className="recap-row" role="row" key={`${result.matchId}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><strong>{result.matchLabel}</strong><span>{result.playerName}</span><span>{result.incorrectGuesses.length} · {result.cluesUsed}</span><b>{result.points}</b></div>)}</div></section>
       <div className="results-actions"><button className="primary-button primary-button--large" type="button" onClick={onPlayAgain}>{t('Play again')}</button><button className="secondary-button" type="button" onClick={onHome}>{t('Back to home page')}</button></div>
+      <SupportPill />
     </main>
   )
 }

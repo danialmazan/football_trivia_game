@@ -3,6 +3,7 @@ import { buildDailyShareData, getLocalizedGameUrl } from '../game/sharing'
 import { LeaderboardTabs } from './LeaderboardTabs'
 import { SavedResultShare } from './SavedResultShare'
 import { useI18n } from '../i18n'
+import { SupportPill } from './SupportPill'
 
 interface DailyResultsScreenProps {
   game: GameState
@@ -65,6 +66,7 @@ export function DailyResultsScreen({
           {t('Back to home page')}
         </button>
       </div>
+      <SupportPill />
     </main>
   )
 }

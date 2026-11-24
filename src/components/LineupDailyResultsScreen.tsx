@@ -3,6 +3,7 @@ import { LeaderboardTabs } from './LeaderboardTabs'
 import { SavedResultShare } from './SavedResultShare'
 import { buildLineupDailyShareData, getLocalizedGameUrl } from '../game/sharing'
 import { useI18n } from '../i18n'
+import { SupportPill } from './SupportPill'
 
 interface Props {
   game: LineupGameState
@@ -49,6 +50,7 @@ export function LineupDailyResultsScreen({ game, completion, boards, loading, er
       <div className="daily-results-actions">
         <button className="primary-button primary-button--large" type="button" onClick={onExit}>{t('Back to home page')}</button>
       </div>
+      <SupportPill />
     </main>
   )
 }

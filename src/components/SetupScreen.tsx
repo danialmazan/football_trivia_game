@@ -7,6 +7,7 @@ import { getActivePool } from '../game/selection'
 import type { GameSettings, PracticeLeague, SavedData } from '../game/types'
 import { GoatCrest } from './GoatCrest'
 import { useI18n } from '../i18n'
+import { SupportPill } from './SupportPill'
 
 interface SetupScreenProps {
   settings: GameSettings
@@ -226,6 +227,7 @@ export function SetupScreen({
             {t('Continue unfinished lineup challenge')}
           </button>
         )}
+        <SupportPill />
       </section>
     </main>
   )
